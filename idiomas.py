@@ -40,14 +40,40 @@ TRADUCCIONES = {
         
         # NUEVO MENÚ DE EJEMPLOS (Español)
         'menu_ejemplos': "&Ejemplos",
-        'ej_silogismo': "Silogismo Clásico (Modus Ponens)",
-        'ej_paradoja': "Dilema Constructivo",
+        'ej_p9_1': "Silogismo Clásico (Modus Ponens)",
+        'ej_p9_2': "Dilema Constructivo",
+        'ej_m4_1': "Teoría de Grupos (Buscar Orden)",
+        'ej_m4_2': "No-Conmutatividad (Contraejemplo)",
         
         # Contenidos de los ejemplos
         'datos_silogismo_premisas': "todos_los_hombres_son_mortales -> aristoteles_es_mortal\ntodos_los_hombres_son_mortales",
         'datos_silogismo_conclusion': "aristoteles_es_mortal",
         'datos_paradoja_premisas': "(p -> q) & (r -> s)\np | r",
-        'datos_paradoja_conclusion': "q | s"
+        'datos_paradoja_conclusion': "q | s" ,
+
+        'datos_grupo_premisas': "f(x,e) = x.\nf(e,x) = x.\n f(x,g(x)) = e.\nf(g(x),x) = e.\nf(f(x,y),z) = f(x,f(y,z)).",
+        'datos_grupo_conclusion': "", # Dejar vacío para que Mace4 busque modelos generales de la teoría
+        'datos_conmut_premisas': "f(x,e) = x.\nf(e,x) = x.\nf(f(x,y),z) = f(x,f(y,z)).",
+        'datos_conmut_conclusion': "f(x,y) = f(y,x)", # Buscaremos un contraejemplo donde no se cumpla
+
+        'tit_historial': "Historial de Ejecuciones",
+        'col_hora': "Hora",
+        'col_motor': "Motor",
+        'col_resultado': "Resultado",
+        'status_sin_archivo': "Sin archivo abierto",
+        'status_guardado': "Archivo guardado: ",
+        'status_error_guardar': "Error al guardar el archivo",
+        'status_abierto': "Archivo abierto: ",
+        'hist_proved': "Demostrado",
+        'hist_no_proved': "No demostrado",
+        'hist_counter': "Contraejemplo",
+        'hist_no_counter': "Sin contraejemplo",
+        'hist_timeout': "Tiempo agotado",
+        'hist_error': "Error sintaxis/entorno",
+
+        # NUEVOS TEXTOS: Configuración de Timeout (Español)
+        'menu_config': "&Configuración",
+        'lbl_timeout': "Tiempo límite (seg):"
     },
     'en_US': {
         'titulo': "Prover9-Mace4 GUI",
@@ -88,13 +114,39 @@ TRADUCCIONES = {
         
         # NUEVO MENÚ DE EJEMPLOS (Inglés)
         'menu_ejemplos': "&Examples",
-        'ej_silogismo': "Classical Silogism (Modus Ponens)",
-        'ej_paradoja': "Constructive Dilemma",
+        'ej_p9_1': "Classical Syllogism (Modus Ponens)",
+        'ej_p9_2': "Constructive Dilemma",
+        'ej_m4_1': "Group Theory (Search Models)",
+        'ej_m4_2': "Non-Commutativity (Counterexample)",
         
         # Contenidos (los mantenemos iguales porque la lógica formal es universal, ¡como mi planta!)
         'datos_silogismo_premisas': "all_men_are_mortal -> aristotle_is_mortal\nall_men_are_mortal",
         'datos_silogismo_conclusion': "aristotle_is_mortal",
         'datos_paradoja_premisas': "(p -> q) & (r -> s)\np | r",
-        'datos_paradoja_conclusion': "q | s"
+        'datos_paradoja_conclusion': "q | s",
+
+        'datos_grupo_premisas': "f(x,e) = x.\nf(e,x) = x.\nf(x,g(x)) = e.\nf(g(x),x) = e.\nf(f(x,y),z) = f(x,f(y,z)).",
+        'datos_grupo_conclusion': "",
+        'datos_conmut_premisas': "f(x,e) = x.\nf(e,x) = x.\nf(f(x,y),z) = f(x,f(y,z)).",
+        'datos_conmut_conclusion': "f(x,y) = f(y,x)",
+
+        'tit_historial': "Execution History",
+        'col_hora': "Time",
+        'col_motor': "Engine",
+        'col_resultado': "Result",
+        'status_sin_archivo': "No open file",
+        'status_guardado': "File saved: ",
+        'status_error_guardar': "Error saving file",
+        'status_abierto': "File opened: ",
+        'hist_proved': "Proved",
+        'hist_no_proved': "Not proved",
+        'hist_counter': "Counterexample",
+        'hist_no_counter': "No counterexample",
+        'hist_timeout': "Timeout",
+        'hist_error': "Syntax/Env Error",
+
+        # NUEVOS TEXTOS: Configuración de Timeout (Inglés)
+        'menu_config': "&Settings",
+        'lbl_timeout': "Timeout limit (sec):"
     }
 }

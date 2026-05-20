@@ -1,5 +1,6 @@
 import subprocess
 import platform
+from datetime import datetime
 
 def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
     """
@@ -60,8 +61,12 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
         else:
             return f"Error crítico: El ejecutable '{comando_base[0]}' no es accesible."
 
-def ejecutar_prover9(texto_entrada):
-    return ejecutar_motor_logico(['prover9'], texto_entrada, tiempo_limite=5) # 5 seg para demostrar
+def ejecutar_prover9(texto_entrada, tiempo_limite=5):
+    hora_ejecucion = datetime.now().strftime("%H:%M:%S")
+    resultado = ejecutar_motor_logico(['prover9'], texto_entrada, tiempo_limite=tiempo_limite)
+    return resultado, hora_ejecucion
 
-def ejecutar_mace4(texto_entrada):
-    return ejecutar_motor_logico(['mace4'], texto_entrada, tiempo_limite=3) # 3 seg para buscar fallos
+def ejecutar_mace4(texto_entrada, tiempo_limite=3):
+    hora_ejecucion = datetime.now().strftime("%H:%M:%S")
+    resultado = ejecutar_motor_logico(['mace4'], texto_entrada, tiempo_limite=tiempo_limite)
+    return resultado, hora_ejecucion
