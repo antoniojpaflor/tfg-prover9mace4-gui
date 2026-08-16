@@ -9,7 +9,7 @@ from PyQt6.QtGui import QFont, QAction
 from PyQt6.QtCore import QEvent
 
 from launcher import ejecutar_prover9, ejecutar_mace4
-from idiomas import TRADUCCIONES
+from idiomas import TRADUCCIONES, DICCIONARIO_PANELES
 
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
@@ -17,6 +17,11 @@ class VentanaPrincipal(QMainWindow):
         self.idioma_actual = 'es_ES'
         self.ruta_archivo_actual = None  # Almacena la ruta del archivo vinculado (.in)
         self.datos_historial = []        # Caché para restaurar fórmulas del historial
+        # NUEVO: Rastreadores para la traducción en vivo de los paneles laterales
+        self.labels_subcategorias = []
+        self.botones_reset_cats = []
+        self.nombres_categorias = []
+        self.combos_traducibles = []
         self.init_ui()
         
     def init_ui(self):
@@ -221,6 +226,30 @@ class VentanaPrincipal(QMainWindow):
                 caja.setPlainText(texto_ejemplo)
                 caja.setStyleSheet("color: gray; font-family: 'Courier New'; font-size: 11pt;")
 
+        # --- NUEVO: Traducción en vivo de los paneles laterales ---
+        dic_paneles = DICCIONARIO_PANELES.get(self.idioma_actual, {})
+        def trad(texto_ing): return dic_paneles.get(texto_ing, texto_ing) if self.idioma_actual == 'es_ES' else texto_ing
+
+        if hasattr(self, 'grupo_basico_p9'):
+            self.grupo_basico_p9.setTitle(trad("Basic Options"))
+            self.grupo_all_options.setTitle(trad("All Options"))
+            self.btn_reset_basico_p9.setText(trad("Reset These to Defaults"))
+
+            self.grupo_basico_m4.setTitle(trad("Basic Options"))
+            self.grupo_otros_m4.setTitle(trad("Other Options"))
+            self.grupo_exp_m4.setTitle(trad("Experimental Options"))
+            self.btn_reset_m4.setText(trad("Reset These to Defaults"))
+
+            for btn in self.botones_reset_cats: btn.setText(trad("Reset These to Defaults"))
+            for lbl, orig_txt in self.labels_subcategorias: lbl.setText(trad(orig_txt))
+
+            for i, nombre_ing in enumerate(self.nombres_categorias):
+                self.combo_grupos_p9.setItemText(i, trad(nombre_ing))
+
+            for combo in self.combos_traducibles:
+                for i in range(combo.count()):
+                    combo.setItemText(i, trad(combo.itemData(i)))
+
     def actualizar_titulo_ventana(self):
         """Calcula el título de la barra superior dependiendo del archivo abierto"""
         txt = TRADUCCIONES[self.idioma_actual]
@@ -396,7 +425,7 @@ class VentanaPrincipal(QMainWindow):
         if hasattr(self, 'grupo_all_options') and self.grupo_all_options.isChecked():
             # Parámetros numéricos y textos (assign)
             for nombre, (widget, _, _) in self.all_assigns_p9.items():
-                val = widget.value() if isinstance(widget, QSpinBox) else widget.currentText()
+                val = widget.value() if isinstance(widget, QSpinBox) else widget.currentData()
                 texto_cocinado += f"assign({nombre}, {val}).\n"
                 
             # Parámetros booleanos (set/clear)
@@ -408,8 +437,8 @@ class VentanaPrincipal(QMainWindow):
         else:
             texto_cocinado += f"assign(max_weight, {self.spin_max_weight.value()}).\n"
             texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
-            texto_cocinado += f"assign(order, {self.combo_order.currentText()}).\n"
-            texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentText()}).\n"
+            texto_cocinado += f"assign(order, {self.combo_order.currentData()}).\n"
+            texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentData()}).\n"
             texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
             
             flags_basicos = [
@@ -451,7 +480,7 @@ class VentanaPrincipal(QMainWindow):
         texto_cocinado += f"assign(start_size, {self.spin_start_size.value()}).\n"
         texto_cocinado += f"assign(end_size, {self.spin_end_size.value()}).\n"
         texto_cocinado += f"assign(increment, {self.spin_increment.value()}).\n"
-        texto_cocinado += f"assign(iterate, {self.combo_iterate.currentText()}).\n"
+        texto_cocinado += f"assign(iterate, {self.combo_iterate.currentData()}).\n"
         texto_cocinado += f"assign(max_models, {self.spin_max_models.value()}).\n"
         texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_m4.value()}).\n"
         texto_cocinado += f"assign(max_seconds_per, {self.spin_max_seconds_per.value()}).\n"
@@ -772,23 +801,29 @@ class VentanaPrincipal(QMainWindow):
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
-        # Diccionarios maestros para recopilar datos dinámicamente
         self.all_flags_p9 = {}
         self.all_assigns_p9 = {}
 
-        # --- Basic Options (se mantiene igual) ---
-        grupo_basico = QGroupBox("Basic Options")
-        grupo_basico.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
+        # --- Basic Options ---
+        self.grupo_basico_p9 = QGroupBox("Basic Options")
+        self.grupo_basico_p9.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
         form_basico = QFormLayout()
 
         self.spin_max_weight = QSpinBox(); self.spin_max_weight.setRange(-1000, 100000); self.spin_max_weight.setValue(100)
         form_basico.addRow("max_weight:", self.spin_max_weight)
         self.spin_pick_ratio = QSpinBox(); self.spin_pick_ratio.setRange(-1, 100); self.spin_pick_ratio.setValue(-1)
         form_basico.addRow("pick_given_ratio:", self.spin_pick_ratio)
-        self.combo_order = QComboBox(); self.combo_order.addItems(["lpo", "rpo", "kbo"])
+        
+        self.combo_order = QComboBox()
+        for opc in ["lpo", "rpo", "kbo"]: self.combo_order.addItem(opc, opc)
         form_basico.addRow("order:", self.combo_order)
-        self.combo_eq_defs = QComboBox(); self.combo_eq_defs.addItems(["unfold", "fold", "pass"])
+        self.combos_traducibles.append(self.combo_order)
+        
+        self.combo_eq_defs = QComboBox()
+        for opc in ["unfold", "fold", "pass"]: self.combo_eq_defs.addItem(opc, opc)
         form_basico.addRow("eq_defs:", self.combo_eq_defs)
+        self.combos_traducibles.append(self.combo_eq_defs)
+        
         self.chk_expand_relational = QCheckBox()
         form_basico.addRow("expand_relational_defs:", self.chk_expand_relational)
         self.chk_restrict_denials = QCheckBox()
@@ -798,14 +833,14 @@ class VentanaPrincipal(QMainWindow):
         self.chk_prolog_vars = QCheckBox()
         form_basico.addRow("prolog_style_variables:", self.chk_prolog_vars)
 
-        btn_reset_basico = QPushButton("Reset These to Defaults")
-        btn_reset_basico.clicked.connect(self.reset_opciones_p9)
-        form_basico.addRow(btn_reset_basico)
+        self.btn_reset_basico_p9 = QPushButton("Reset These to Defaults")
+        self.btn_reset_basico_p9.clicked.connect(self.reset_opciones_p9)
+        form_basico.addRow(self.btn_reset_basico_p9)
 
-        grupo_basico.setLayout(form_basico)
-        layout_principal.addWidget(grupo_basico)
+        self.grupo_basico_p9.setLayout(form_basico)
+        layout_principal.addWidget(self.grupo_basico_p9)
 
-        # --- All Options (Motor Dinámico) ---
+        # --- All Options ---
         self.grupo_all_options = QGroupBox("All Options")
         self.grupo_all_options.setCheckable(True)
         self.grupo_all_options.setChecked(False)
@@ -816,7 +851,7 @@ class VentanaPrincipal(QMainWindow):
         layout_all.addWidget(self.combo_grupos_p9)
         self.stack_opciones_p9 = QStackedWidget()
 
-        # ESQUEMA DE DATOS (Data-Driven UI) ACTUALIZADO
+        # Copia el bloque SCHEMA exactamente como lo tenías antes de este paso...
         SCHEMA = [
             ("Meta Options", [
                 ('flag', 'auto', True), ('flag', 'auto_setup', True), ('flag', 'auto_limits', True),
@@ -928,7 +963,8 @@ class VentanaPrincipal(QMainWindow):
 
         # Constructor automático de interfaz
         for nombre_grupo, elementos in SCHEMA:
-            self.combo_grupos_p9.addItem(nombre_grupo)
+            self.combo_grupos_p9.addItem(nombre_grupo, nombre_grupo)
+            self.nombres_categorias.append(nombre_grupo)
             page = QWidget()
             form = QFormLayout(page)
             form.setContentsMargins(0, 5, 0, 0)
@@ -939,6 +975,7 @@ class VentanaPrincipal(QMainWindow):
                     lbl = QLabel(elemento[1])
                     lbl.setStyleSheet("font-style: italic; color: #1e3d59; font-weight: bold; padding-top: 8px;")
                     form.addRow(lbl)
+                    self.labels_subcategorias.append((lbl, elemento[1]))
                 elif tipo == 'flag':
                     _, nombre, por_defecto = elemento
                     chk = QCheckBox()
@@ -955,14 +992,16 @@ class VentanaPrincipal(QMainWindow):
                 elif tipo == 'combo':
                     _, nombre, opciones, por_defecto = elemento
                     combo = QComboBox()
-                    combo.addItems(opciones)
+                    for opc in opciones: combo.addItem(opc, opc) # Se inyecta data interna
                     combo.setCurrentText(por_defecto)
                     form.addRow(f"{nombre}:", combo)
                     self.all_assigns_p9[nombre] = (combo, por_defecto, nombre_grupo)
+                    self.combos_traducibles.append(combo)
 
             btn_reset = QPushButton("Reset These to Defaults")
             btn_reset.clicked.connect(lambda checked, cat=nombre_grupo: self.reset_categoria_p9(cat))
             form.addRow(btn_reset)
+            self.botones_reset_cats.append(btn_reset)
             self.stack_opciones_p9.addWidget(page)
 
         self.combo_grupos_p9.currentIndexChanged.connect(self.stack_opciones_p9.setCurrentIndex)
@@ -998,25 +1037,23 @@ class VentanaPrincipal(QMainWindow):
                     widget.setCurrentText(por_defecto)
 
     def crear_panel_opciones_m4(self):
-        # Contenedor principal con barra de desplazamiento
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFixedWidth(330)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        scroll.setStyleSheet("QScrollArea { background-color: white; }") # <--- AÑADIR ESTO
+        scroll.setStyleSheet("QScrollArea { background-color: white; }")
 
         contenido = QWidget()
-        contenido.setObjectName("fondo_blanco_m4") # <--- AÑADIR ESTO
-        contenido.setStyleSheet("#fondo_blanco_m4 { background-color: white; }") # <--- AÑADIR ESTO
+        contenido.setObjectName("fondo_blanco_m4")
+        contenido.setStyleSheet("#fondo_blanco_m4 { background-color: white; }")
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
-        # Guardamos el estilo en una variable
         estilo_cuadros = "QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }"
 
         # --- Basic Options ---
-        grupo_basico = QGroupBox("Basic Options")
-        grupo_basico.setStyleSheet(estilo_cuadros)
+        self.grupo_basico_m4 = QGroupBox("Basic Options")
+        self.grupo_basico_m4.setStyleSheet(estilo_cuadros)
         form_basico = QFormLayout()
 
         self.spin_domain_size = QSpinBox(); self.spin_domain_size.setRange(0, 1000); self.spin_domain_size.setValue(0)
@@ -1029,9 +1066,10 @@ class VentanaPrincipal(QMainWindow):
         form_basico.addRow("increment:", self.spin_increment)
 
         self.combo_iterate = QComboBox()
-        self.combo_iterate.addItems(["all", "evens", "odds", "primes", "nonprimes"]) 
+        for opc in ["all", "evens", "odds", "primes", "nonprimes"]: self.combo_iterate.addItem(opc, opc)
         self.combo_iterate.setCurrentText("all")
         form_basico.addRow("iterate:", self.combo_iterate)
+        self.combos_traducibles.append(self.combo_iterate)
 
         self.spin_max_models = QSpinBox(); self.spin_max_models.setRange(-1, 10000); self.spin_max_models.setValue(1)
         form_basico.addRow("max_models:", self.spin_max_models)
@@ -1039,18 +1077,16 @@ class VentanaPrincipal(QMainWindow):
         form_basico.addRow("max_seconds:", self.spin_max_seconds_m4)
         self.spin_max_seconds_per = QSpinBox(); self.spin_max_seconds_per.setRange(-1, 3600); self.spin_max_seconds_per.setValue(-1)
         form_basico.addRow("max_seconds_per:", self.spin_max_seconds_per)
-
         self.chk_prolog_vars_m4 = QCheckBox()
         form_basico.addRow("prolog_style_variables:", self.chk_prolog_vars_m4)
 
-        grupo_basico.setLayout(form_basico)
-        layout_principal.addWidget(grupo_basico)
+        self.grupo_basico_m4.setLayout(form_basico)
+        layout_principal.addWidget(self.grupo_basico_m4)
 
         # --- Other Options ---
-        grupo_otros = QGroupBox("Other Options")
-        grupo_otros.setStyleSheet(estilo_cuadros)
+        self.grupo_otros_m4 = QGroupBox("Other Options")
+        self.grupo_otros_m4.setStyleSheet(estilo_cuadros)
         form_otros = QFormLayout()
-
         self.chk_integer_ring = QCheckBox()
         form_otros.addRow("integer_ring:", self.chk_integer_ring)
         self.chk_skolems_last = QCheckBox()
@@ -1059,15 +1095,13 @@ class VentanaPrincipal(QMainWindow):
         form_otros.addRow("max_megs:", self.spin_max_megs)
         self.chk_print_models = QCheckBox(); self.chk_print_models.setChecked(True)
         form_otros.addRow("print_models:", self.chk_print_models)
-
-        grupo_otros.setLayout(form_otros)
-        layout_principal.addWidget(grupo_otros)
+        self.grupo_otros_m4.setLayout(form_otros)
+        layout_principal.addWidget(self.grupo_otros_m4)
 
         # --- Experimental Options ---
-        grupo_exp = QGroupBox("Experimental Options")
-        grupo_exp.setStyleSheet(estilo_cuadros)
+        self.grupo_exp_m4 = QGroupBox("Experimental Options")
+        self.grupo_exp_m4.setStyleSheet(estilo_cuadros)
         form_exp = QFormLayout()
-
         self.chk_lnh = QCheckBox(); self.chk_lnh.setChecked(True)
         form_exp.addRow("lnh:", self.chk_lnh)
         self.chk_negprop = QCheckBox(); self.chk_negprop.setChecked(True)
@@ -1080,19 +1114,16 @@ class VentanaPrincipal(QMainWindow):
         form_exp.addRow("neg_elim:", self.chk_neg_elim)
         self.chk_neg_elim_near = QCheckBox(); self.chk_neg_elim_near.setChecked(True)
         form_exp.addRow("neg_elim_near:", self.chk_neg_elim_near)
-
         self.spin_selection_order = QSpinBox(); self.spin_selection_order.setRange(-1, 100); self.spin_selection_order.setValue(2)
         form_exp.addRow("selection_order:", self.spin_selection_order)
         self.spin_selection_measure = QSpinBox(); self.spin_selection_measure.setRange(-1, 100); self.spin_selection_measure.setValue(4)
         form_exp.addRow("selection_measure:", self.spin_selection_measure)
+        self.grupo_exp_m4.setLayout(form_exp)
+        layout_principal.addWidget(self.grupo_exp_m4)
 
-        grupo_exp.setLayout(form_exp)
-        layout_principal.addWidget(grupo_exp)
-
-        # Botón Reset
-        btn_reset = QPushButton("Reset These to Defaults")
-        btn_reset.clicked.connect(self.reset_opciones_m4)
-        layout_principal.addWidget(btn_reset)
+        self.btn_reset_m4 = QPushButton("Reset These to Defaults")
+        self.btn_reset_m4.clicked.connect(self.reset_opciones_m4)
+        layout_principal.addWidget(self.btn_reset_m4)
 
         scroll.setWidget(contenido)
         return scroll

@@ -150,3 +150,28 @@ TRADUCCIONES = {
         'lbl_timeout': "Timeout limit (sec):"
     }
 }
+
+DICCIONARIO_PANELES = {
+    'es_ES': {
+        'Basic Options': 'Opciones Básicas', 'All Options': 'Todas las Opciones',
+        'Other Options': 'Otras Opciones', 'Experimental Options': 'Opciones Experimentales',
+        'Reset These to Defaults': 'Restablecer por defecto',
+        'Meta Options': 'Opciones Meta', 'Term Ordering': 'Orden de Términos',
+        'Limits': 'Límites', 'Search Prep': 'Prep. de Búsqueda',
+        'Goals/Denials': 'Objetivos/Negaciones', 'Select Given': 'Selección de Dados',
+        'Inference Rules': 'Reglas de Inferencia', 'Rewriting': 'Reescritura',
+        'Weighting': 'Pesos', 'Process Inferred': 'Proceso Inferido',
+        'Input/Output': 'Entrada/Salida', 'Hints': 'Pistas',
+        'Search Limits': 'Límites de Búsqueda', 'Limits on Kept Clauses': 'Límites de Cláusulas',
+        'Sos Control': 'Control SOS', 'Selection Ratio': 'Ratio de Selección',
+        'Semantic Guidance': 'Guía Semántica', 'Others': 'Otros',
+        'Ordinary Rules': 'Reglas Ordinarias', 'Other Rules': 'Otras Reglas',
+        'General Restrictions': 'Restricciones Generales', 'Resolution Restrictions': 'Restr. de Resolución',
+        'Paramodulation Restrictions': 'Restr. de Paramodulación', 'Term Rewriting Limits': 'Límites de Reescritura',
+        'Lex-Dependent Rewriting': 'Reescritura Dependiente Lex', 'Symbol Weights': 'Pesos de Símbolos',
+        'Penalties': 'Penalizaciones',
+        'none': 'ninguno', 'some': 'algunos', 'lots': 'muchos', 'all': 'todos',
+        'false_in_all': 'falso_en_todas', 'false_in_some': 'falso_en_algunas',
+        'evens': 'pares', 'odds': 'impares', 'primes': 'primos', 'nonprimes': 'no_primos'
+    }
+}
