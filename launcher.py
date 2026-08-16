@@ -1,19 +1,26 @@
 import subprocess
 import platform
+import os
+import sys
 from datetime import datetime
 
+def obtener_ruta_recurso(nombre_archivo):
+    """Obtiene la ruta absoluta al recurso, compatible con desarrollo y con PyInstaller"""
+    try:
+        ruta_base = sys._MEIPASS
+    except Exception:
+        ruta_base = os.path.abspath(".")
+    return os.path.join(ruta_base, 'bin', nombre_archivo)
+
 def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
-    """
-    Función genérica interna que interactúa con los binarios en segundo plano.
-    Añade un control de 'timeout' (tiempo_limite) para evitar que procesos en bucle
-    infinito congelen la aplicación principal.
-    """
     sistema = platform.system()
     
+    nombre_binario = comando_base[0]
     if sistema == 'Windows':
-        comando_final = ['wsl', '-d', 'Ubuntu-24.04'] + comando_base
-    else:
-        comando_final = comando_base
+        nombre_binario += '.exe'
+        
+    ruta_binario = obtener_ruta_recurso(nombre_binario)
+    comando_final = [ruta_binario] + comando_base[1:]
 
     proceso = None
     try:
@@ -25,41 +32,37 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
             text=True
         )
         
-        # Bloqueamos el proceso con un límite de tiempo estricto (3 segundos por defecto)
         stdout, stderr = proceso.communicate(input=texto_entrada, timeout=tiempo_limite)
         
+        # CAPTURA MEJORADA: Mostramos el código de salida y la ruta intentada
         if proceso.returncode != 0 and not stdout:
-            return f"Error en la ejecución del binario:\n{stderr}"
+            return f"Error de ejecución (Código de salida: {proceso.returncode}):\nIntentando ejecutar: {ruta_binario}\nDetalles (Stderr): {stderr}"
             
         return stdout
         
     except subprocess.TimeoutExpired:
-        # ¡Acción de rescate! Si el binario se pasa de tiempo, lo matamos de raíz
         if proceso:
             proceso.kill()
-            # Limpiamos los buffers para liberar descriptores de archivos
             proceso.communicate()
             
         if comando_base[0] == 'mace4':
             return (
                 "TIMEOUT_EXPIRED_M4\n"
                 "Mace4 ha agotado el tiempo límite de búsqueda sin encontrar contraejemplos.\n"
-                "Esto suele ocurrir porque el teorema es VÁLIDO (no existen fallos lógicos) "
-                "y el motor se ha quedado atrapado buscando un modelo imposible infinitamente.\n"
                 "¡Prueba a verificarlo en la pestaña de Prover9!"
             )
         else:
             return (
                 "TIMEOUT_EXPIRED_P9\n"
-                "Prover9 ha agotado el tiempo límite configurado sin encontrar una demostración.\n"
-                "El problema podría ser demasiado complejo o inválido."
+                "Prover9 ha agotado el tiempo límite configurado sin encontrar una demostración."
             )
             
     except FileNotFoundError:
-        if sistema == 'Windows':
-            return "Error crítico: No se ha detectado la distribución WSL o los binarios."
-        else:
-            return f"Error crítico: El ejecutable '{comando_base[0]}' no es accesible."
+        return f"Error crítico: No se encuentra el ejecutable en la ruta {ruta_binario}. Revisa la carpeta 'bin/'."
+        
+    except OSError as e:
+        # CAPTURA DE ERROR DE FORMATO DE WINDOWS
+        return f"Error del sistema operativo (¿es un .exe válido?):\n{str(e)}"
 
 def ejecutar_prover9(texto_entrada, tiempo_limite=5):
     hora_ejecucion = datetime.now().strftime("%H:%M:%S")
