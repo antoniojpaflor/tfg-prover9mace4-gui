@@ -34,8 +34,9 @@ class HiloMotor(QThread):
         self.resultado_listo.emit(resultado_crudo, hora, self.snapshot)
 
 class ResaltadorProver9(QSyntaxHighlighter):
-    def __init__(self, document):
-        super().__init__(document)
+    def __init__(self, editor):
+        super().__init__(editor.document()) # Inicializamos con el documento
+        self.editor = editor # Guardamos la referencia directa a la caja de texto
         self.reglas = []
 
         # 1. Operadores Lógicos (Púrpura VS Code)
@@ -64,11 +65,15 @@ class ResaltadorProver9(QSyntaxHighlighter):
         # 4. Comentarios (Verde VS Code)
         formato_comentario = QTextCharFormat()
         formato_comentario.setForeground(QColor("#008000"))
-        # El comentario en Prover9 empieza por % y va hasta el final de la línea
         self.reglas.append((QRegularExpression(r"%.*"), formato_comentario))
 
     def highlightBlock(self, text):
-        """Este método es llamado automáticamente por Qt cada vez que el texto cambia"""
+        # --- PARCHE ESTÉTICO: Ignorar placeholders ---
+        texto_completo = self.editor.toPlainText().strip()
+        if texto_completo.startswith("Ejemplo:") or texto_completo.startswith("Example:"):
+            return # Abortamos el coloreado, dejando el gris intacto
+            
+        # Si no es un placeholder, aplicamos la pintura normalmente
         for expresion, formato in self.reglas:
             iterador = expresion.globalMatch(text)
             while iterador.hasNext():
@@ -380,14 +385,14 @@ class VentanaPrincipal(QMainWindow):
         layout_limpio.addWidget(self.lbl_premisas_p9)
         self.premisas_p9 = QTextEdit()
         self.premisas_p9.setFont(fuente_codigo)
-        self.resaltador_premisas_p9 = ResaltadorProver9(self.premisas_p9.document())
+        self.resaltador_premisas_p9 = ResaltadorProver9(self.premisas_p9)
         layout_limpio.addWidget(self.premisas_p9)
         self.lbl_conclusion_p9 = QLabel("")
         layout_limpio.addWidget(self.lbl_conclusion_p9)
         self.conclusion_p9 = QTextEdit()
         self.conclusion_p9.setFont(fuente_codigo)
         self.conclusion_p9.setMaximumHeight(100)
-        self.resaltador_conclusion_p9 = ResaltadorProver9(self.conclusion_p9.document())
+        self.resaltador_conclusion_p9 = ResaltadorProver9(self.conclusion_p9)
         layout_limpio.addWidget(self.conclusion_p9)
         
         vista_libre = QWidget()
@@ -397,7 +402,7 @@ class VentanaPrincipal(QMainWindow):
         layout_libre.addWidget(self.lbl_libre_p9)
         self.entrada_libre_p9 = QTextEdit()
         self.entrada_libre_p9.setFont(fuente_codigo)
-        self.resaltador_libre_p9 = ResaltadorProver9(self.entrada_libre_p9.document())
+        self.resaltador_libre_p9 = ResaltadorProver9(self.entrada_libre_p9)
         layout_libre.addWidget(self.entrada_libre_p9)
         
         self.vista_stack_p9.addWidget(vista_limpia)
@@ -443,14 +448,14 @@ class VentanaPrincipal(QMainWindow):
         layout_limpio.addWidget(self.lbl_premisas_m4)
         self.premisas_m4 = QTextEdit()
         self.premisas_m4.setFont(fuente_codigo)
-        self.resaltador_premisas_m4 = ResaltadorProver9(self.premisas_m4.document())
+        self.resaltador_premisas_m4 = ResaltadorProver9(self.premisas_m4)
         layout_limpio.addWidget(self.premisas_m4)
         self.lbl_objetivo_m4 = QLabel("")
         layout_limpio.addWidget(self.lbl_objetivo_m4)
         self.conclusion_m4 = QTextEdit()
         self.conclusion_m4.setFont(fuente_codigo)
         self.conclusion_m4.setMaximumHeight(100)
-        self.resaltador_conclusion_m4 = ResaltadorProver9(self.conclusion_m4.document())
+        self.resaltador_conclusion_m4 = ResaltadorProver9(self.conclusion_m4)
         layout_limpio.addWidget(self.conclusion_m4)
         
         vista_libre = QWidget()
@@ -460,7 +465,7 @@ class VentanaPrincipal(QMainWindow):
         layout_libre.addWidget(self.lbl_libre_m4)
         self.entrada_libre_m4 = QTextEdit()
         self.entrada_libre_m4.setFont(fuente_codigo)
-        self.resaltador_libre_m4 = ResaltadorProver9(self.entrada_libre_m4.document())
+        self.resaltador_libre_m4 = ResaltadorProver9(self.entrada_libre_m4)
         layout_libre.addWidget(self.entrada_libre_m4)
         
         self.vista_stack_m4.addWidget(vista_limpia)
@@ -555,7 +560,10 @@ class VentanaPrincipal(QMainWindow):
         texto_cocinado = ""
 
         # 1. Parámetros assign
-        texto_cocinado += f"assign(domain_size, {self.spin_domain_size.value()}).\n"
+        # --- PARCHE MACE4: Si domain_size es 0, no lo enviamos para evitar que machaque el start_size interno ---
+        if self.spin_domain_size.value() > 0:
+            texto_cocinado += f"assign(domain_size, {self.spin_domain_size.value()}).\n"
+            
         texto_cocinado += f"assign(start_size, {self.spin_start_size.value()}).\n"
         texto_cocinado += f"assign(end_size, {self.spin_end_size.value()}).\n"
         texto_cocinado += f"assign(increment, {self.spin_increment.value()}).\n"
@@ -1164,7 +1172,7 @@ class VentanaPrincipal(QMainWindow):
 
         self.spin_domain_size = QSpinBox(); self.spin_domain_size.setRange(0, 1000); self.spin_domain_size.setValue(0)
         form_basico.addRow("domain_size:", self.spin_domain_size)
-        self.spin_start_size = QSpinBox(); self.spin_start_size.setRange(1, 1000); self.spin_start_size.setValue(2)
+        self.spin_start_size = QSpinBox(); self.spin_start_size.setRange(2, 1000); self.spin_start_size.setValue(2)
         form_basico.addRow("start_size:", self.spin_start_size)
         self.spin_end_size = QSpinBox(); self.spin_end_size.setRange(-1, 1000); self.spin_end_size.setValue(-1)
         form_basico.addRow("end_size:", self.spin_end_size)
