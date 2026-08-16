@@ -999,7 +999,7 @@ class VentanaPrincipal(QMainWindow):
         # Contenedor principal con barra de desplazamiento
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFixedWidth(300)
+        scroll.setFixedWidth(330)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         scroll.setStyleSheet("QScrollArea { background-color: white; }") # <--- AÑADIR ESTO
 
