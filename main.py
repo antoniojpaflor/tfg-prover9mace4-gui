@@ -42,6 +42,7 @@ class VentanaPrincipal(QMainWindow):
         
         # 2. PANEL DEL HISTORIAL (Fondo de la aplicación)
         self.grupo_historial = QGroupBox("")
+        self.grupo_historial.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
         layout_historial = QVBoxLayout(self.grupo_historial)
         
         self.tabla_historial = QTableWidget(0, 3) # 0 filas iniciales, 3 columnas
@@ -232,6 +233,7 @@ class VentanaPrincipal(QMainWindow):
 
     def crear_panel_insercion(self, editor_destino):
         grupo = QGroupBox("")
+        grupo.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
         layout_grupo = QVBoxLayout()
         estilo_btn = "padding: 5px; font-weight: bold; background-color: #f0f0f0;"
         lbl_ops = QLabel("")
@@ -807,7 +809,7 @@ class VentanaPrincipal(QMainWindow):
         self.grupo_all_options = QGroupBox("All Options")
         self.grupo_all_options.setCheckable(True)
         self.grupo_all_options.setChecked(False)
-        self.grupo_all_options.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 15px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
+        self.grupo_all_options.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
         
         layout_all = QVBoxLayout()
         self.combo_grupos_p9 = QComboBox()
@@ -1009,8 +1011,12 @@ class VentanaPrincipal(QMainWindow):
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
+        # Guardamos el estilo en una variable
+        estilo_cuadros = "QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }"
+
         # --- Basic Options ---
         grupo_basico = QGroupBox("Basic Options")
+        grupo_basico.setStyleSheet(estilo_cuadros)
         form_basico = QFormLayout()
 
         self.spin_domain_size = QSpinBox(); self.spin_domain_size.setRange(0, 1000); self.spin_domain_size.setValue(0)
@@ -1042,6 +1048,7 @@ class VentanaPrincipal(QMainWindow):
 
         # --- Other Options ---
         grupo_otros = QGroupBox("Other Options")
+        grupo_otros.setStyleSheet(estilo_cuadros)
         form_otros = QFormLayout()
 
         self.chk_integer_ring = QCheckBox()
@@ -1058,6 +1065,7 @@ class VentanaPrincipal(QMainWindow):
 
         # --- Experimental Options ---
         grupo_exp = QGroupBox("Experimental Options")
+        grupo_exp.setStyleSheet(estilo_cuadros)
         form_exp = QFormLayout()
 
         self.chk_lnh = QCheckBox(); self.chk_lnh.setChecked(True)
