@@ -744,7 +744,7 @@ class VentanaPrincipal(QMainWindow):
         
         btn_reset = QPushButton("Reset These to Defaults")
         btn_reset.clicked.connect(self.reset_opciones_p9)
-        layout.addRow("", btn_reset)
+        layout.addRow(btn_reset) # Al pasar solo el widget, abarcará las dos columnas enteras
         
         grupo.setLayout(layout)
         grupo.setFixedWidth(270) # Ancho fijo para el panel derecho
