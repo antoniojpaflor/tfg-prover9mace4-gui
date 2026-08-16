@@ -5,8 +5,8 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QTabWidget, QFileDialog, QGroupBox, QCheckBox, QStackedWidget,
                              QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
                              QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea)
-from PyQt6.QtGui import QFont, QAction
-from PyQt6.QtCore import QEvent, QThread, pyqtSignal
+from PyQt6.QtGui import QFont, QAction, QSyntaxHighlighter, QTextCharFormat, QColor
+from PyQt6.QtCore import QEvent, QThread, pyqtSignal, QRegularExpression
 
 from launcher import ejecutar_prover9, ejecutar_mace4
 from idiomas import TRADUCCIONES, DICCIONARIO_PANELES
@@ -32,6 +32,48 @@ class HiloMotor(QThread):
         
         # Al terminar, emitimos los datos de vuelta al hilo principal
         self.resultado_listo.emit(resultado_crudo, hora, self.snapshot)
+
+class ResaltadorProver9(QSyntaxHighlighter):
+    def __init__(self, document):
+        super().__init__(document)
+        self.reglas = []
+
+        # 1. Operadores Lógicos (Púrpura VS Code)
+        formato_operador = QTextCharFormat()
+        formato_operador.setForeground(QColor("#AF00DB"))
+        formato_operador.setFontWeight(QFont.Weight.Bold)
+        operadores = [r"->", r"<->", r"&", r"\|", r"-", r"=", r"!="]
+        for op in operadores:
+            self.reglas.append((QRegularExpression(op), formato_operador))
+
+        # 2. Palabras Clave del Sistema (Azul VS Code)
+        formato_clave = QTextCharFormat()
+        formato_clave.setForeground(QColor("#0000FF"))
+        formato_clave.setFontWeight(QFont.Weight.Bold)
+        claves = [r"\bformulas\b", r"\bend_of_list\b", r"\bassign\b", r"\bset\b", r"\bclear\b", r"\blist\b"]
+        for clave in claves:
+            self.reglas.append((QRegularExpression(clave), formato_clave))
+
+        # 3. Nombres de Bloques / Entornos (Rojo Oscuro VS Code)
+        formato_bloque = QTextCharFormat()
+        formato_bloque.setForeground(QColor("#A31515"))
+        bloques = [r"\bsos\b", r"\bgoals\b", r"\busable\b", r"\bdemodulators\b", r"\bassumptions\b"]
+        for bloque in bloques:
+            self.reglas.append((QRegularExpression(bloque), formato_bloque))
+
+        # 4. Comentarios (Verde VS Code)
+        formato_comentario = QTextCharFormat()
+        formato_comentario.setForeground(QColor("#008000"))
+        # El comentario en Prover9 empieza por % y va hasta el final de la línea
+        self.reglas.append((QRegularExpression(r"%.*"), formato_comentario))
+
+    def highlightBlock(self, text):
+        """Este método es llamado automáticamente por Qt cada vez que el texto cambia"""
+        for expresion, formato in self.reglas:
+            iterador = expresion.globalMatch(text)
+            while iterador.hasNext():
+                match = iterador.next()
+                self.setFormat(match.capturedStart(), match.capturedLength(), formato)
 
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
@@ -338,12 +380,14 @@ class VentanaPrincipal(QMainWindow):
         layout_limpio.addWidget(self.lbl_premisas_p9)
         self.premisas_p9 = QTextEdit()
         self.premisas_p9.setFont(fuente_codigo)
+        self.resaltador_premisas_p9 = ResaltadorProver9(self.premisas_p9.document())
         layout_limpio.addWidget(self.premisas_p9)
         self.lbl_conclusion_p9 = QLabel("")
         layout_limpio.addWidget(self.lbl_conclusion_p9)
         self.conclusion_p9 = QTextEdit()
         self.conclusion_p9.setFont(fuente_codigo)
         self.conclusion_p9.setMaximumHeight(100)
+        self.resaltador_conclusion_p9 = ResaltadorProver9(self.conclusion_p9.document())
         layout_limpio.addWidget(self.conclusion_p9)
         
         vista_libre = QWidget()
@@ -353,6 +397,7 @@ class VentanaPrincipal(QMainWindow):
         layout_libre.addWidget(self.lbl_libre_p9)
         self.entrada_libre_p9 = QTextEdit()
         self.entrada_libre_p9.setFont(fuente_codigo)
+        self.resaltador_libre_p9 = ResaltadorProver9(self.entrada_libre_p9.document())
         layout_libre.addWidget(self.entrada_libre_p9)
         
         self.vista_stack_p9.addWidget(vista_limpia)
@@ -398,12 +443,14 @@ class VentanaPrincipal(QMainWindow):
         layout_limpio.addWidget(self.lbl_premisas_m4)
         self.premisas_m4 = QTextEdit()
         self.premisas_m4.setFont(fuente_codigo)
+        self.resaltador_premisas_m4 = ResaltadorProver9(self.premisas_m4.document())
         layout_limpio.addWidget(self.premisas_m4)
         self.lbl_objetivo_m4 = QLabel("")
         layout_limpio.addWidget(self.lbl_objetivo_m4)
         self.conclusion_m4 = QTextEdit()
         self.conclusion_m4.setFont(fuente_codigo)
         self.conclusion_m4.setMaximumHeight(100)
+        self.resaltador_conclusion_m4 = ResaltadorProver9(self.conclusion_m4.document())
         layout_limpio.addWidget(self.conclusion_m4)
         
         vista_libre = QWidget()
@@ -413,6 +460,7 @@ class VentanaPrincipal(QMainWindow):
         layout_libre.addWidget(self.lbl_libre_m4)
         self.entrada_libre_m4 = QTextEdit()
         self.entrada_libre_m4.setFont(fuente_codigo)
+        self.resaltador_libre_m4 = ResaltadorProver9(self.entrada_libre_m4.document())
         layout_libre.addWidget(self.entrada_libre_m4)
         
         self.vista_stack_m4.addWidget(vista_limpia)
