@@ -650,7 +650,7 @@ class VentanaPrincipal(QMainWindow):
         else:
             premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
             conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
-            texto_final = self.cocinar_entrada(self.premisas_p9, self.conclusion_p9) if (premisas or conclusion) else ""
+            texto_final = self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9) if (premisas or conclusion) else ""
             
         if not texto_final.strip():
             self.salida_p9.setPlainText("❌ Error: No hay datos de entrada válidos.")
@@ -680,7 +680,7 @@ class VentanaPrincipal(QMainWindow):
         else:
             premisas = self.extraer_texto_util(self.premisas_m4, txt['ph_premisas_m4'])
             conclusion = self.extraer_texto_util(self.conclusion_m4, txt['ph_conclusion_m4'])
-            texto_final = self.cocinar_entrada(self.premisas_m4, self.conclusion_m4) if (premisas or conclusion) else ""
+            texto_final = self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4) if (premisas or conclusion) else ""
 
         if not texto_final.strip():
             self.salida_m4.setPlainText("❌ Error: No hay datos de entrada válidos.")
