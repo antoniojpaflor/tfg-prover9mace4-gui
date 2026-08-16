@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QTextEdit, QPushButton, QLabel, 
                              QTabWidget, QFileDialog, QGroupBox, QCheckBox, QStackedWidget,
                              QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
-                             QWidgetAction, QSpinBox, QFormLayout, QComboBox)
+                             QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea)
 from PyQt6.QtGui import QFont, QAction
 from PyQt6.QtCore import QEvent
 
@@ -380,9 +380,14 @@ class VentanaPrincipal(QMainWindow):
         self.grupo_ins_m4, self.lbl_ops_m4, self.botones_ops_m4 = self.crear_panel_insercion(self.entrada_libre_m4)
         layout_principal.addWidget(self.grupo_ins_m4)
         layout_principal.addLayout(columna_derecha)
+        
+        # NUEVO: Integrar el panel lateral de Mace4
+        self.grupo_opciones_m4 = self.crear_panel_opciones_m4()
+        layout_principal.addWidget(self.grupo_opciones_m4)
+        
         self.tab_mace4.setLayout(layout_principal)
 
-    def cocinar_entrada(self, caja_premisas, caja_conclusion):
+    def cocinar_entrada_p9(self, caja_premisas, caja_conclusion):
         texto_cocinado = ""
         
         # 1. Parámetros assign directamente desde la interfaz
@@ -390,7 +395,7 @@ class VentanaPrincipal(QMainWindow):
         texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
         texto_cocinado += f"assign(order, {self.combo_order.currentText()}).\n"
         texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentText()}).\n"
-        texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds.value()}).\n"
+        texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
         
         # 2. Flags booleanos directamente desde los checkboxes
         if self.chk_expand_relational.isChecked():
@@ -428,6 +433,53 @@ class VentanaPrincipal(QMainWindow):
                 conclusion += '.'
             texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
             
+        return texto_cocinado
+
+    def cocinar_entrada_m4(self, caja_premisas, caja_conclusion):
+        texto_cocinado = ""
+
+        # 1. Parámetros assign
+        texto_cocinado += f"assign(domain_size, {self.spin_domain_size.value()}).\n"
+        texto_cocinado += f"assign(start_size, {self.spin_start_size.value()}).\n"
+        texto_cocinado += f"assign(end_size, {self.spin_end_size.value()}).\n"
+        texto_cocinado += f"assign(increment, {self.spin_increment.value()}).\n"
+        texto_cocinado += f"assign(iterate, {self.combo_iterate.currentText()}).\n"
+        texto_cocinado += f"assign(max_models, {self.spin_max_models.value()}).\n"
+        texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_m4.value()}).\n"
+        texto_cocinado += f"assign(max_seconds_per, {self.spin_max_seconds_per.value()}).\n"
+        texto_cocinado += f"assign(max_megs, {self.spin_max_megs.value()}).\n"
+        texto_cocinado += f"assign(selection_order, {self.spin_selection_order.value()}).\n"
+        texto_cocinado += f"assign(selection_measure, {self.spin_selection_measure.value()}).\n"
+
+        # 2. Flags booleanos
+        flags_m4 = {
+            'prolog_style_variables': self.chk_prolog_vars_m4, 'integer_ring': self.chk_integer_ring,
+            'skolems_last': self.chk_skolems_last, 'print_models': self.chk_print_models,
+            'lnh': self.chk_lnh, 'negprop': self.chk_negprop, 'neg_assign': self.chk_neg_assign,
+            'neg_assign_near': self.chk_neg_assign_near, 'neg_elim': self.chk_neg_elim,
+            'neg_elim_near': self.chk_neg_elim_near
+        }
+        for flag, widget in flags_m4.items():
+            if widget.isChecked(): texto_cocinado += f"set({flag}).\n"
+            else: texto_cocinado += f"clear({flag}).\n"
+
+        texto_cocinado += "\n"
+
+        # 3. Fórmulas
+        lineas_premisas = caja_premisas.toPlainText().split('\n')
+        conclusion = caja_conclusion.toPlainText().strip()
+        texto_cocinado += "formulas(sos).\n"
+        for linea in lineas_premisas:
+            linea_limpia = linea.strip()
+            if linea_limpia:
+                if not linea_limpia.endswith('.'): linea_limpia += '.'
+                texto_cocinado += f"  {linea_limpia}\n"
+        texto_cocinado += "end_of_list.\n\n"
+
+        if conclusion:
+            if not conclusion.endswith('.'): conclusion += '.'
+            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
+
         return texto_cocinado
 
     def cocinar_entrada_directa(self, texto_premisas, texto_conclusion):
@@ -557,7 +609,7 @@ class VentanaPrincipal(QMainWindow):
         }
         
         if self.chk_modo_p9.isChecked():
-            texto_final = self.extraer_texto_util(self.entrada_libre_p9, txt['ph_libre_p9'])
+            texto_final = self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9) if (premisas or conclusion) else ""
         else:
             premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
             conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
@@ -568,7 +620,7 @@ class VentanaPrincipal(QMainWindow):
             self.btn_p9.setEnabled(True)
             return
 
-        resultado_crudo, hora = ejecutar_prover9(texto_final, tiempo_limite=self.spin_max_seconds.value())
+        resultado_crudo, hora = ejecutar_prover9(texto_final, tiempo_limite=self.spin_max_seconds_p9.value())
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
         
         self.salida_p9.setPlainText(resultado_traducido)
@@ -587,7 +639,7 @@ class VentanaPrincipal(QMainWindow):
         }
         
         if self.chk_modo_m4.isChecked():
-            texto_final = self.extraer_texto_util(self.entrada_libre_m4, txt['ph_libre_m4'])
+            texto_final = self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4) if (premisas or conclusion) else ""
         else:
             premisas = self.extraer_texto_util(self.premisas_m4, txt['ph_premisas_m4'])
             conclusion = self.extraer_texto_util(self.conclusion_m4, txt['ph_conclusion_m4'])
@@ -598,7 +650,7 @@ class VentanaPrincipal(QMainWindow):
             self.btn_m4.setEnabled(True)
             return
 
-        resultado_crudo, hora = ejecutar_mace4(texto_final, tiempo_limite=self.spin_max_seconds.value())
+        resultado_crudo, hora = ejecutar_mace4(texto_final, tiempo_limite=self.spin_max_seconds_m4.value())
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
         
         self.salida_m4.setPlainText(resultado_traducido)
@@ -680,9 +732,9 @@ class VentanaPrincipal(QMainWindow):
         p = self.tabs.currentIndex()
         idioma_txt = TRADUCCIONES[self.idioma_actual]
         if p == 0:
-            texto = self.extraer_texto_util(self.entrada_libre_p9, idioma_txt['ph_libre_p9']) if self.chk_modo_p9.isChecked() else self.cocinar_entrada(self.premisas_p9, self.conclusion_p9)
+            texto = self.extraer_texto_util(self.entrada_libre_p9, idioma_txt['ph_libre_p9']) if self.chk_modo_p9.isChecked() else self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9)
         else:
-            texto = self.extraer_texto_util(self.entrada_libre_m4, idioma_txt['ph_libre_m4']) if self.chk_modo_m4.isChecked() else self.cocinar_entrada(self.premisas_m4, self.conclusion_m4)
+            texto = self.extraer_texto_util(self.entrada_libre_m4, idioma_txt['ph_libre_m4']) if self.chk_modo_m4.isChecked() else self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4)
         
         try:
             with open(self.ruta_archivo_actual, "w", encoding="utf-8") as f: 
@@ -698,13 +750,6 @@ class VentanaPrincipal(QMainWindow):
             ruta, _ = QFileDialog.getSaveFileName(self, "Exportar / Export", "", "Reports (*.out *.txt)")
             if ruta:
                 with open(ruta, "w", encoding="utf-8") as f: f.write(editor.toPlainText())
-
-    def abrir_opciones_p9(self):
-        dialogo = DialogoOpcionesProver9(self.opciones_p9, self.idioma_actual, self)
-        if dialogo.exec():
-            self.opciones_p9 = dialogo.opciones
-            # Si quieres que el timeout afecte también al spinbox del menú superior, actualízalo:
-            self.spin_timeout.setValue(self.opciones_p9['max_seconds'])
 
     def crear_panel_opciones_p9(self):
         grupo = QGroupBox("Opciones Básicas")
@@ -734,10 +779,10 @@ class VentanaPrincipal(QMainWindow):
         self.chk_restrict_denials = QCheckBox()
         layout.addRow("restrict_denials:", self.chk_restrict_denials)
         
-        self.spin_max_seconds = QSpinBox()
-        self.spin_max_seconds.setRange(1, 3600)
-        self.spin_max_seconds.setValue(60)
-        layout.addRow("max_seconds:", self.spin_max_seconds)
+        self.spin_max_seconds_p9 = QSpinBox()
+        self.spin_max_seconds_p9.setRange(1, 3600)
+        self.spin_max_seconds_p9.setValue(60)
+        layout.addRow("max_seconds:", self.spin_max_seconds_p9)
         
         self.chk_prolog_vars = QCheckBox()
         layout.addRow("prolog_style_variables:", self.chk_prolog_vars)
@@ -757,8 +802,124 @@ class VentanaPrincipal(QMainWindow):
         self.combo_eq_defs.setCurrentText("unfold")
         self.chk_expand_relational.setChecked(False)
         self.chk_restrict_denials.setChecked(False)
-        self.spin_max_seconds.setValue(60)
+        self.spin_max_seconds_p9.setValue(60)
         self.chk_prolog_vars.setChecked(False)
+
+    def crear_panel_opciones_m4(self):
+        # Contenedor principal con barra de desplazamiento
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFixedWidth(300)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+
+        contenido = QWidget()
+        layout_principal = QVBoxLayout(contenido)
+        layout_principal.setContentsMargins(5, 0, 5, 0)
+
+        # --- Basic Options ---
+        grupo_basico = QGroupBox("Basic Options")
+        form_basico = QFormLayout()
+
+        self.spin_domain_size = QSpinBox(); self.spin_domain_size.setRange(0, 1000); self.spin_domain_size.setValue(0)
+        form_basico.addRow("domain_size:", self.spin_domain_size)
+        self.spin_start_size = QSpinBox(); self.spin_start_size.setRange(1, 1000); self.spin_start_size.setValue(2)
+        form_basico.addRow("start_size:", self.spin_start_size)
+        self.spin_end_size = QSpinBox(); self.spin_end_size.setRange(-1, 1000); self.spin_end_size.setValue(-1)
+        form_basico.addRow("end_size:", self.spin_end_size)
+        self.spin_increment = QSpinBox(); self.spin_increment.setRange(1, 100); self.spin_increment.setValue(1)
+        form_basico.addRow("increment:", self.spin_increment)
+
+        self.combo_iterate = QComboBox()
+        self.combo_iterate.addItems(["all", "up_to"]) 
+        self.combo_iterate.setCurrentText("all")
+        form_basico.addRow("iterate:", self.combo_iterate)
+
+        self.spin_max_models = QSpinBox(); self.spin_max_models.setRange(-1, 10000); self.spin_max_models.setValue(1)
+        form_basico.addRow("max_models:", self.spin_max_models)
+        self.spin_max_seconds_m4 = QSpinBox(); self.spin_max_seconds_m4.setRange(-1, 3600); self.spin_max_seconds_m4.setValue(60)
+        form_basico.addRow("max_seconds:", self.spin_max_seconds_m4)
+        self.spin_max_seconds_per = QSpinBox(); self.spin_max_seconds_per.setRange(-1, 3600); self.spin_max_seconds_per.setValue(-1)
+        form_basico.addRow("max_seconds_per:", self.spin_max_seconds_per)
+
+        self.chk_prolog_vars_m4 = QCheckBox()
+        form_basico.addRow("prolog_style_variables:", self.chk_prolog_vars_m4)
+
+        grupo_basico.setLayout(form_basico)
+        layout_principal.addWidget(grupo_basico)
+
+        # --- Other Options ---
+        grupo_otros = QGroupBox("Other Options")
+        form_otros = QFormLayout()
+
+        self.chk_integer_ring = QCheckBox()
+        form_otros.addRow("integer_ring:", self.chk_integer_ring)
+        self.chk_skolems_last = QCheckBox()
+        form_otros.addRow("skolems_last:", self.chk_skolems_last)
+        self.spin_max_megs = QSpinBox(); self.spin_max_megs.setRange(1, 10000); self.spin_max_megs.setValue(200)
+        form_otros.addRow("max_megs:", self.spin_max_megs)
+        self.chk_print_models = QCheckBox(); self.chk_print_models.setChecked(True)
+        form_otros.addRow("print_models:", self.chk_print_models)
+
+        grupo_otros.setLayout(form_otros)
+        layout_principal.addWidget(grupo_otros)
+
+        # --- Experimental Options ---
+        grupo_exp = QGroupBox("Experimental Options")
+        form_exp = QFormLayout()
+
+        self.chk_lnh = QCheckBox(); self.chk_lnh.setChecked(True)
+        form_exp.addRow("lnh:", self.chk_lnh)
+        self.chk_negprop = QCheckBox(); self.chk_negprop.setChecked(True)
+        form_exp.addRow("negprop:", self.chk_negprop)
+        self.chk_neg_assign = QCheckBox(); self.chk_neg_assign.setChecked(True)
+        form_exp.addRow("neg_assign:", self.chk_neg_assign)
+        self.chk_neg_assign_near = QCheckBox(); self.chk_neg_assign_near.setChecked(True)
+        form_exp.addRow("neg_assign_near:", self.chk_neg_assign_near)
+        self.chk_neg_elim = QCheckBox(); self.chk_neg_elim.setChecked(True)
+        form_exp.addRow("neg_elim:", self.chk_neg_elim)
+        self.chk_neg_elim_near = QCheckBox(); self.chk_neg_elim_near.setChecked(True)
+        form_exp.addRow("neg_elim_near:", self.chk_neg_elim_near)
+
+        self.spin_selection_order = QSpinBox(); self.spin_selection_order.setRange(-1, 100); self.spin_selection_order.setValue(2)
+        form_exp.addRow("selection_order:", self.spin_selection_order)
+        self.spin_selection_measure = QSpinBox(); self.spin_selection_measure.setRange(-1, 100); self.spin_selection_measure.setValue(4)
+        form_exp.addRow("selection_measure:", self.spin_selection_measure)
+
+        grupo_exp.setLayout(form_exp)
+        layout_principal.addWidget(grupo_exp)
+
+        # Botón Reset
+        btn_reset = QPushButton("Reset These to Defaults")
+        btn_reset.clicked.connect(self.reset_opciones_m4)
+        layout_principal.addWidget(btn_reset)
+
+        scroll.setWidget(contenido)
+        return scroll
+
+    def reset_opciones_m4(self):
+        self.spin_domain_size.setValue(0)
+        self.spin_start_size.setValue(2)
+        self.spin_end_size.setValue(-1)
+        self.spin_increment.setValue(1)
+        self.combo_iterate.setCurrentText("all")
+        self.spin_max_models.setValue(1)
+        self.spin_max_seconds_m4.setValue(60)
+        self.spin_max_seconds_per.setValue(-1)
+        self.chk_prolog_vars_m4.setChecked(False)
+
+        self.chk_integer_ring.setChecked(False)
+        self.chk_skolems_last.setChecked(False)
+        self.spin_max_megs.setValue(200)
+        self.chk_print_models.setChecked(True)
+
+        self.chk_lnh.setChecked(True)
+        self.chk_negprop.setChecked(True)
+        self.chk_neg_assign.setChecked(True)
+        self.chk_neg_assign_near.setChecked(True)
+        self.chk_neg_elim.setChecked(True)
+        self.chk_neg_elim_near.setChecked(True)
+        self.spin_selection_order.setValue(2)
+        self.spin_selection_measure.setValue(4)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
