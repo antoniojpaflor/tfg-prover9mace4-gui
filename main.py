@@ -6,10 +6,32 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
                              QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea)
 from PyQt6.QtGui import QFont, QAction
-from PyQt6.QtCore import QEvent
+from PyQt6.QtCore import QEvent, QThread, pyqtSignal
 
 from launcher import ejecutar_prover9, ejecutar_mace4
 from idiomas import TRADUCCIONES, DICCIONARIO_PANELES
+
+class HiloMotor(QThread):
+    # Definimos la señal que el hilo enviará a la ventana principal al terminar
+    # Contendrá: resultado_crudo (str), hora (str), y el snapshot del historial (dict)
+    resultado_listo = pyqtSignal(str, str, dict)
+
+    def __init__(self, motor, texto_final, tiempo_limite, snapshot):
+        super().__init__()
+        self.motor = motor
+        self.texto_final = texto_final
+        self.tiempo_limite = tiempo_limite
+        self.snapshot = snapshot
+
+    def run(self):
+        # Este método se ejecuta en un núcleo secundario del procesador
+        if self.motor == 'prover9':
+            resultado_crudo, hora = ejecutar_prover9(self.texto_final, tiempo_limite=self.tiempo_limite)
+        else:
+            resultado_crudo, hora = ejecutar_mace4(self.texto_final, tiempo_limite=self.tiempo_limite)
+        
+        # Al terminar, emitimos los datos de vuelta al hilo principal
+        self.resultado_listo.emit(resultado_crudo, hora, self.snapshot)
 
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
@@ -643,11 +665,8 @@ class VentanaPrincipal(QMainWindow):
                 c.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
 
     def procesar_prover9(self):
-        self.btn_p9.setEnabled(False)
-        self.salida_p9.setPlainText(TRADUCCIONES[self.idioma_actual]['msg_procesando_p9'])
         txt = TRADUCCIONES[self.idioma_actual]
         
-        # Snapshot para el historial
         snapshot = {
             'pestaña': 0, 'modo_avanzado': self.chk_modo_p9.isChecked(),
             'premisas': self.premisas_p9.toPlainText(), 'conclusion': self.conclusion_p9.toPlainText(),
@@ -655,7 +674,7 @@ class VentanaPrincipal(QMainWindow):
         }
         
         if self.chk_modo_p9.isChecked():
-            texto_final = self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9) if (premisas or conclusion) else ""
+            texto_final = self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9) if (self.premisas_p9.toPlainText() or self.conclusion_p9.toPlainText()) else ""
         else:
             premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
             conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
@@ -663,19 +682,33 @@ class VentanaPrincipal(QMainWindow):
             
         if not texto_final.strip():
             self.salida_p9.setPlainText("❌ Error: No hay datos de entrada válidos.")
-            self.btn_p9.setEnabled(True)
             return
 
-        resultado_crudo, hora = ejecutar_prover9(texto_final, tiempo_limite=self.spin_max_seconds_p9.value())
+        # 1. Bloquear la interfaz visualmente para evitar múltiples envíos
+        self.btn_p9.setEnabled(False)
+        self.btn_p9.setText("Procesando... (Por favor, espera)")
+        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;") # Naranja de carga
+        self.salida_p9.setPlainText(txt['msg_procesando_p9'])
+
+        # 2. Arrancar el obrero en segundo plano
+        self.hilo_p9 = HiloMotor('prover9', texto_final, self.spin_max_seconds_p9.value(), snapshot)
+        self.hilo_p9.resultado_listo.connect(self.al_terminar_prover9)
+        self.hilo_p9.start()
+
+    def al_terminar_prover9(self, resultado_crudo, hora, snapshot):
+        # 3. Este método se dispara automáticamente cuando el hilo termina
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
         
         self.salida_p9.setPlainText(resultado_traducido)
         self.agregar_al_historial(hora, "Prover9", tag, snapshot)
+        
+        # Restaurar el botón a su estado original
+        txt = TRADUCCIONES[self.idioma_actual]
         self.btn_p9.setEnabled(True)
+        self.btn_p9.setText(txt['btn_verificar_p9'])
+        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #1e3d59; color: white; padding: 10px;")
 
     def procesar_mace4(self):
-        self.btn_m4.setEnabled(False)
-        self.salida_m4.setPlainText(TRADUCCIONES[self.idioma_actual]['msg_procesando_m4'])
         txt = TRADUCCIONES[self.idioma_actual]
         
         snapshot = {
@@ -685,7 +718,7 @@ class VentanaPrincipal(QMainWindow):
         }
         
         if self.chk_modo_m4.isChecked():
-            texto_final = self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4) if (premisas or conclusion) else ""
+            texto_final = self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4) if (self.premisas_m4.toPlainText() or self.conclusion_m4.toPlainText()) else ""
         else:
             premisas = self.extraer_texto_util(self.premisas_m4, txt['ph_premisas_m4'])
             conclusion = self.extraer_texto_util(self.conclusion_m4, txt['ph_conclusion_m4'])
@@ -693,15 +726,31 @@ class VentanaPrincipal(QMainWindow):
 
         if not texto_final.strip():
             self.salida_m4.setPlainText("❌ Error: No hay datos de entrada válidos.")
-            self.btn_m4.setEnabled(True)
             return
 
-        resultado_crudo, hora = ejecutar_mace4(texto_final, tiempo_limite=self.spin_max_seconds_m4.value())
+        # 1. Bloquear la interfaz visualmente
+        self.btn_m4.setEnabled(False)
+        self.btn_m4.setText("Procesando... (Por favor, espera)")
+        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
+        self.salida_m4.setPlainText(txt['msg_procesando_m4'])
+
+        # 2. Arrancar el obrero en segundo plano
+        self.hilo_m4 = HiloMotor('mace4', texto_final, self.spin_max_seconds_m4.value(), snapshot)
+        self.hilo_m4.resultado_listo.connect(self.al_terminar_m4)
+        self.hilo_m4.start()
+
+    def al_terminar_m4(self, resultado_crudo, hora, snapshot):
+        # 3. Recepción de datos y actualización de interfaz
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
         
         self.salida_m4.setPlainText(resultado_traducido)
         self.agregar_al_historial(hora, "Mace4", tag, snapshot)
+        
+        # Restaurar el botón
+        txt = TRADUCCIONES[self.idioma_actual]
         self.btn_m4.setEnabled(True)
+        self.btn_m4.setText(txt['btn_buscar_m4'])
+        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #17b978; color: white; padding: 10px;")
 
     def cargar_ejemplo_tipo(self, slot_menu):
         """Carga problemas específicos calculando si el usuario está en Prover9 o Mace4"""
