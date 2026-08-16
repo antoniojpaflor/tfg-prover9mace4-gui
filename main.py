@@ -814,7 +814,7 @@ class VentanaPrincipal(QMainWindow):
         layout_all.addWidget(self.combo_grupos_p9)
         self.stack_opciones_p9 = QStackedWidget()
 
-        # ESQUEMA DE DATOS (Data-Driven UI)
+        # ESQUEMA DE DATOS (Data-Driven UI) ACTUALIZADO
         SCHEMA = [
             ("Meta Options", [
                 ('flag', 'auto', True), ('flag', 'auto_setup', True), ('flag', 'auto_limits', True),
@@ -824,7 +824,7 @@ class VentanaPrincipal(QMainWindow):
             ("Term Ordering", [
                 ('combo', 'order', ["lpo", "rpo", "kbo"], "lpo"),
                 ('combo', 'eq_defs', ["unfold", "fold", "pass"], "unfold"),
-                ('flag', 'inverse_order', False)
+                ('flag', 'inverse_order', True)
             ]),
             ("Limits", [
                 ('sub', 'Search Limits'),
@@ -836,7 +836,7 @@ class VentanaPrincipal(QMainWindow):
                 ('spin', 'max_weight', -1000, 100000, 100), ('spin', 'max_depth', -1, 1000, -1),
                 ('spin', 'max_literals', -1, 1000, -1), ('spin', 'max_vars', -1, 1000, -1),
                 ('sub', 'Sos Control'),
-                ('spin', 'sos_limit', -1, 100000, -1)
+                ('spin', 'sos_limit', -1, 2147483647, 20000)
             ]),
             ("Search Prep", [
                 ('flag', 'expand_relational_defs', False), ('flag', 'dont_flip_input', False),
@@ -848,14 +848,18 @@ class VentanaPrincipal(QMainWindow):
             ]),
             ("Select Given", [
                 ('sub', 'Selection Ratio'),
-                ('spin', 'hints_part', 0, 1000, 2), ('spin', 'age_part', 0, 1000, 1),
-                ('spin', 'weight_part', 0, 1000, 1), ('spin', 'false_part', 0, 1000, 0),
-                ('spin', 'true_part', 0, 1000, 0), ('spin', 'random_part', 0, 1000, 0),
+                ('spin', 'hints_part', 0, 2147483647, 2147483647),
+                ('spin', 'age_part', 0, 1000, 1),
+                ('spin', 'weight_part', 0, 1000, 0),
+                ('spin', 'false_part', 0, 1000, 4),
+                ('spin', 'true_part', 0, 1000, 4),
+                ('spin', 'random_part', 0, 1000, 0),
                 ('sub', 'Semantic Guidance'),
                 ('combo', 'multiple_interps', ["false_in_all", "false_in_some"], "false_in_all"),
-                ('spin', 'eval_limit', -1, 100000, -1),
+                ('spin', 'eval_limit', -1, 100000, 1024),
                 ('sub', 'Meta Options'),
-                ('spin', 'pick_given_ratio', -1, 1000, 3), ('flag', 'breadth_first', False),
+                ('spin', 'pick_given_ratio', -1, 1000, -1),
+                ('flag', 'breadth_first', False),
                 ('flag', 'lightest_first', False), ('flag', 'random_given', False),
                 ('sub', 'Others'),
                 ('flag', 'input_sos_first', True), ('flag', 'breadth_first_hints', False)
@@ -866,17 +870,17 @@ class VentanaPrincipal(QMainWindow):
                 ('flag', 'hyper_resolution', False), ('flag', 'pos_hyper_resolution', False),
                 ('flag', 'neg_hyper_resolution', False), ('flag', 'ur_resolution', False),
                 ('flag', 'pos_ur_resolution', False), ('flag', 'neg_ur_resolution', False),
-                ('flag', 'paramodulation', True),
+                ('flag', 'paramodulation', False),
                 ('sub', 'Other Rules'),
                 ('spin', 'new_constants', 0, 10000, 0), ('flag', 'factor', False),
                 ('sub', 'General Restrictions'),
                 ('combo', 'literal_selection', ["max_negative", "all_negative", "none"], "max_negative"),
                 ('sub', 'Resolution Restrictions'),
-                ('flag', 'ordered_res', False), ('flag', 'check_res_instances', False),
+                ('flag', 'ordered_res', True), ('flag', 'check_res_instances', False),
                 ('flag', 'initial_nuclei', False), ('spin', 'ur_nucleus_limit', -1, 10000, -1),
                 ('sub', 'Paramodulation Restrictions'),
-                ('flag', 'ordered_para', False), ('flag', 'check_para_instances', False),
-                ('flag', 'para_from_vars', False), ('flag', 'para_units_only', False),
+                ('flag', 'ordered_para', True), ('flag', 'check_para_instances', False),
+                ('flag', 'para_from_vars', True), ('flag', 'para_units_only', False),
                 ('spin', 'para_lit_limit', -1, 10000, -1)
             ]),
             ("Rewriting", [
@@ -891,29 +895,29 @@ class VentanaPrincipal(QMainWindow):
             ("Weighting", [
                 ('sub', 'Symbol Weights'),
                 ('spin', 'variable_weight', -1000, 1000, 1), ('spin', 'constant_weight', -1000, 1000, 1),
-                ('spin', 'not_weight', -1000, 1000, 1), ('spin', 'or_weight', -1000, 1000, 1),
+                ('spin', 'not_weight', -1000, 1000, 0), ('spin', 'or_weight', -1000, 1000, 0),
                 ('spin', 'sk_constant_weight', -1000, 1000, 1), ('spin', 'prop_atom_weight', -1000, 1000, 1),
                 ('sub', 'Penalties'),
                 ('spin', 'skolem_penalty', -1000, 1000, 1), ('spin', 'nest_penalty', -1000, 1000, 0),
                 ('spin', 'depth_penalty', -1000, 1000, 0), ('spin', 'var_penalty', -1000, 1000, 0),
                 ('sub', 'Others'),
-                ('spin', 'default_weight', -1000, 1000, 1)
+                ('spin', 'default_weight', -1000, 2147483647, 2147483647)
             ]),
             ("Process Inferred", [
                 ('flag', 'safe_unit_conflict', False), ('flag', 'back_subsume', True),
-                ('flag', 'backsub_check', False)
+                ('spin', 'backsub_check', -1, 100000, 500)
             ]),
             ("Input/Output", [
                 ('flag', 'print_initial_clauses', True), ('flag', 'print_given', True),
-                ('flag', 'print_gen', False), ('flag', 'print_kept', True),
+                ('flag', 'print_gen', False), ('flag', 'print_kept', False),
                 ('flag', 'print_labeled', False), ('flag', 'print_proofs', True),
                 ('flag', 'print_clause_properties', False),
-                ('combo', 'stats', ["none", "some", "lots", "all"], "some"),
-                ('flag', 'report', True), ('flag', 'prolog_style_variables', False)
+                ('combo', 'stats', ["none", "some", "lots", "all"], "lots"),
+                ('spin', 'report', -1, 100000, -1), ('flag', 'prolog_style_variables', False)
             ]),
             ("Hints", [
                 ('flag', 'limit_hint_matchers', False), ('flag', 'collect_hint_labels', False),
-                ('flag', 'degrade_hints', True), ('flag', 'back_demod_hints', False)
+                ('flag', 'degrade_hints', True), ('flag', 'back_demod_hints', True)
             ]),
             ("Other Options", [
                 ('spin', 'random_seed', -1, 100000, 0)
