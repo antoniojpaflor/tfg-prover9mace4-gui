@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QTextEdit, QPushButton, QLabel, 
                              QTabWidget, QFileDialog, QGroupBox, QCheckBox, QStackedWidget,
                              QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
-                             QWidgetAction, QSpinBox)
+                             QWidgetAction, QSpinBox, QFormLayout, QComboBox)
 from PyQt6.QtGui import QFont, QAction
 from PyQt6.QtCore import QEvent
 
@@ -134,26 +134,6 @@ class VentanaPrincipal(QMainWindow):
         self.menu_ejemplos.addAction(self.accion_ej1)
         self.menu_ejemplos.addAction(self.accion_ej2)
         
-        # === NUEVO: Menú Configuración con QSpinBox incrustado ===
-        self.menu_config = barra_menus.addMenu("")
-        
-        widget_config = QWidget()
-        layout_config = QHBoxLayout(widget_config)
-        layout_config.setContentsMargins(10, 5, 10, 5)
-        
-        self.lbl_timeout_menu = QLabel("")
-        self.spin_timeout = QSpinBox()
-        self.spin_timeout.setRange(1, 60)  # Rango de 1 a 60 segundos
-        self.spin_timeout.setValue(5)       # Valor por defecto inicial (5 seg)
-        self.spin_timeout.setFixedWidth(50)
-        
-        layout_config.addWidget(self.lbl_timeout_menu)
-        layout_config.addWidget(self.spin_timeout)
-        
-        accion_widget = QWidgetAction(self)
-        accion_widget.setDefaultWidget(widget_config)
-        self.menu_config.addAction(accion_widget)
-        
         # Menú Idioma
         self.menu_idioma = barra_menus.addMenu("")
         accion_es = QAction("Español (es-ES)", self)
@@ -193,10 +173,6 @@ class VentanaPrincipal(QMainWindow):
         else:
             self.accion_ej1.setText(txt['ej_m4_1'])
             self.accion_ej2.setText(txt['ej_m4_2'])
-            
-        # === NUEVO: Traducción del menú de Configuración y sus elementos ===
-        self.menu_config.setTitle(txt['menu_config'])
-        self.lbl_timeout_menu.setText(txt['lbl_timeout'])
         
         self.menu_idioma.setTitle(txt['menu_idioma'])
         
@@ -341,9 +317,16 @@ class VentanaPrincipal(QMainWindow):
         self.salida_p9.setReadOnly(True)
         columna_derecha.addWidget(self.salida_p9)
         
+        # (Final de configurar_tab_prover9)
         self.grupo_ins_p9, self.lbl_ops_p9, self.botones_ops_p9 = self.crear_panel_insercion(self.entrada_libre_p9)
+        
+        # Ensamblaje de las 3 columnas: Izquierda (Inserción) - Centro (Editor) - Derecha (Opciones)
         layout_principal.addWidget(self.grupo_ins_p9)
         layout_principal.addLayout(columna_derecha)
+        
+        self.grupo_opciones_p9 = self.crear_panel_opciones_p9()
+        layout_principal.addWidget(self.grupo_opciones_p9)
+        
         self.tab_prover9.setLayout(layout_principal)
 
     def configurar_tab_mace4(self):
@@ -400,9 +383,38 @@ class VentanaPrincipal(QMainWindow):
         self.tab_mace4.setLayout(layout_principal)
 
     def cocinar_entrada(self, caja_premisas, caja_conclusion):
+        texto_cocinado = ""
+        
+        # 1. Parámetros assign directamente desde la interfaz
+        texto_cocinado += f"assign(max_weight, {self.spin_max_weight.value()}).\n"
+        texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
+        texto_cocinado += f"assign(order, {self.combo_order.currentText()}).\n"
+        texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentText()}).\n"
+        texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds.value()}).\n"
+        
+        # 2. Flags booleanos directamente desde los checkboxes
+        if self.chk_expand_relational.isChecked():
+            texto_cocinado += "set(expand_relational_defs).\n"
+        else:
+            texto_cocinado += "clear(expand_relational_defs).\n"
+            
+        if self.chk_restrict_denials.isChecked():
+            texto_cocinado += "set(restrict_denials).\n"
+        else:
+            texto_cocinado += "clear(restrict_denials).\n"
+            
+        if self.chk_prolog_vars.isChecked():
+            texto_cocinado += "set(prolog_style_variables).\n"
+        else:
+            texto_cocinado += "clear(prolog_style_variables).\n"
+                
+        texto_cocinado += "\n"
+        
+        # 3. Bloque de fórmulas
         lineas_premisas = caja_premisas.toPlainText().split('\n')
         conclusion = caja_conclusion.toPlainText().strip()
-        texto_cocinado = "formulas(sos).\n"
+        
+        texto_cocinado += "formulas(sos).\n"
         for linea in lineas_premisas:
             linea_limpia = linea.strip()
             if linea_limpia:
@@ -410,10 +422,12 @@ class VentanaPrincipal(QMainWindow):
                     linea_limpia += '.'
                 texto_cocinado += f"  {linea_limpia}\n"
         texto_cocinado += "end_of_list.\n\n"
+        
         if conclusion:
             if not conclusion.endswith('.'):
                 conclusion += '.'
             texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
+            
         return texto_cocinado
 
     def cocinar_entrada_directa(self, texto_premisas, texto_conclusion):
@@ -554,7 +568,7 @@ class VentanaPrincipal(QMainWindow):
             self.btn_p9.setEnabled(True)
             return
 
-        resultado_crudo, hora = ejecutar_prover9(texto_final, tiempo_limite=self.spin_timeout.value())
+        resultado_crudo, hora = ejecutar_prover9(texto_final, tiempo_limite=self.spin_max_seconds.value())
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
         
         self.salida_p9.setPlainText(resultado_traducido)
@@ -584,7 +598,7 @@ class VentanaPrincipal(QMainWindow):
             self.btn_m4.setEnabled(True)
             return
 
-        resultado_crudo, hora = ejecutar_mace4(texto_final, tiempo_limite=self.spin_timeout.value())
+        resultado_crudo, hora = ejecutar_mace4(texto_final, tiempo_limite=self.spin_max_seconds.value())
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
         
         self.salida_m4.setPlainText(resultado_traducido)
@@ -684,6 +698,67 @@ class VentanaPrincipal(QMainWindow):
             ruta, _ = QFileDialog.getSaveFileName(self, "Exportar / Export", "", "Reports (*.out *.txt)")
             if ruta:
                 with open(ruta, "w", encoding="utf-8") as f: f.write(editor.toPlainText())
+
+    def abrir_opciones_p9(self):
+        dialogo = DialogoOpcionesProver9(self.opciones_p9, self.idioma_actual, self)
+        if dialogo.exec():
+            self.opciones_p9 = dialogo.opciones
+            # Si quieres que el timeout afecte también al spinbox del menú superior, actualízalo:
+            self.spin_timeout.setValue(self.opciones_p9['max_seconds'])
+
+    def crear_panel_opciones_p9(self):
+        grupo = QGroupBox("Opciones Básicas")
+        layout = QFormLayout()
+        
+        self.spin_max_weight = QSpinBox()
+        self.spin_max_weight.setRange(-1000, 100000)
+        self.spin_max_weight.setValue(100)
+        layout.addRow("max_weight:", self.spin_max_weight)
+        
+        self.spin_pick_ratio = QSpinBox()
+        self.spin_pick_ratio.setRange(-1, 100)
+        self.spin_pick_ratio.setValue(-1)
+        layout.addRow("pick_given_ratio:", self.spin_pick_ratio)
+        
+        self.combo_order = QComboBox()
+        self.combo_order.addItems(["lpo", "rpo", "kbo"])
+        layout.addRow("order:", self.combo_order)
+        
+        self.combo_eq_defs = QComboBox()
+        self.combo_eq_defs.addItems(["unfold", "fold", "pass"])
+        layout.addRow("eq_defs:", self.combo_eq_defs)
+        
+        self.chk_expand_relational = QCheckBox()
+        layout.addRow("expand_relational_defs:", self.chk_expand_relational)
+        
+        self.chk_restrict_denials = QCheckBox()
+        layout.addRow("restrict_denials:", self.chk_restrict_denials)
+        
+        self.spin_max_seconds = QSpinBox()
+        self.spin_max_seconds.setRange(1, 3600)
+        self.spin_max_seconds.setValue(60)
+        layout.addRow("max_seconds:", self.spin_max_seconds)
+        
+        self.chk_prolog_vars = QCheckBox()
+        layout.addRow("prolog_style_variables:", self.chk_prolog_vars)
+        
+        btn_reset = QPushButton("Reset These to Defaults")
+        btn_reset.clicked.connect(self.reset_opciones_p9)
+        layout.addRow("", btn_reset)
+        
+        grupo.setLayout(layout)
+        grupo.setFixedWidth(270) # Ancho fijo para el panel derecho
+        return grupo
+
+    def reset_opciones_p9(self):
+        self.spin_max_weight.setValue(100)
+        self.spin_pick_ratio.setValue(-1)
+        self.combo_order.setCurrentText("lpo")
+        self.combo_eq_defs.setCurrentText("unfold")
+        self.chk_expand_relational.setChecked(False)
+        self.chk_restrict_denials.setChecked(False)
+        self.spin_max_seconds.setValue(60)
+        self.chk_prolog_vars.setChecked(False)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
