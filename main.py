@@ -830,7 +830,7 @@ class VentanaPrincipal(QMainWindow):
         form_basico.addRow("increment:", self.spin_increment)
 
         self.combo_iterate = QComboBox()
-        self.combo_iterate.addItems(["all", "up_to"]) 
+        self.combo_iterate.addItems(["all", "evens", "odds", "primes", "nonprimes"]) 
         self.combo_iterate.setCurrentText("all")
         form_basico.addRow("iterate:", self.combo_iterate)
 
