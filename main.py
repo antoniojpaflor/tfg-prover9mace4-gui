@@ -412,6 +412,21 @@ class VentanaPrincipal(QMainWindow):
             texto_cocinado += "set(prolog_style_variables).\n"
         else:
             texto_cocinado += "clear(prolog_style_variables).\n"
+
+        # --- NUEVO: Extraer "All Options" solo si está activado ---
+        if hasattr(self, 'grupo_all_options') and self.grupo_all_options.isChecked():
+            # Meta Options
+            flags_meta = {
+                'auto': self.chk_auto, 'auto_setup': self.chk_auto_setup,
+                'auto_limits': self.chk_auto_limits, 'auto_denials': self.chk_auto_denials,
+                'auto_inference': self.chk_auto_inference, 'auto_process': self.chk_auto_process,
+                'auto2': self.chk_auto2, 'raw': self.chk_raw
+            }
+            for flag, widget in flags_meta.items():
+                if widget.isChecked():
+                    texto_cocinado += f"set({flag}).\n"
+                else:
+                    texto_cocinado += f"clear({flag}).\n"
                 
         texto_cocinado += "\n"
         
@@ -752,63 +767,110 @@ class VentanaPrincipal(QMainWindow):
                 with open(ruta, "w", encoding="utf-8") as f: f.write(editor.toPlainText())
 
     def crear_panel_opciones_p9(self):
-        grupo = QGroupBox("Opciones Básicas")
-        grupo.setObjectName("fondo_blanco_p9") # <--- AÑADIR ESTO
-        grupo.setStyleSheet("""
-            #fondo_blanco_p9 { 
-                background-color: white; 
-                border: 1px solid #d0d0d0; 
-                border-radius: 4px; 
-                margin-top: 10px; 
-            }
-            #fondo_blanco_p9::title { 
-                subcontrol-origin: margin; 
-                left: 10px; 
-                padding: 0 3px; 
-            }
-        """) # <--- AÑADIR ESTO
-        
-        layout = QFormLayout()
-        
-        self.spin_max_weight = QSpinBox()
-        self.spin_max_weight.setRange(-1000, 100000)
-        self.spin_max_weight.setValue(100)
-        layout.addRow("max_weight:", self.spin_max_weight)
-        
-        self.spin_pick_ratio = QSpinBox()
-        self.spin_pick_ratio.setRange(-1, 100)
-        self.spin_pick_ratio.setValue(-1)
-        layout.addRow("pick_given_ratio:", self.spin_pick_ratio)
-        
-        self.combo_order = QComboBox()
-        self.combo_order.addItems(["lpo", "rpo", "kbo"])
-        layout.addRow("order:", self.combo_order)
-        
-        self.combo_eq_defs = QComboBox()
-        self.combo_eq_defs.addItems(["unfold", "fold", "pass"])
-        layout.addRow("eq_defs:", self.combo_eq_defs)
-        
+        # 1. Contenedor principal con scroll
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFixedWidth(310)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.setStyleSheet("QScrollArea { background-color: white; }")
+
+        contenido = QWidget()
+        contenido.setObjectName("fondo_blanco_p9")
+        contenido.setStyleSheet("#fondo_blanco_p9 { background-color: white; }")
+        layout_principal = QVBoxLayout(contenido)
+        layout_principal.setContentsMargins(5, 0, 5, 0)
+
+        # 2. --- Basic Options ---
+        grupo_basico = QGroupBox("Basic Options")
+        grupo_basico.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
+        form_basico = QFormLayout()
+
+        self.spin_max_weight = QSpinBox(); self.spin_max_weight.setRange(-1000, 100000); self.spin_max_weight.setValue(100)
+        form_basico.addRow("max_weight:", self.spin_max_weight)
+        self.spin_pick_ratio = QSpinBox(); self.spin_pick_ratio.setRange(-1, 100); self.spin_pick_ratio.setValue(-1)
+        form_basico.addRow("pick_given_ratio:", self.spin_pick_ratio)
+        self.combo_order = QComboBox(); self.combo_order.addItems(["lpo", "rpo", "kbo"])
+        form_basico.addRow("order:", self.combo_order)
+        self.combo_eq_defs = QComboBox(); self.combo_eq_defs.addItems(["unfold", "fold", "pass"])
+        form_basico.addRow("eq_defs:", self.combo_eq_defs)
         self.chk_expand_relational = QCheckBox()
-        layout.addRow("expand_relational_defs:", self.chk_expand_relational)
-        
+        form_basico.addRow("expand_relational_defs:", self.chk_expand_relational)
         self.chk_restrict_denials = QCheckBox()
-        layout.addRow("restrict_denials:", self.chk_restrict_denials)
-        
-        self.spin_max_seconds_p9 = QSpinBox()
-        self.spin_max_seconds_p9.setRange(1, 3600)
-        self.spin_max_seconds_p9.setValue(60)
-        layout.addRow("max_seconds:", self.spin_max_seconds_p9)
-        
+        form_basico.addRow("restrict_denials:", self.chk_restrict_denials)
+        self.spin_max_seconds_p9 = QSpinBox(); self.spin_max_seconds_p9.setRange(1, 3600); self.spin_max_seconds_p9.setValue(60)
+        form_basico.addRow("max_seconds:", self.spin_max_seconds_p9)
         self.chk_prolog_vars = QCheckBox()
-        layout.addRow("prolog_style_variables:", self.chk_prolog_vars)
-        
-        btn_reset = QPushButton("Reset These to Defaults")
-        btn_reset.clicked.connect(self.reset_opciones_p9)
-        layout.addRow(btn_reset) # Al pasar solo el widget, abarcará las dos columnas enteras
-        
-        grupo.setLayout(layout)
-        grupo.setFixedWidth(270) # Ancho fijo para el panel derecho
-        return grupo
+        form_basico.addRow("prolog_style_variables:", self.chk_prolog_vars)
+
+        btn_reset_basico = QPushButton("Reset These to Defaults")
+        btn_reset_basico.clicked.connect(self.reset_opciones_p9)
+        form_basico.addRow(btn_reset_basico)
+
+        grupo_basico.setLayout(form_basico)
+        layout_principal.addWidget(grupo_basico)
+
+        # 3. --- All Options (Desbloqueable) ---
+        self.grupo_all_options = QGroupBox("All Options")
+        self.grupo_all_options.setCheckable(True)
+        self.grupo_all_options.setChecked(False) # Actúa como el toggle original
+        self.grupo_all_options.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 15px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
+
+        layout_all = QVBoxLayout()
+
+        # Desplegable de Option Groups
+        self.combo_grupos_p9 = QComboBox()
+        self.combo_grupos_p9.addItems([
+            "Meta Options", "Term Ordering", "Limits", "Search Prep",
+            "Goals/Denials", "Select Given", "Inference Rules", "Rewriting",
+            "Weighting", "Process Inferred", "Input/Output", "Hints", "Other Options"
+        ])
+        layout_all.addWidget(self.combo_grupos_p9)
+
+        self.stack_opciones_p9 = QStackedWidget()
+
+        # Página 0: Meta Options
+        page_meta = QWidget()
+        form_meta = QFormLayout(page_meta)
+        form_meta.setContentsMargins(0, 5, 0, 0)
+
+        self.chk_auto = QCheckBox(); self.chk_auto.setChecked(True)
+        form_meta.addRow("auto:", self.chk_auto)
+        self.chk_auto_setup = QCheckBox(); self.chk_auto_setup.setChecked(True)
+        form_meta.addRow("auto_setup:", self.chk_auto_setup)
+        self.chk_auto_limits = QCheckBox(); self.chk_auto_limits.setChecked(True)
+        form_meta.addRow("auto_limits:", self.chk_auto_limits)
+        self.chk_auto_denials = QCheckBox(); self.chk_auto_denials.setChecked(True)
+        form_meta.addRow("auto_denials:", self.chk_auto_denials)
+        self.chk_auto_inference = QCheckBox(); self.chk_auto_inference.setChecked(True)
+        form_meta.addRow("auto_inference:", self.chk_auto_inference)
+        self.chk_auto_process = QCheckBox(); self.chk_auto_process.setChecked(True)
+        form_meta.addRow("auto_process:", self.chk_auto_process)
+        self.chk_auto2 = QCheckBox()
+        form_meta.addRow("auto2:", self.chk_auto2)
+        self.chk_raw = QCheckBox()
+        form_meta.addRow("raw:", self.chk_raw)
+
+        btn_reset_meta = QPushButton("Reset These to Defaults")
+        btn_reset_meta.clicked.connect(self.reset_meta_options)
+        form_meta.addRow(btn_reset_meta)
+
+        self.stack_opciones_p9.addWidget(page_meta)
+
+        # Placeholders para los otros 12 grupos de opciones
+        for _ in range(12):
+            self.stack_opciones_p9.addWidget(QWidget())
+
+        layout_all.addWidget(self.stack_opciones_p9)
+        self.grupo_all_options.setLayout(layout_all)
+
+        # Conectar el combobox con el stack de páginas
+        self.combo_grupos_p9.currentIndexChanged.connect(self.stack_opciones_p9.setCurrentIndex)
+
+        layout_principal.addWidget(self.grupo_all_options)
+        layout_principal.addStretch() # Empuja el contenido hacia arriba
+
+        scroll.setWidget(contenido)
+        return scroll
 
     def reset_opciones_p9(self):
         self.spin_max_weight.setValue(100)
@@ -819,6 +881,16 @@ class VentanaPrincipal(QMainWindow):
         self.chk_restrict_denials.setChecked(False)
         self.spin_max_seconds_p9.setValue(60)
         self.chk_prolog_vars.setChecked(False)
+
+    def reset_meta_options(self):
+        self.chk_auto.setChecked(True)
+        self.chk_auto_setup.setChecked(True)
+        self.chk_auto_limits.setChecked(True)
+        self.chk_auto_denials.setChecked(True)
+        self.chk_auto_inference.setChecked(True)
+        self.chk_auto_process.setChecked(True)
+        self.chk_auto2.setChecked(False)
+        self.chk_raw.setChecked(False)
 
     def crear_panel_opciones_m4(self):
         # Contenedor principal con barra de desplazamiento
