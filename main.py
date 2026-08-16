@@ -390,43 +390,34 @@ class VentanaPrincipal(QMainWindow):
     def cocinar_entrada_p9(self, caja_premisas, caja_conclusion):
         texto_cocinado = ""
         
-        # 1. Parámetros assign directamente desde la interfaz
-        texto_cocinado += f"assign(max_weight, {self.spin_max_weight.value()}).\n"
-        texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
-        texto_cocinado += f"assign(order, {self.combo_order.currentText()}).\n"
-        texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentText()}).\n"
-        texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
-        
-        # 2. Flags booleanos directamente desde los checkboxes
-        if self.chk_expand_relational.isChecked():
-            texto_cocinado += "set(expand_relational_defs).\n"
-        else:
-            texto_cocinado += "clear(expand_relational_defs).\n"
-            
-        if self.chk_restrict_denials.isChecked():
-            texto_cocinado += "set(restrict_denials).\n"
-        else:
-            texto_cocinado += "clear(restrict_denials).\n"
-            
-        if self.chk_prolog_vars.isChecked():
-            texto_cocinado += "set(prolog_style_variables).\n"
-        else:
-            texto_cocinado += "clear(prolog_style_variables).\n"
-
-        # --- NUEVO: Extraer "All Options" solo si está activado ---
+        # Si 'All Options' está activado, volcamos TODA la base de datos de configuraciones.
         if hasattr(self, 'grupo_all_options') and self.grupo_all_options.isChecked():
-            # Meta Options
-            flags_meta = {
-                'auto': self.chk_auto, 'auto_setup': self.chk_auto_setup,
-                'auto_limits': self.chk_auto_limits, 'auto_denials': self.chk_auto_denials,
-                'auto_inference': self.chk_auto_inference, 'auto_process': self.chk_auto_process,
-                'auto2': self.chk_auto2, 'raw': self.chk_raw
-            }
-            for flag, widget in flags_meta.items():
-                if widget.isChecked():
-                    texto_cocinado += f"set({flag}).\n"
-                else:
-                    texto_cocinado += f"clear({flag}).\n"
+            # Parámetros numéricos y textos (assign)
+            for nombre, (widget, _, _) in self.all_assigns_p9.items():
+                val = widget.value() if isinstance(widget, QSpinBox) else widget.currentText()
+                texto_cocinado += f"assign({nombre}, {val}).\n"
+                
+            # Parámetros booleanos (set/clear)
+            for nombre, (chk, _, _) in self.all_flags_p9.items():
+                if chk.isChecked(): texto_cocinado += f"set({nombre}).\n"
+                else: texto_cocinado += f"clear({nombre}).\n"
+        
+        # Si NO está activado, inyectamos solo lo visible en "Basic Options"
+        else:
+            texto_cocinado += f"assign(max_weight, {self.spin_max_weight.value()}).\n"
+            texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
+            texto_cocinado += f"assign(order, {self.combo_order.currentText()}).\n"
+            texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentText()}).\n"
+            texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
+            
+            flags_basicos = [
+                ('expand_relational_defs', self.chk_expand_relational),
+                ('restrict_denials', self.chk_restrict_denials),
+                ('prolog_style_variables', self.chk_prolog_vars)
+            ]
+            for nombre, widget in flags_basicos:
+                if widget.isChecked(): texto_cocinado += f"set({nombre}).\n"
+                else: texto_cocinado += f"clear({nombre}).\n"
                 
         texto_cocinado += "\n"
         
@@ -767,10 +758,9 @@ class VentanaPrincipal(QMainWindow):
                 with open(ruta, "w", encoding="utf-8") as f: f.write(editor.toPlainText())
 
     def crear_panel_opciones_p9(self):
-        # 1. Contenedor principal con scroll
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFixedWidth(310)
+        scroll.setFixedWidth(330)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         scroll.setStyleSheet("QScrollArea { background-color: white; }")
 
@@ -780,7 +770,11 @@ class VentanaPrincipal(QMainWindow):
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
-        # 2. --- Basic Options ---
+        # Diccionarios maestros para recopilar datos dinámicamente
+        self.all_flags_p9 = {}
+        self.all_assigns_p9 = {}
+
+        # --- Basic Options (se mantiene igual) ---
         grupo_basico = QGroupBox("Basic Options")
         grupo_basico.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
         form_basico = QFormLayout()
@@ -809,66 +803,168 @@ class VentanaPrincipal(QMainWindow):
         grupo_basico.setLayout(form_basico)
         layout_principal.addWidget(grupo_basico)
 
-        # 3. --- All Options (Desbloqueable) ---
+        # --- All Options (Motor Dinámico) ---
         self.grupo_all_options = QGroupBox("All Options")
         self.grupo_all_options.setCheckable(True)
-        self.grupo_all_options.setChecked(False) # Actúa como el toggle original
+        self.grupo_all_options.setChecked(False)
         self.grupo_all_options.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 15px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
-
+        
         layout_all = QVBoxLayout()
-
-        # Desplegable de Option Groups
         self.combo_grupos_p9 = QComboBox()
-        self.combo_grupos_p9.addItems([
-            "Meta Options", "Term Ordering", "Limits", "Search Prep",
-            "Goals/Denials", "Select Given", "Inference Rules", "Rewriting",
-            "Weighting", "Process Inferred", "Input/Output", "Hints", "Other Options"
-        ])
         layout_all.addWidget(self.combo_grupos_p9)
-
         self.stack_opciones_p9 = QStackedWidget()
 
-        # Página 0: Meta Options
-        page_meta = QWidget()
-        form_meta = QFormLayout(page_meta)
-        form_meta.setContentsMargins(0, 5, 0, 0)
+        # ESQUEMA DE DATOS (Data-Driven UI)
+        SCHEMA = [
+            ("Meta Options", [
+                ('flag', 'auto', True), ('flag', 'auto_setup', True), ('flag', 'auto_limits', True),
+                ('flag', 'auto_denials', True), ('flag', 'auto_inference', True), ('flag', 'auto_process', True),
+                ('flag', 'auto2', False), ('flag', 'raw', False)
+            ]),
+            ("Term Ordering", [
+                ('combo', 'order', ["lpo", "rpo", "kbo"], "lpo"),
+                ('combo', 'eq_defs', ["unfold", "fold", "pass"], "unfold"),
+                ('flag', 'inverse_order', False)
+            ]),
+            ("Limits", [
+                ('sub', 'Search Limits'),
+                ('spin', 'max_given', -1, 100000, -1), ('spin', 'max_kept', -1, 100000, -1),
+                ('spin', 'max_proofs', -1, 100000, 1), ('spin', 'max_megs', -1, 100000, 200),
+                ('spin', 'max_seconds', -1, 100000, 60), ('spin', 'max_minutes', -1, 100000, -1),
+                ('spin', 'max_hours', -1, 1000, -1), ('spin', 'max_days', -1, 100, -1),
+                ('sub', 'Limits on Kept Clauses'),
+                ('spin', 'max_weight', -1000, 100000, 100), ('spin', 'max_depth', -1, 1000, -1),
+                ('spin', 'max_literals', -1, 1000, -1), ('spin', 'max_vars', -1, 1000, -1),
+                ('sub', 'Sos Control'),
+                ('spin', 'sos_limit', -1, 100000, -1)
+            ]),
+            ("Search Prep", [
+                ('flag', 'expand_relational_defs', False), ('flag', 'dont_flip_input', False),
+                ('flag', 'process_initial_sos', True), ('flag', 'sort_initial_sos', False),
+                ('flag', 'predicate_elim', True), ('spin', 'fold_denial_max', -1, 1000, 0)
+            ]),
+            ("Goals/Denials", [
+                ('flag', 'restrict_denials', False), ('flag', 'reuse_denials', False)
+            ]),
+            ("Select Given", [
+                ('sub', 'Selection Ratio'),
+                ('spin', 'hints_part', 0, 1000, 2), ('spin', 'age_part', 0, 1000, 1),
+                ('spin', 'weight_part', 0, 1000, 1), ('spin', 'false_part', 0, 1000, 0),
+                ('spin', 'true_part', 0, 1000, 0), ('spin', 'random_part', 0, 1000, 0),
+                ('sub', 'Semantic Guidance'),
+                ('combo', 'multiple_interps', ["false_in_all", "false_in_some"], "false_in_all"),
+                ('spin', 'eval_limit', -1, 100000, -1),
+                ('sub', 'Meta Options'),
+                ('spin', 'pick_given_ratio', -1, 1000, 3), ('flag', 'breadth_first', False),
+                ('flag', 'lightest_first', False), ('flag', 'random_given', False),
+                ('sub', 'Others'),
+                ('flag', 'input_sos_first', True), ('flag', 'breadth_first_hints', False)
+            ]),
+            ("Inference Rules", [
+                ('sub', 'Ordinary Rules'),
+                ('flag', 'binary_resolution', False), ('flag', 'neg_binary_resolution', False),
+                ('flag', 'hyper_resolution', False), ('flag', 'pos_hyper_resolution', False),
+                ('flag', 'neg_hyper_resolution', False), ('flag', 'ur_resolution', False),
+                ('flag', 'pos_ur_resolution', False), ('flag', 'neg_ur_resolution', False),
+                ('flag', 'paramodulation', True),
+                ('sub', 'Other Rules'),
+                ('spin', 'new_constants', 0, 10000, 0), ('flag', 'factor', False),
+                ('sub', 'General Restrictions'),
+                ('combo', 'literal_selection', ["max_negative", "all_negative", "none"], "max_negative"),
+                ('sub', 'Resolution Restrictions'),
+                ('flag', 'ordered_res', False), ('flag', 'check_res_instances', False),
+                ('flag', 'initial_nuclei', False), ('spin', 'ur_nucleus_limit', -1, 10000, -1),
+                ('sub', 'Paramodulation Restrictions'),
+                ('flag', 'ordered_para', False), ('flag', 'check_para_instances', False),
+                ('flag', 'para_from_vars', False), ('flag', 'para_units_only', False),
+                ('spin', 'para_lit_limit', -1, 10000, -1)
+            ]),
+            ("Rewriting", [
+                ('sub', 'Term Rewriting Limits'),
+                ('spin', 'demod_step_limit', -1, 100000, 1000), ('spin', 'demod_size_limit', -1, 100000, 1000),
+                ('sub', 'Others'),
+                ('flag', 'back_demod', True), ('flag', 'unit_deletion', False), ('flag', 'cac_redundancy', True),
+                ('sub', 'Lex-Dependent Rewriting'),
+                ('flag', 'lex_dep_demod', True), ('flag', 'lex_dep_demod_sane', True),
+                ('spin', 'lex_dep_demod_lim', -1, 10000, 11), ('flag', 'lex_order_vars', False)
+            ]),
+            ("Weighting", [
+                ('sub', 'Symbol Weights'),
+                ('spin', 'variable_weight', -1000, 1000, 1), ('spin', 'constant_weight', -1000, 1000, 1),
+                ('spin', 'not_weight', -1000, 1000, 1), ('spin', 'or_weight', -1000, 1000, 1),
+                ('spin', 'sk_constant_weight', -1000, 1000, 1), ('spin', 'prop_atom_weight', -1000, 1000, 1),
+                ('sub', 'Penalties'),
+                ('spin', 'skolem_penalty', -1000, 1000, 1), ('spin', 'nest_penalty', -1000, 1000, 0),
+                ('spin', 'depth_penalty', -1000, 1000, 0), ('spin', 'var_penalty', -1000, 1000, 0),
+                ('sub', 'Others'),
+                ('spin', 'default_weight', -1000, 1000, 1)
+            ]),
+            ("Process Inferred", [
+                ('flag', 'safe_unit_conflict', False), ('flag', 'back_subsume', True),
+                ('flag', 'backsub_check', False)
+            ]),
+            ("Input/Output", [
+                ('flag', 'print_initial_clauses', True), ('flag', 'print_given', True),
+                ('flag', 'print_gen', False), ('flag', 'print_kept', True),
+                ('flag', 'print_labeled', False), ('flag', 'print_proofs', True),
+                ('flag', 'print_clause_properties', False),
+                ('combo', 'stats', ["none", "some", "lots", "all"], "some"),
+                ('flag', 'report', True), ('flag', 'prolog_style_variables', False)
+            ]),
+            ("Hints", [
+                ('flag', 'limit_hint_matchers', False), ('flag', 'collect_hint_labels', False),
+                ('flag', 'degrade_hints', True), ('flag', 'back_demod_hints', False)
+            ]),
+            ("Other Options", [
+                ('spin', 'random_seed', -1, 100000, 0)
+            ])
+        ]
 
-        self.chk_auto = QCheckBox(); self.chk_auto.setChecked(True)
-        form_meta.addRow("auto:", self.chk_auto)
-        self.chk_auto_setup = QCheckBox(); self.chk_auto_setup.setChecked(True)
-        form_meta.addRow("auto_setup:", self.chk_auto_setup)
-        self.chk_auto_limits = QCheckBox(); self.chk_auto_limits.setChecked(True)
-        form_meta.addRow("auto_limits:", self.chk_auto_limits)
-        self.chk_auto_denials = QCheckBox(); self.chk_auto_denials.setChecked(True)
-        form_meta.addRow("auto_denials:", self.chk_auto_denials)
-        self.chk_auto_inference = QCheckBox(); self.chk_auto_inference.setChecked(True)
-        form_meta.addRow("auto_inference:", self.chk_auto_inference)
-        self.chk_auto_process = QCheckBox(); self.chk_auto_process.setChecked(True)
-        form_meta.addRow("auto_process:", self.chk_auto_process)
-        self.chk_auto2 = QCheckBox()
-        form_meta.addRow("auto2:", self.chk_auto2)
-        self.chk_raw = QCheckBox()
-        form_meta.addRow("raw:", self.chk_raw)
+        # Constructor automático de interfaz
+        for nombre_grupo, elementos in SCHEMA:
+            self.combo_grupos_p9.addItem(nombre_grupo)
+            page = QWidget()
+            form = QFormLayout(page)
+            form.setContentsMargins(0, 5, 0, 0)
 
-        btn_reset_meta = QPushButton("Reset These to Defaults")
-        btn_reset_meta.clicked.connect(self.reset_meta_options)
-        form_meta.addRow(btn_reset_meta)
+            for elemento in elementos:
+                tipo = elemento[0]
+                if tipo == 'sub':
+                    lbl = QLabel(elemento[1])
+                    lbl.setStyleSheet("font-style: italic; color: #1e3d59; font-weight: bold; padding-top: 8px;")
+                    form.addRow(lbl)
+                elif tipo == 'flag':
+                    _, nombre, por_defecto = elemento
+                    chk = QCheckBox()
+                    chk.setChecked(por_defecto)
+                    form.addRow(f"{nombre}:", chk)
+                    self.all_flags_p9[nombre] = (chk, por_defecto, nombre_grupo)
+                elif tipo == 'spin':
+                    _, nombre, val_min, val_max, por_defecto = elemento
+                    spin = QSpinBox()
+                    spin.setRange(val_min, val_max)
+                    spin.setValue(por_defecto)
+                    form.addRow(f"{nombre}:", spin)
+                    self.all_assigns_p9[nombre] = (spin, por_defecto, nombre_grupo)
+                elif tipo == 'combo':
+                    _, nombre, opciones, por_defecto = elemento
+                    combo = QComboBox()
+                    combo.addItems(opciones)
+                    combo.setCurrentText(por_defecto)
+                    form.addRow(f"{nombre}:", combo)
+                    self.all_assigns_p9[nombre] = (combo, por_defecto, nombre_grupo)
 
-        self.stack_opciones_p9.addWidget(page_meta)
+            btn_reset = QPushButton("Reset These to Defaults")
+            btn_reset.clicked.connect(lambda checked, cat=nombre_grupo: self.reset_categoria_p9(cat))
+            form.addRow(btn_reset)
+            self.stack_opciones_p9.addWidget(page)
 
-        # Placeholders para los otros 12 grupos de opciones
-        for _ in range(12):
-            self.stack_opciones_p9.addWidget(QWidget())
-
+        self.combo_grupos_p9.currentIndexChanged.connect(self.stack_opciones_p9.setCurrentIndex)
         layout_all.addWidget(self.stack_opciones_p9)
         self.grupo_all_options.setLayout(layout_all)
 
-        # Conectar el combobox con el stack de páginas
-        self.combo_grupos_p9.currentIndexChanged.connect(self.stack_opciones_p9.setCurrentIndex)
-
         layout_principal.addWidget(self.grupo_all_options)
-        layout_principal.addStretch() # Empuja el contenido hacia arriba
-
+        layout_principal.addStretch()
         scroll.setWidget(contenido)
         return scroll
 
@@ -882,15 +978,18 @@ class VentanaPrincipal(QMainWindow):
         self.spin_max_seconds_p9.setValue(60)
         self.chk_prolog_vars.setChecked(False)
 
-    def reset_meta_options(self):
-        self.chk_auto.setChecked(True)
-        self.chk_auto_setup.setChecked(True)
-        self.chk_auto_limits.setChecked(True)
-        self.chk_auto_denials.setChecked(True)
-        self.chk_auto_inference.setChecked(True)
-        self.chk_auto_process.setChecked(True)
-        self.chk_auto2.setChecked(False)
-        self.chk_raw.setChecked(False)
+    def reset_categoria_p9(self, categoria):
+        """Resetea a valores por defecto solo los widgets de la categoría actual"""
+        for nombre, (chk, por_defecto, cat) in self.all_flags_p9.items():
+            if cat == categoria:
+                chk.setChecked(por_defecto)
+                
+        for nombre, (widget, por_defecto, cat) in self.all_assigns_p9.items():
+            if cat == categoria:
+                if isinstance(widget, QSpinBox):
+                    widget.setValue(por_defecto)
+                elif isinstance(widget, QComboBox):
+                    widget.setCurrentText(por_defecto)
 
     def crear_panel_opciones_m4(self):
         # Contenedor principal con barra de desplazamiento
