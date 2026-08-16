@@ -426,6 +426,11 @@ class VentanaPrincipal(QMainWindow):
             # Parámetros numéricos y textos (assign)
             for nombre, (widget, _, _) in self.all_assigns_p9.items():
                 val = widget.value() if isinstance(widget, QSpinBox) else widget.currentData()
+                
+                # --- PARCHE PROVER9: Evitar bug interno de pick_given_ratio = -1 ---
+                if nombre == "pick_given_ratio" and val == -1:
+                    continue
+                    
                 texto_cocinado += f"assign({nombre}, {val}).\n"
                 
             # Parámetros booleanos (set/clear)
@@ -436,7 +441,11 @@ class VentanaPrincipal(QMainWindow):
         # Si NO está activado, inyectamos solo lo visible en "Basic Options"
         else:
             texto_cocinado += f"assign(max_weight, {self.spin_max_weight.value()}).\n"
-            texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
+            
+            # --- PARCHE PROVER9: Evitar bug interno de pick_given_ratio = -1 ---
+            if self.spin_pick_ratio.value() != -1:
+                texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
+                
             texto_cocinado += f"assign(order, {self.combo_order.currentData()}).\n"
             texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentData()}).\n"
             texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
