@@ -753,6 +753,21 @@ class VentanaPrincipal(QMainWindow):
 
     def crear_panel_opciones_p9(self):
         grupo = QGroupBox("Opciones Básicas")
+        grupo.setObjectName("fondo_blanco_p9") # <--- AÑADIR ESTO
+        grupo.setStyleSheet("""
+            #fondo_blanco_p9 { 
+                background-color: white; 
+                border: 1px solid #d0d0d0; 
+                border-radius: 4px; 
+                margin-top: 10px; 
+            }
+            #fondo_blanco_p9::title { 
+                subcontrol-origin: margin; 
+                left: 10px; 
+                padding: 0 3px; 
+            }
+        """) # <--- AÑADIR ESTO
+        
         layout = QFormLayout()
         
         self.spin_max_weight = QSpinBox()
@@ -811,8 +826,11 @@ class VentanaPrincipal(QMainWindow):
         scroll.setWidgetResizable(True)
         scroll.setFixedWidth(300)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.setStyleSheet("QScrollArea { background-color: white; }") # <--- AÑADIR ESTO
 
         contenido = QWidget()
+        contenido.setObjectName("fondo_blanco_m4") # <--- AÑADIR ESTO
+        contenido.setStyleSheet("#fondo_blanco_m4 { background-color: white; }") # <--- AÑADIR ESTO
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
