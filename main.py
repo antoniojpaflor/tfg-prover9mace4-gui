@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea)
 from PyQt6.QtGui import QFont, QAction, QSyntaxHighlighter, QTextCharFormat, QColor
 from PyQt6.QtCore import QEvent, QThread, pyqtSignal, QRegularExpression
+from qt_material import apply_stylesheet
 
 from launcher import ejecutar_prover9, ejecutar_mace4
 from idiomas import TRADUCCIONES, DICCIONARIO_PANELES
@@ -39,32 +40,32 @@ class ResaltadorProver9(QSyntaxHighlighter):
         self.editor = editor # Guardamos la referencia directa a la caja de texto
         self.reglas = []
 
-        # 1. Operadores Lógicos (Púrpura VS Code)
+        # 1. Operadores Lógicos (Púrpura claro)
         formato_operador = QTextCharFormat()
-        formato_operador.setForeground(QColor("#AF00DB"))
+        formato_operador.setForeground(QColor("#C586C0"))
         formato_operador.setFontWeight(QFont.Weight.Bold)
         operadores = [r"->", r"<->", r"&", r"\|", r"-", r"=", r"!="]
         for op in operadores:
             self.reglas.append((QRegularExpression(op), formato_operador))
 
-        # 2. Palabras Clave del Sistema (Azul VS Code)
+        # 2. Palabras Clave del Sistema (Azul claro)
         formato_clave = QTextCharFormat()
-        formato_clave.setForeground(QColor("#0000FF"))
+        formato_clave.setForeground(QColor("#569CD6"))
         formato_clave.setFontWeight(QFont.Weight.Bold)
         claves = [r"\bformulas\b", r"\bend_of_list\b", r"\bassign\b", r"\bset\b", r"\bclear\b", r"\blist\b"]
         for clave in claves:
             self.reglas.append((QRegularExpression(clave), formato_clave))
 
-        # 3. Nombres de Bloques / Entornos (Rojo Oscuro VS Code)
+        # 3. Nombres de Bloques / Entornos (Naranja tierra)
         formato_bloque = QTextCharFormat()
-        formato_bloque.setForeground(QColor("#A31515"))
+        formato_bloque.setForeground(QColor("#CE9178"))
         bloques = [r"\bsos\b", r"\bgoals\b", r"\busable\b", r"\bdemodulators\b", r"\bassumptions\b"]
         for bloque in bloques:
             self.reglas.append((QRegularExpression(bloque), formato_bloque))
 
-        # 4. Comentarios (Verde VS Code)
+        # 4. Comentarios (Verde claro)
         formato_comentario = QTextCharFormat()
-        formato_comentario.setForeground(QColor("#008000"))
+        formato_comentario.setForeground(QColor("#6A9955"))
         self.reglas.append((QRegularExpression(r"%.*"), formato_comentario))
 
     def highlightBlock(self, text):
@@ -107,6 +108,7 @@ class VentanaPrincipal(QMainWindow):
         self.tabs.addTab(self.tab_prover9, "")
         self.tabs.addTab(self.tab_mace4, "")
         self.tabs.currentChanged.connect(self.actualizar_textos_interfaz)
+        self.tabs.currentChanged.connect(self.actualizar_tema)
         
         # Configuración de contenidos de las pestañas
         self.configurar_tab_prover9()
@@ -146,6 +148,8 @@ class VentanaPrincipal(QMainWindow):
         # 5. Menús y traducción inicial
         self.crear_barra_menus()
         self.actualizar_textos_interfaz()
+
+        self.actualizar_tema() # <--- Fuerza la carga del tema oscuro al iniciar
 
     def eventFilter(self, objeto, evento):
         txt = TRADUCCIONES[self.idioma_actual]
@@ -318,6 +322,15 @@ class VentanaPrincipal(QMainWindow):
             for combo in self.combos_traducibles:
                 for i in range(combo.count()):
                     combo.setItemText(i, trad(combo.itemData(i)))
+
+    def actualizar_tema(self):
+        app = QApplication.instance()
+        if self.tabs.currentIndex() == 0:
+            # Tema oscuro principal para Prover9
+            apply_stylesheet(app, theme='dark_teal.xml')
+        else:
+            # Tema oscuro alternativo para Mace4
+            apply_stylesheet(app, theme='dark_amber.xml')
 
     def actualizar_titulo_ventana(self):
         """Calcula el título de la barra superior dependiendo del archivo abierto"""
@@ -907,11 +920,11 @@ class VentanaPrincipal(QMainWindow):
         scroll.setWidgetResizable(True)
         scroll.setFixedWidth(330)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        scroll.setStyleSheet("QScrollArea { background-color: white; }")
+        #scroll.setStyleSheet("QScrollArea { background-color: white; }")
 
         contenido = QWidget()
         contenido.setObjectName("fondo_blanco_p9")
-        contenido.setStyleSheet("#fondo_blanco_p9 { background-color: white; }")
+        #contenido.setStyleSheet("#fondo_blanco_p9 { background-color: white; }")
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
@@ -1155,11 +1168,11 @@ class VentanaPrincipal(QMainWindow):
         scroll.setWidgetResizable(True)
         scroll.setFixedWidth(330)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        scroll.setStyleSheet("QScrollArea { background-color: white; }")
+        #scroll.setStyleSheet("QScrollArea { background-color: white; }")
 
         contenido = QWidget()
         contenido.setObjectName("fondo_blanco_m4")
-        contenido.setStyleSheet("#fondo_blanco_m4 { background-color: white; }")
+        #contenido.setStyleSheet("#fondo_blanco_m4 { background-color: white; }")
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
