@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QTabWidget, QFileDialog, QGroupBox, QCheckBox, QStackedWidget,
                              QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
                              QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea)
-from PyQt6.QtGui import QFont, QAction, QSyntaxHighlighter, QTextCharFormat, QColor
+from PyQt6.QtGui import QFont, QAction, QSyntaxHighlighter, QTextCharFormat, QColor, QFontDatabase
 from PyQt6.QtCore import QEvent, QThread, pyqtSignal, QRegularExpression
 from qt_material import apply_stylesheet
 
@@ -161,11 +161,11 @@ class VentanaPrincipal(QMainWindow):
             if evento.type() == QEvent.Type.FocusIn:
                 if objeto.toPlainText().strip() == mapeo_ejemplos[objeto].strip():
                     objeto.clear()
-                    objeto.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
+                    objeto.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
             elif evento.type() == QEvent.Type.FocusOut:
                 if not objeto.toPlainText().strip():
                     objeto.setPlainText(mapeo_ejemplos[objeto])
-                    objeto.setStyleSheet("color: gray; font-family: 'Courier New'; font-size: 11pt;")
+                    objeto.setStyleSheet("color: gray; font-family: 'JetBrains Mono'; font-size: 12pt;")
         return super().eventFilter(objeto, evento)
 
     def crear_barra_menus(self):
@@ -293,7 +293,7 @@ class VentanaPrincipal(QMainWindow):
             texto_actual = caja.toPlainText().strip()
             if not texto_actual or texto_actual in [v.strip() for v in TRADUCCIONES['es_ES'].values()] or texto_actual in [v.strip() for v in TRADUCCIONES['en_US'].values()]:
                 caja.setPlainText(texto_ejemplo)
-                caja.setStyleSheet("color: gray; font-family: 'Courier New'; font-size: 11pt;")
+                caja.setStyleSheet("color: gray; font-family: 'JetBrains Mono'; font-size: 12pt;")
 
         # --- NUEVO: Traducción en vivo de los paneles laterales ---
         dic_paneles = DICCIONARIO_PANELES.get(self.idioma_actual, {})
@@ -350,7 +350,7 @@ class VentanaPrincipal(QMainWindow):
         grupo.setLayout(layout_grupo)
         
         # AUMENTADO el ancho a 220 para que quepa "EQUIVALENCIA"
-        grupo.setFixedWidth(220) 
+        grupo.setFixedWidth(230) 
         
         return grupo, lbl_ops, botones_ops
 
@@ -367,12 +367,12 @@ class VentanaPrincipal(QMainWindow):
         if caja:
             if caja.toPlainText().strip() == ejemplo.strip():
                 caja.clear()
-                caja.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
+                caja.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
             caja.insertPlainText(simbolo)
             caja.setFocus()
 
     def configurar_tab_prover9(self):
-        fuente_codigo = QFont("Courier New", 11)
+        estilo_codigo = "font-family: 'JetBrains Mono'; font-size: 12pt;"
         layout_principal = QHBoxLayout()
         columna_derecha = QVBoxLayout()
         self.chk_modo_p9 = QCheckBox("")
@@ -386,13 +386,13 @@ class VentanaPrincipal(QMainWindow):
         self.lbl_premisas_p9 = QLabel("")
         layout_limpio.addWidget(self.lbl_premisas_p9)
         self.premisas_p9 = QTextEdit()
-        self.premisas_p9.setFont(fuente_codigo)
+        self.premisas_p9.setStyleSheet(estilo_codigo)
         self.resaltador_premisas_p9 = ResaltadorProver9(self.premisas_p9)
         layout_limpio.addWidget(self.premisas_p9)
         self.lbl_conclusion_p9 = QLabel("")
         layout_limpio.addWidget(self.lbl_conclusion_p9)
         self.conclusion_p9 = QTextEdit()
-        self.conclusion_p9.setFont(fuente_codigo)
+        self.conclusion_p9.setStyleSheet(estilo_codigo)
         self.conclusion_p9.setMaximumHeight(100)
         self.resaltador_conclusion_p9 = ResaltadorProver9(self.conclusion_p9)
         layout_limpio.addWidget(self.conclusion_p9)
@@ -403,7 +403,7 @@ class VentanaPrincipal(QMainWindow):
         self.lbl_libre_p9 = QLabel("")
         layout_libre.addWidget(self.lbl_libre_p9)
         self.entrada_libre_p9 = QTextEdit()
-        self.entrada_libre_p9.setFont(fuente_codigo)
+        self.entrada_libre_p9.setStyleSheet(estilo_codigo)
         self.resaltador_libre_p9 = ResaltadorProver9(self.entrada_libre_p9)
         layout_libre.addWidget(self.entrada_libre_p9)
         
@@ -418,7 +418,6 @@ class VentanaPrincipal(QMainWindow):
         self.lbl_res_p9 = QLabel("")
         columna_derecha.addWidget(self.lbl_res_p9)
         self.salida_p9 = QTextEdit()
-        self.salida_p9.setFont(fuente_codigo)
         self.salida_p9.setReadOnly(True)
         columna_derecha.addWidget(self.salida_p9)
         
@@ -435,7 +434,7 @@ class VentanaPrincipal(QMainWindow):
         self.tab_prover9.setLayout(layout_principal)
 
     def configurar_tab_mace4(self):
-        fuente_codigo = QFont("Courier New", 11)
+        estilo_codigo = "font-family: 'JetBrains Mono'; font-size: 12pt;"
         layout_principal = QHBoxLayout()
         columna_derecha = QVBoxLayout()
         self.chk_modo_m4 = QCheckBox("")
@@ -449,13 +448,13 @@ class VentanaPrincipal(QMainWindow):
         self.lbl_premisas_m4 = QLabel("")
         layout_limpio.addWidget(self.lbl_premisas_m4)
         self.premisas_m4 = QTextEdit()
-        self.premisas_m4.setFont(fuente_codigo)
+        self.premisas_m4.setStyleSheet(estilo_codigo)
         self.resaltador_premisas_m4 = ResaltadorProver9(self.premisas_m4)
         layout_limpio.addWidget(self.premisas_m4)
         self.lbl_objetivo_m4 = QLabel("")
         layout_limpio.addWidget(self.lbl_objetivo_m4)
         self.conclusion_m4 = QTextEdit()
-        self.conclusion_m4.setFont(fuente_codigo)
+        self.conclusion_m4.setStyleSheet(estilo_codigo)
         self.conclusion_m4.setMaximumHeight(100)
         self.resaltador_conclusion_m4 = ResaltadorProver9(self.conclusion_m4)
         layout_limpio.addWidget(self.conclusion_m4)
@@ -466,7 +465,7 @@ class VentanaPrincipal(QMainWindow):
         self.lbl_libre_m4 = QLabel("")
         layout_libre.addWidget(self.lbl_libre_m4)
         self.entrada_libre_m4 = QTextEdit()
-        self.entrada_libre_m4.setFont(fuente_codigo)
+        self.entrada_libre_m4.setStyleSheet(estilo_codigo)
         self.resaltador_libre_m4 = ResaltadorProver9(self.entrada_libre_m4)
         layout_libre.addWidget(self.entrada_libre_m4)
         
@@ -481,7 +480,6 @@ class VentanaPrincipal(QMainWindow):
         self.lbl_res_m4 = QLabel("")
         columna_derecha.addWidget(self.lbl_res_m4)
         self.salida_m4 = QTextEdit()
-        self.salida_m4.setFont(fuente_codigo)
         self.salida_m4.setReadOnly(True)
         columna_derecha.addWidget(self.salida_m4)
         
@@ -713,14 +711,14 @@ class VentanaPrincipal(QMainWindow):
             self.entrada_libre_p9.setPlainText(snap['libre'])
             # Forzamos estilos negros
             for c in [self.premisas_p9, self.conclusion_p9, self.entrada_libre_p9]:
-                c.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
+                c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
         else:
             self.chk_modo_m4.setChecked(snap['modo_avanzado'])
             self.premisas_m4.setPlainText(snap['premisas'])
             self.conclusion_m4.setPlainText(snap['conclusion'])
             self.entrada_libre_m4.setPlainText(snap['libre'])
             for c in [self.premisas_m4, self.conclusion_m4, self.entrada_libre_m4]:
-                c.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
+                c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
 
     def procesar_prover9(self):
         txt = TRADUCCIONES[self.idioma_actual]
@@ -822,9 +820,9 @@ class VentanaPrincipal(QMainWindow):
             conclusion_ej = txt[f'datos_{tipo}_conclusion']
             codigo_completo_libre = self.cocinar_entrada_directa(premisas_ej, conclusion_ej)
             
-            self.premisas_p9.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
-            self.conclusion_p9.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
-            self.entrada_libre_p9.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
+            self.premisas_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.conclusion_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.entrada_libre_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
             self.premisas_p9.setPlainText(premisas_ej)
             self.conclusion_p9.setPlainText(conclusion_ej)
             self.entrada_libre_p9.setPlainText(codigo_completo_libre)
@@ -835,9 +833,9 @@ class VentanaPrincipal(QMainWindow):
             conclusion_ej = txt[f'datos_{tipo}_conclusion']
             codigo_completo_libre = self.cocinar_entrada_directa(premisas_ej, conclusion_ej)
             
-            self.premisas_m4.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
-            self.conclusion_m4.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
-            self.entrada_libre_m4.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
+            self.premisas_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.conclusion_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.entrada_libre_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
             self.premisas_m4.setPlainText(premisas_ej)
             self.conclusion_m4.setPlainText(conclusion_ej)
             self.entrada_libre_m4.setPlainText(codigo_completo_libre)
@@ -862,11 +860,11 @@ class VentanaPrincipal(QMainWindow):
             if self.tabs.currentIndex() == 0:
                 self.chk_modo_p9.setChecked(True)
                 self.entrada_libre_p9.setPlainText(contenido)
-                self.entrada_libre_p9.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
+                self.entrada_libre_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
             else:
                 self.chk_modo_m4.setChecked(True)
                 self.entrada_libre_m4.setPlainText(contenido)
-                self.entrada_libre_m4.setStyleSheet("color: black; font-family: 'Courier New'; font-size: 11pt;")
+                self.entrada_libre_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
             
             self.actualizar_textos_interfaz()
 
@@ -907,7 +905,7 @@ class VentanaPrincipal(QMainWindow):
     def crear_panel_opciones_p9(self):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFixedWidth(330)
+        scroll.setFixedWidth(385)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         #scroll.setStyleSheet("QScrollArea { background-color: white; }")
 
@@ -1087,7 +1085,7 @@ class VentanaPrincipal(QMainWindow):
                 tipo = elemento[0]
                 if tipo == 'sub':
                     lbl = QLabel(elemento[1])
-                    lbl.setStyleSheet("font-style: italic; color: #1e3d59; font-weight: bold; padding-top: 8px;")
+                    lbl.setStyleSheet("font-style: 'Nexa'; color: #81c784; font-weight: bold; padding-top: 8px;")
                     form.addRow(lbl)
                     self.labels_subcategorias.append((lbl, elemento[1]))
                 elif tipo == 'flag':
@@ -1153,7 +1151,7 @@ class VentanaPrincipal(QMainWindow):
     def crear_panel_opciones_m4(self):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFixedWidth(330)
+        scroll.setFixedWidth(385)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         #scroll.setStyleSheet("QScrollArea { background-color: white; }")
 
@@ -1264,7 +1262,18 @@ class VentanaPrincipal(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    apply_stylesheet(app, theme='dark_teal.xml')
+
+    QFontDatabase.addApplicationFont("Nexa-Heavy.ttf")
+    
+    # 1. Definimos las variables extra para qt-material
+    extra_config = {
+        'font_family': 'Nexa',  # Puedes cambiarlo a 'Roboto', 'Inter', etc.
+    }
+    
+    # 2. Se las pasamos a la función apply_stylesheet
+    apply_stylesheet(app, theme='dark_lightgreen.xml', extra=extra_config)
+    
     ventana = VentanaPrincipal()
-    ventana.show()
+    ventana.show() 
+    
     sys.exit(app.exec())
