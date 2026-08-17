@@ -108,7 +108,6 @@ class VentanaPrincipal(QMainWindow):
         self.tabs.addTab(self.tab_prover9, "")
         self.tabs.addTab(self.tab_mace4, "")
         self.tabs.currentChanged.connect(self.actualizar_textos_interfaz)
-        self.tabs.currentChanged.connect(self.actualizar_tema)
         
         # Configuración de contenidos de las pestañas
         self.configurar_tab_prover9()
@@ -118,7 +117,6 @@ class VentanaPrincipal(QMainWindow):
         
         # 2. PANEL DEL HISTORIAL (Fondo de la aplicación)
         self.grupo_historial = QGroupBox("")
-        self.grupo_historial.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
         layout_historial = QVBoxLayout(self.grupo_historial)
         
         self.tabla_historial = QTableWidget(0, 3) # 0 filas iniciales, 3 columnas
@@ -148,8 +146,6 @@ class VentanaPrincipal(QMainWindow):
         # 5. Menús y traducción inicial
         self.crear_barra_menus()
         self.actualizar_textos_interfaz()
-
-        self.actualizar_tema() # <--- Fuerza la carga del tema oscuro al iniciar
 
     def eventFilter(self, objeto, evento):
         txt = TRADUCCIONES[self.idioma_actual]
@@ -323,15 +319,6 @@ class VentanaPrincipal(QMainWindow):
                 for i in range(combo.count()):
                     combo.setItemText(i, trad(combo.itemData(i)))
 
-    def actualizar_tema(self):
-        app = QApplication.instance()
-        if self.tabs.currentIndex() == 0:
-            # Tema oscuro principal para Prover9
-            apply_stylesheet(app, theme='dark_teal.xml')
-        else:
-            # Tema oscuro alternativo para Mace4
-            apply_stylesheet(app, theme='dark_amber.xml')
-
     def actualizar_titulo_ventana(self):
         """Calcula el título de la barra superior dependiendo del archivo abierto"""
         txt = TRADUCCIONES[self.idioma_actual]
@@ -344,9 +331,8 @@ class VentanaPrincipal(QMainWindow):
 
     def crear_panel_insercion(self, editor_destino):
         grupo = QGroupBox("")
-        grupo.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
+        # ELIMINADA la línea de grupo.setStyleSheet(...)
         layout_grupo = QVBoxLayout()
-        estilo_btn = "padding: 5px; font-weight: bold; background-color: #f0f0f0;"
         lbl_ops = QLabel("")
         layout_grupo.addWidget(lbl_ops)
         botones_ops = []
@@ -356,13 +342,16 @@ class VentanaPrincipal(QMainWindow):
         ]
         for clave, simbolo in operadores_config:
             btn = QPushButton("") 
-            btn.setStyleSheet(estilo_btn)
+            # ELIMINADA la línea de btn.setStyleSheet(...) para que qt-material lo pinte bien
             btn.clicked.connect(lambda checked, s=simbolo, c_clave=clave: self.inyectar_operador_inteligente(s, c_clave))
             layout_grupo.addWidget(btn)
             botones_ops.append((btn, clave))
         layout_grupo.addStretch()
         grupo.setLayout(layout_grupo)
-        grupo.setFixedWidth(180)
+        
+        # AUMENTADO el ancho a 220 para que quepa "EQUIVALENCIA"
+        grupo.setFixedWidth(220) 
+        
         return grupo, lbl_ops, botones_ops
 
     def inyectar_operador_inteligente(self, simbolo, clave_op):
@@ -933,7 +922,6 @@ class VentanaPrincipal(QMainWindow):
 
         # --- Basic Options ---
         self.grupo_basico_p9 = QGroupBox("Basic Options")
-        self.grupo_basico_p9.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
         form_basico = QFormLayout()
 
         self.spin_max_weight = QSpinBox(); self.spin_max_weight.setRange(-1000, 100000); self.spin_max_weight.setValue(100)
@@ -971,7 +959,6 @@ class VentanaPrincipal(QMainWindow):
         self.grupo_all_options = QGroupBox("All Options")
         self.grupo_all_options.setCheckable(True)
         self.grupo_all_options.setChecked(False)
-        self.grupo_all_options.setStyleSheet("QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }")
         
         layout_all = QVBoxLayout()
         self.combo_grupos_p9 = QComboBox()
@@ -1176,11 +1163,8 @@ class VentanaPrincipal(QMainWindow):
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
-        estilo_cuadros = "QGroupBox { border: 1px solid #d0d0d0; border-radius: 4px; margin-top: 10px; font-weight: bold; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 3px; }"
-
         # --- Basic Options ---
         self.grupo_basico_m4 = QGroupBox("Basic Options")
-        self.grupo_basico_m4.setStyleSheet(estilo_cuadros)
         form_basico = QFormLayout()
 
         self.spin_domain_size = QSpinBox(); self.spin_domain_size.setRange(0, 1000); self.spin_domain_size.setValue(0)
@@ -1212,7 +1196,6 @@ class VentanaPrincipal(QMainWindow):
 
         # --- Other Options ---
         self.grupo_otros_m4 = QGroupBox("Other Options")
-        self.grupo_otros_m4.setStyleSheet(estilo_cuadros)
         form_otros = QFormLayout()
         self.chk_integer_ring = QCheckBox()
         form_otros.addRow("integer_ring:", self.chk_integer_ring)
@@ -1227,7 +1210,6 @@ class VentanaPrincipal(QMainWindow):
 
         # --- Experimental Options ---
         self.grupo_exp_m4 = QGroupBox("Experimental Options")
-        self.grupo_exp_m4.setStyleSheet(estilo_cuadros)
         form_exp = QFormLayout()
         self.chk_lnh = QCheckBox(); self.chk_lnh.setChecked(True)
         form_exp.addRow("lnh:", self.chk_lnh)
@@ -1282,6 +1264,7 @@ class VentanaPrincipal(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    apply_stylesheet(app, theme='dark_teal.xml')
     ventana = VentanaPrincipal()
     ventana.show()
     sys.exit(app.exec())
