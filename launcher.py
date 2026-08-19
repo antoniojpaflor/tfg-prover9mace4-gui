@@ -4,6 +4,7 @@ import os
 import sys
 from datetime import datetime
 
+
 def obtener_ruta_recurso(nombre_archivo):
     """Obtiene la ruta absoluta al recurso, compatible con desarrollo y con PyInstaller"""
     try:
@@ -11,6 +12,7 @@ def obtener_ruta_recurso(nombre_archivo):
     except Exception:
         ruta_base = os.path.abspath(".")
     return os.path.join(ruta_base, 'bin', nombre_archivo)
+
 
 def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
     sistema = platform.system()
@@ -64,10 +66,12 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
         # CAPTURA DE ERROR DE FORMATO DE WINDOWS
         return f"Error del sistema operativo (¿es un .exe válido?):\n{str(e)}"
 
+
 def ejecutar_prover9(texto_entrada, tiempo_limite=5):
     hora_ejecucion = datetime.now().strftime("%H:%M:%S")
     resultado = ejecutar_motor_logico(['prover9'], texto_entrada, tiempo_limite=tiempo_limite)
     return resultado, hora_ejecucion
+
 
 def ejecutar_mace4(texto_entrada, tiempo_limite=3):
     hora_ejecucion = datetime.now().strftime("%H:%M:%S")

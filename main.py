@@ -5,8 +5,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QTextEdit, QPushButton, QLabel, 
                              QTabWidget, QFileDialog, QGroupBox, QCheckBox, QStackedWidget,
                              QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
-                             QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea,
-                             QMessageBox)
+                             QSpinBox, QFormLayout, QComboBox, QScrollArea, QMessageBox)
 from PyQt6.QtGui import QFont, QAction, QSyntaxHighlighter, QTextCharFormat, QColor, QFontDatabase, QIcon
 from PyQt6.QtCore import QEvent, QThread, pyqtSignal, QRegularExpression
 from qt_material import apply_stylesheet
@@ -14,9 +13,8 @@ from qt_material import apply_stylesheet
 from launcher import ejecutar_prover9, ejecutar_mace4
 from idiomas import TRADUCCIONES, DICCIONARIO_PANELES
 
+
 class HiloMotor(QThread):
-    # Definimos la señal que el hilo enviará a la ventana principal al terminar
-    # Contendrá: resultado_crudo (str), hora (str), y el snapshot del historial (dict)
     resultado_listo = pyqtSignal(str, str, dict)
 
     def __init__(self, motor, texto_final, tiempo_limite, snapshot):
@@ -35,6 +33,7 @@ class HiloMotor(QThread):
         
         # Al terminar, emitimos los datos de vuelta al hilo principal
         self.resultado_listo.emit(resultado_crudo, hora, self.snapshot)
+
 
 class ResaltadorProver9(QSyntaxHighlighter):
     def __init__(self, editor):
@@ -83,6 +82,7 @@ class ResaltadorProver9(QSyntaxHighlighter):
                 match = iterador.next()
                 self.setFormat(match.capturedStart(), match.capturedLength(), formato)
 
+
 class VentanaPrincipal(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -95,7 +95,7 @@ class VentanaPrincipal(QMainWindow):
         self.nombres_categorias = []
         self.combos_traducibles = []
         self.init_ui()
-        
+
     def init_ui(self):
         self.setGeometry(100, 100, 1100, 900)
 
@@ -153,27 +153,6 @@ class VentanaPrincipal(QMainWindow):
 
         self.snapshot_guardado = self.obtener_estado_actual()
 
-    def eventFilter(self, objeto, evento):
-        txt = TRADUCCIONES[self.idioma_actual]
-        mapeo_ejemplos = {
-            self.premisas_p9: txt['ph_premisas_p9'],
-            self.conclusion_p9: txt['ph_conclusion_p9'],
-            self.entrada_libre_p9: txt['ph_libre_p9'],
-            self.premisas_m4: txt['ph_premisas_m4'],
-            self.conclusion_m4: txt['ph_conclusion_m4'],
-            self.entrada_libre_m4: txt['ph_libre_m4']
-        }
-        if objeto in mapeo_ejemplos:
-            if evento.type() == QEvent.Type.FocusIn:
-                if objeto.toPlainText().strip() == mapeo_ejemplos[objeto].strip():
-                    objeto.clear()
-                    objeto.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            elif evento.type() == QEvent.Type.FocusOut:
-                if not objeto.toPlainText().strip():
-                    objeto.setPlainText(mapeo_ejemplos[objeto])
-                    objeto.setStyleSheet("color: gray; font-family: 'JetBrains Mono'; font-size: 12pt;")
-        return super().eventFilter(objeto, evento)
-
     def crear_barra_menus(self):
         self.menuBar().clear()
         barra_menus = self.menuBar()
@@ -226,161 +205,6 @@ class VentanaPrincipal(QMainWindow):
         accion_en.triggered.connect(lambda: self.cambiar_idioma('en_US'))
         self.menu_idioma.addAction(accion_es)
         self.menu_idioma.addAction(accion_en)
-
-    def cambiar_idioma(self, nuevo_idioma):
-        self.idioma_actual = nuevo_idioma
-        self.crear_barra_menus()         
-        self.actualizar_textos_interfaz() 
-
-    def actualizar_textos_interfaz(self):
-        txt = TRADUCCIONES[self.idioma_actual]
-        
-        # Título dinámico respetando el archivo vinculado
-        self.actualizar_titulo_ventana()
-        
-        self.tabs.setTabText(0, txt['tab_p9'])
-        self.tabs.setTabText(1, txt['tab_m4'])
-        
-        self.menu_archivo.setTitle(txt['menu_archivo'])
-        self.accion_nuevo.setText(txt['accion_nuevo'])
-        self.accion_abrir.setText(txt['accion_abrir'])
-        self.accion_guardar.setText(txt['accion_guardar'])
-        self.accion_exportar.setText(txt['accion_exportar'])
-        self.accion_salir.setText(txt['accion_salir'])
-        
-        # Menú de ejemplos contextual según la pestaña activa
-        self.menu_ejemplos.setTitle(txt['menu_ejemplos'])
-        pestaña_activa = self.tabs.currentIndex()
-        if pestaña_activa == 0:
-            self.accion_ej1.setText(txt['ej_p9_1'])
-            self.accion_ej2.setText(txt['ej_p9_2'])
-            self.accion_ej3.setText(txt['ej_p9_3'])
-        else:
-            self.accion_ej1.setText(txt['ej_m4_1'])
-            self.accion_ej2.setText(txt['ej_m4_2'])
-            self.accion_ej3.setText(txt['ej_m4_3'])
-        
-        self.menu_idioma.setTitle(txt['menu_idioma'])
-        
-        # Elementos de la pestaña Prover9
-        self.chk_modo_p9.setText(txt['chk_modo_avanzado'])
-        self.lbl_premisas_p9.setText(txt['lbl_premisas_p9'])
-        self.lbl_conclusion_p9.setText(txt['lbl_conclusion_p9'])
-        self.lbl_libre_p9.setText(txt['lbl_libre_p9'])
-        self.btn_p9.setText(txt['btn_verificar_p9'])
-        self.lbl_res_p9.setText(txt['lbl_resultado'])
-        self.grupo_ins_p9.setTitle(txt['grupo_insercion'])
-        self.lbl_ops_p9.setText(txt['lbl_operadores'])
-        for boton, clave in self.botones_ops_p9:
-            boton.setText(txt[clave])
-        
-        # Elementos de la pestaña Mace4
-        self.chk_modo_m4.setText(txt['chk_modo_avanzado'])
-        self.lbl_premisas_m4.setText(txt['lbl_premisas_m4'])
-        self.lbl_objetivo_m4.setText(txt['lbl_objetivo_m4'])
-        self.lbl_libre_m4.setText(txt['lbl_libre_m4'])
-        self.btn_m4.setText(txt['btn_buscar_m4'])
-        self.lbl_res_m4.setText(txt['lbl_resultado'])
-        self.grupo_ins_m4.setTitle(txt['grupo_insercion'])
-        self.lbl_ops_m4.setText(txt['lbl_operadores'])
-        for boton, clave in self.botones_ops_m4:
-            boton.setText(txt[clave])
-            
-        # Historial y barra de estado
-        self.grupo_historial.setTitle(txt['tit_historial'])
-        self.tabla_historial.setHorizontalHeaderLabels([txt['col_hora'], txt['col_motor'], txt['col_resultado']])
-        if not self.ruta_archivo_actual:
-            self.barra_estado.showMessage(txt['status_sin_archivo'])
-        else:
-            self.barra_estado.showMessage(f"{txt['status_abierto']}{self.ruta_archivo_actual}")
-        
-        # Placeholders dinámicos simulados con control multilínea
-        cajas = [
-            (self.premisas_p9, txt['ph_premisas_p9']), (self.conclusion_p9, txt['ph_conclusion_p9']),
-            (self.entrada_libre_p9, txt['ph_libre_p9']), (self.premisas_m4, txt['ph_premisas_m4']),
-            (self.conclusion_m4, txt['ph_conclusion_m4']), (self.entrada_libre_m4, txt['ph_libre_m4'])
-        ]
-        for caja, texto_ejemplo in cajas:
-            texto_actual = caja.toPlainText().strip()
-            if not texto_actual or texto_actual in [v.strip() for v in TRADUCCIONES['es_ES'].values()] or texto_actual in [v.strip() for v in TRADUCCIONES['en_US'].values()]:
-                caja.setPlainText(texto_ejemplo)
-                caja.setStyleSheet("color: gray; font-family: 'JetBrains Mono'; font-size: 12pt;")
-
-        # --- NUEVO: Traducción en vivo de los paneles laterales ---
-        dic_paneles = DICCIONARIO_PANELES.get(self.idioma_actual, {})
-        def trad(texto_ing): return dic_paneles.get(texto_ing, texto_ing) if self.idioma_actual == 'es_ES' else texto_ing
-
-        if hasattr(self, 'grupo_basico_p9'):
-            self.grupo_basico_p9.setTitle(trad("Basic Options"))
-            self.grupo_all_options.setTitle(trad("All Options"))
-            self.btn_reset_basico_p9.setText(trad("Reset These to Defaults"))
-
-            self.grupo_basico_m4.setTitle(trad("Basic Options"))
-            self.grupo_otros_m4.setTitle(trad("Other Options"))
-            self.grupo_exp_m4.setTitle(trad("Experimental Options"))
-            self.btn_reset_m4.setText(trad("Reset These to Defaults"))
-
-            for btn in self.botones_reset_cats: btn.setText(trad("Reset These to Defaults"))
-            for lbl, orig_txt in self.labels_subcategorias: lbl.setText(trad(orig_txt))
-
-            for i, nombre_ing in enumerate(self.nombres_categorias):
-                self.combo_grupos_p9.setItemText(i, trad(nombre_ing))
-
-            for combo in self.combos_traducibles:
-                for i in range(combo.count()):
-                    combo.setItemText(i, trad(combo.itemData(i)))
-
-    def actualizar_titulo_ventana(self):
-        """Calcula el título de la barra superior dependiendo del archivo abierto"""
-        txt = TRADUCCIONES[self.idioma_actual]
-        nombre_base = "Prover9-Mace4 GUI"
-        if self.ruta_archivo_actual:
-            nombre_fichero = os.path.basename(self.ruta_archivo_actual)
-            self.setWindowTitle(f"{nombre_base} - [{nombre_fichero}]")
-        else:
-            self.setWindowTitle(nombre_base)
-
-    def crear_panel_insercion(self, editor_destino):
-        grupo = QGroupBox("")
-        # ELIMINADA la línea de grupo.setStyleSheet(...)
-        layout_grupo = QVBoxLayout()
-        lbl_ops = QLabel("")
-        layout_grupo.addWidget(lbl_ops)
-        botones_ops = []
-        operadores_config = [
-            ('op_neg', " - "), ('op_conj', " & "), ('op_disj', " | "), 
-            ('op_impl', " -> "), ('op_equiv', " <-> ")
-        ]
-        for clave, simbolo in operadores_config:
-            btn = QPushButton("") 
-            # ELIMINADA la línea de btn.setStyleSheet(...) para que qt-material lo pinte bien
-            btn.clicked.connect(lambda checked, s=simbolo, c_clave=clave: self.inyectar_operador_inteligente(s, c_clave))
-            layout_grupo.addWidget(btn)
-            botones_ops.append((btn, clave))
-        layout_grupo.addStretch()
-        grupo.setLayout(layout_grupo)
-        
-        # AUMENTADO el ancho a 220 para que quepa "EQUIVALENCIA"
-        grupo.setFixedWidth(230) 
-        
-        return grupo, lbl_ops, botones_ops
-
-    def inyectar_operador_inteligente(self, simbolo, clave_op):
-        pestaña = self.tabs.currentIndex()
-        caja = None
-        txt = TRADUCCIONES[self.idioma_actual]
-        if pestaña == 0:
-            caja = self.entrada_libre_p9 if self.chk_modo_p9.isChecked() else self.premisas_p9
-            ejemplo = txt['ph_libre_p9'] if self.chk_modo_p9.isChecked() else txt['ph_premisas_p9']
-        else:
-            caja = self.entrada_libre_m4 if self.chk_modo_m4.isChecked() else self.premisas_m4
-            ejemplo = txt['ph_libre_m4'] if self.chk_modo_m4.isChecked() else txt['ph_premisas_m4']
-        if caja:
-            if caja.toPlainText().strip() == ejemplo.strip():
-                caja.clear()
-                caja.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            caja.insertPlainText(simbolo)
-            caja.setFocus()
 
     def configurar_tab_prover9(self):
         estilo_codigo = "font-family: 'JetBrains Mono'; font-size: 12pt;"
@@ -504,430 +328,30 @@ class VentanaPrincipal(QMainWindow):
         
         self.tab_mace4.setLayout(layout_principal)
 
-    def cocinar_entrada_p9(self, caja_premisas, caja_conclusion):
-        texto_cocinado = ""
+    def crear_panel_insercion(self, editor_destino):
+        grupo = QGroupBox("")
+        # ELIMINADA la línea de grupo.setStyleSheet(...)
+        layout_grupo = QVBoxLayout()
+        lbl_ops = QLabel("")
+        layout_grupo.addWidget(lbl_ops)
+        botones_ops = []
+        operadores_config = [
+            ('op_neg', " - "), ('op_conj', " & "), ('op_disj', " | "), 
+            ('op_impl', " -> "), ('op_equiv', " <-> ")
+        ]
+        for clave, simbolo in operadores_config:
+            btn = QPushButton("") 
+            # ELIMINADA la línea de btn.setStyleSheet(...) para que qt-material lo pinte bien
+            btn.clicked.connect(lambda checked, s=simbolo, c_clave=clave: self.inyectar_operador_inteligente(s, c_clave))
+            layout_grupo.addWidget(btn)
+            botones_ops.append((btn, clave))
+        layout_grupo.addStretch()
+        grupo.setLayout(layout_grupo)
         
-        # Si 'All Options' está activado, volcamos TODA la base de datos de configuraciones.
-        if hasattr(self, 'grupo_all_options') and self.grupo_all_options.isChecked():
-            # Parámetros numéricos y textos (assign)
-            for nombre, (widget, _, _) in self.all_assigns_p9.items():
-                val = widget.value() if isinstance(widget, QSpinBox) else widget.currentData()
-                
-                # --- PARCHE PROVER9: Evitar bug interno de pick_given_ratio = -1 ---
-                if nombre == "pick_given_ratio" and val == -1:
-                    continue
-                    
-                texto_cocinado += f"assign({nombre}, {val}).\n"
-                
-            # Parámetros booleanos (set/clear)
-            for nombre, (chk, _, _) in self.all_flags_p9.items():
-                if chk.isChecked(): texto_cocinado += f"set({nombre}).\n"
-                else: texto_cocinado += f"clear({nombre}).\n"
+        # AUMENTADO el ancho a 220 para que quepa "EQUIVALENCIA"
+        grupo.setFixedWidth(230) 
         
-        # Si NO está activado, inyectamos solo lo visible en "Basic Options"
-        else:
-            texto_cocinado += f"assign(max_weight, {self.spin_max_weight.value()}).\n"
-            
-            # --- PARCHE PROVER9: Evitar bug interno de pick_given_ratio = -1 ---
-            if self.spin_pick_ratio.value() != -1:
-                texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
-                
-            texto_cocinado += f"assign(order, {self.combo_order.currentData()}).\n"
-            texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentData()}).\n"
-            texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
-            
-            flags_basicos = [
-                ('expand_relational_defs', self.chk_expand_relational),
-                ('restrict_denials', self.chk_restrict_denials),
-                ('prolog_style_variables', self.chk_prolog_vars)
-            ]
-            for nombre, widget in flags_basicos:
-                if widget.isChecked(): texto_cocinado += f"set({nombre}).\n"
-                else: texto_cocinado += f"clear({nombre}).\n"
-                
-        texto_cocinado += "\n"
-        
-        # 3. Bloque de fórmulas
-        lineas_premisas = caja_premisas.toPlainText().split('\n')
-        conclusion = caja_conclusion.toPlainText().strip()
-        
-        texto_cocinado += "formulas(sos).\n"
-        for linea in lineas_premisas:
-            linea_limpia = linea.strip()
-            if linea_limpia:
-                if not linea_limpia.endswith('.'):
-                    linea_limpia += '.'
-                texto_cocinado += f"  {linea_limpia}\n"
-        texto_cocinado += "end_of_list.\n\n"
-        
-        if conclusion:
-            if not conclusion.endswith('.'):
-                conclusion += '.'
-            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
-            
-        return texto_cocinado
-
-    def cocinar_entrada_m4(self, caja_premisas, caja_conclusion):
-        texto_cocinado = ""
-
-        # 1. Parámetros assign
-        # --- PARCHE MACE4: Si domain_size es 0, no lo enviamos para evitar que machaque el start_size interno ---
-        if self.spin_domain_size.value() > 0:
-            texto_cocinado += f"assign(domain_size, {self.spin_domain_size.value()}).\n"
-            
-        texto_cocinado += f"assign(start_size, {self.spin_start_size.value()}).\n"
-        texto_cocinado += f"assign(end_size, {self.spin_end_size.value()}).\n"
-        texto_cocinado += f"assign(increment, {self.spin_increment.value()}).\n"
-        texto_cocinado += f"assign(iterate, {self.combo_iterate.currentData()}).\n"
-        texto_cocinado += f"assign(max_models, {self.spin_max_models.value()}).\n"
-        texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_m4.value()}).\n"
-        texto_cocinado += f"assign(max_seconds_per, {self.spin_max_seconds_per.value()}).\n"
-        texto_cocinado += f"assign(max_megs, {self.spin_max_megs.value()}).\n"
-        texto_cocinado += f"assign(selection_order, {self.spin_selection_order.value()}).\n"
-        texto_cocinado += f"assign(selection_measure, {self.spin_selection_measure.value()}).\n"
-
-        # 2. Flags booleanos
-        flags_m4 = {
-            'prolog_style_variables': self.chk_prolog_vars_m4, 'integer_ring': self.chk_integer_ring,
-            'skolems_last': self.chk_skolems_last, 'print_models': self.chk_print_models,
-            'lnh': self.chk_lnh, 'negprop': self.chk_negprop, 'neg_assign': self.chk_neg_assign,
-            'neg_assign_near': self.chk_neg_assign_near, 'neg_elim': self.chk_neg_elim,
-            'neg_elim_near': self.chk_neg_elim_near
-        }
-        for flag, widget in flags_m4.items():
-            if widget.isChecked(): texto_cocinado += f"set({flag}).\n"
-            else: texto_cocinado += f"clear({flag}).\n"
-
-        texto_cocinado += "\n"
-
-        # 3. Fórmulas
-        lineas_premisas = caja_premisas.toPlainText().split('\n')
-        conclusion = caja_conclusion.toPlainText().strip()
-        texto_cocinado += "formulas(sos).\n"
-        for linea in lineas_premisas:
-            linea_limpia = linea.strip()
-            if linea_limpia:
-                if not linea_limpia.endswith('.'): linea_limpia += '.'
-                texto_cocinado += f"  {linea_limpia}\n"
-        texto_cocinado += "end_of_list.\n\n"
-
-        if conclusion:
-            if not conclusion.endswith('.'): conclusion += '.'
-            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
-
-        return texto_cocinado
-
-    def cocinar_entrada_directa(self, texto_premisas, texto_conclusion):
-        lineas_premisas = texto_premisas.split('\n')
-        conclusion = texto_conclusion.strip()
-        texto_cocinado = "formulas(sos).\n"
-        for linea in lineas_premisas:
-            linea_limpia = linea.strip()
-            if linea_limpia:
-                if not linea_limpia.endswith('.'):
-                    linea_limpia += '.'
-                texto_cocinado += f"  {linea_limpia}\n"
-        texto_cocinado += "end_of_list.\n\n"
-        if conclusion:
-            if not conclusion.endswith('.'):
-                conclusion += '.'
-            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
-        return texto_cocinado
-
-    def limpiar_y_traducir_error(self, salida_cruda):
-        texto = salida_cruda.strip()
-        pestaña_activa = self.tabs.currentIndex()
-        es_en = (self.idioma_actual == 'en_US')
-        
-        if not texto or "Error" in texto:
-            return f"❌ ERROR:\n{salida_cruda}", 'error'
-
-        patrones_error = ["fatal_error", "LABEL: syntax error", "syn_err", "cloffset", "appears more than once", "error"]
-        if any(patron in texto for patron in patrones_error):
-            if es_en:
-                return f"❌ DETECTED SYNTAX ERROR\n---------------------------------\nReview operators.\n\n=== ENGINE LOG ===\n{salida_cruda}", 'error'
-            return f"❌ ERROR DE SINTAXIS DETECTADO\n---------------------------------\nRevisa conectivas.\n\n=== DETALLE TÉCNICO ===\n{salida_cruda}", 'error'
-
-        if "TIMEOUT_EXPIRED" in texto:
-            return salida_cruda, 'timeout'
-
-        if pestaña_activa == 0:
-            if "THEOREM PROVED" in texto:
-                prueba_limpia = ""
-                for linea in texto.split('\n'):
-                    if "=== PROOF ===" in linea or "SUBPROOF" in linea or prueba_limpia:
-                        prueba_limpia += linea + "\n"
-                    if "end of proof" in linea: break
-                if es_en:
-                    return f"✅ THEOREM PROVED SUCCESSFULLY!\n---------------------------------\n=== PROOF STEPS ===\n{prueba_limpia.strip()}\n\n=== FULL LOG ===\n{salida_cruda}", 'proved'
-                return f"✅ ¡TEOREMA DEMOSTRADO CON ÉXITO!\n---------------------------------\n=== PASOS DEDUCTIVOS ===\n{prueba_limpia.strip()}\n\n=== LOG COMPLETO ===\n{salida_cruda}", 'proved'
-            else:
-                if es_en:
-                    return f"⚠️ THEOREM COULD NOT BE PROVED\n---------------------------------\n=== ENGINE LOG ===\n{salida_cruda}", 'no_proved'
-                return f"⚠️ EL TEOREMA NO SE PUDO DEMOSTRAR\n---------------------------------\n=== DETALLE TÉCNICO ===\n{salida_cruda}", 'no_proved'
-        else:
-            if "model(s) found" in texto or "Exiting with 1 model" in texto or "interpretation" in texto:
-                modelo_limpio = ""
-                for linea in texto.split('\n'):
-                    if "interpretation(" in linea or modelo_limpio:
-                        modelo_limpio += linea + "\n"
-                    if "end_of_interpretation" in linea: break
-                if es_en:
-                    return f"🔮 COUNTEREXAMPLE FOUND\n---------------------------------\n=== MATRIX STRUCT ===\n{modelo_limpio.strip()}\n\n=== FULL LOG ===\n{salida_cruda}", 'counter'
-                return f"🔮 CONTRAEJEMPLO ENCONTRADO (EL TEOREMA ES FALSO)\n---------------------------------\n=== MATRIZ SEMÁNTICA ===\n{modelo_limpio.strip()}\n\n=== LOG COMPLETO ===\n{salida_cruda}", 'counter'
-            else:
-                if es_en:
-                    return f"ℹ️ NO COUNTEREXAMPLES FOUND\n---------------------------------\n=== ENGINE LOG ===\n{salida_cruda}", 'no_counter'
-                return f"ℹ️ MACE4 NO ENCONTRÓ CONTRAEJEMPLOS\n---------------------------------\n=== DETALLE TÉCNICO ===\n{salida_cruda}", 'no_counter'
-
-    def extraer_texto_util(self, caja, ejemplo_plantilla):
-        t = caja.toPlainText().strip()
-        if t == ejemplo_plantilla.strip():
-            return ""
-        return t
-
-    # --- NUEVO: Gestión de la tabla del Historial ---
-    def agregar_al_historial(self, hora, motor, tag_resultado, snapshot_datos):
-        txt = TRADUCCIONES[self.idioma_actual]
-        dict_tags = {
-            'proved': txt['hist_proved'], 'no_proved': txt['hist_no_proved'],
-            'counter': txt['hist_counter'], 'no_counter': txt['hist_no_counter'],
-            'timeout': txt['hist_timeout'], 'error': txt['hist_error']
-        }
-        
-        # Insertamos siempre en la fila 0 (arriba del todo)
-        self.tabla_historial.insertRow(0)
-        
-        self.tabla_historial.setItem(0, 0, QTableWidgetItem(hora))
-        self.tabla_historial.setItem(0, 1, QTableWidgetItem(motor))
-        self.tabla_historial.setItem(0, 2, QTableWidgetItem(dict_tags.get(tag_resultado, tag_resultado)))
-        
-        # Insertamos el snapshot al principio de la caché para que el índice coincida con la tabla
-        self.datos_historial.insert(0, snapshot_datos)
-
-    def recuperar_desde_historial(self, item):
-        """Al hacer doble clic en el historial, restaura los editores a ese estado pasado"""
-        fila = item.row()
-        if fila >= len(self.datos_historial):
-            return
-            
-        snap = self.datos_historial[fila]
-        pestaña = snap['pestaña']
-        self.tabs.setCurrentIndex(pestaña)
-        
-        if pestaña == 0:
-            self.chk_modo_p9.setChecked(snap['modo_avanzado'])
-            self.premisas_p9.setPlainText(snap['premisas'])
-            self.conclusion_p9.setPlainText(snap['conclusion'])
-            self.entrada_libre_p9.setPlainText(snap['libre'])
-            # Forzamos estilos negros
-            for c in [self.premisas_p9, self.conclusion_p9, self.entrada_libre_p9]:
-                c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-        else:
-            self.chk_modo_m4.setChecked(snap['modo_avanzado'])
-            self.premisas_m4.setPlainText(snap['premisas'])
-            self.conclusion_m4.setPlainText(snap['conclusion'])
-            self.entrada_libre_m4.setPlainText(snap['libre'])
-            for c in [self.premisas_m4, self.conclusion_m4, self.entrada_libre_m4]:
-                c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-
-    def procesar_prover9(self):
-        txt = TRADUCCIONES[self.idioma_actual]
-        
-        snapshot = {
-            'pestaña': 0, 'modo_avanzado': self.chk_modo_p9.isChecked(),
-            'premisas': self.premisas_p9.toPlainText(), 'conclusion': self.conclusion_p9.toPlainText(),
-            'libre': self.entrada_libre_p9.toPlainText()
-        }
-        
-        if self.chk_modo_p9.isChecked():
-            texto_final = self.extraer_texto_util(self.entrada_libre_p9, txt['ph_libre_p9'])
-        else:
-            premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
-            conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
-            texto_final = self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9) if (premisas or conclusion) else ""
-            
-        if not texto_final.strip():
-            self.salida_p9.setPlainText("❌ Error: No hay datos de entrada válidos.")
-            return
-
-        # 1. Bloquear la interfaz visualmente para evitar múltiples envíos
-        self.btn_p9.setEnabled(False)
-        self.btn_p9.setText("Procesando... (Por favor, espera)")
-        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;") # Naranja de carga
-        self.salida_p9.setPlainText(txt['msg_procesando_p9'])
-
-        # 2. Arrancar el obrero en segundo plano
-        self.hilo_p9 = HiloMotor('prover9', texto_final, self.spin_max_seconds_p9.value(), snapshot)
-        self.hilo_p9.resultado_listo.connect(self.al_terminar_prover9)
-        self.hilo_p9.start()
-
-    def al_terminar_prover9(self, resultado_crudo, hora, snapshot):
-        # 3. Este método se dispara automáticamente cuando el hilo termina
-        resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
-        
-        self.salida_p9.setPlainText(resultado_traducido)
-        self.agregar_al_historial(hora, "Prover9", tag, snapshot)
-        
-        # Restaurar el botón a su estado original
-        txt = TRADUCCIONES[self.idioma_actual]
-        self.btn_p9.setEnabled(True)
-        self.btn_p9.setText(txt['btn_verificar_p9'])
-        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #2962ff; color: white; padding: 10px;")
-
-    def procesar_mace4(self):
-        txt = TRADUCCIONES[self.idioma_actual]
-        
-        snapshot = {
-            'pestaña': 1, 'modo_avanzado': self.chk_modo_m4.isChecked(),
-            'premisas': self.premisas_m4.toPlainText(), 'conclusion': self.conclusion_m4.toPlainText(),
-            'libre': self.entrada_libre_m4.toPlainText()
-        }
-        
-        if self.chk_modo_m4.isChecked():
-            texto_final = self.extraer_texto_util(self.entrada_libre_m4, txt['ph_libre_m4'])
-        else:
-            premisas = self.extraer_texto_util(self.premisas_m4, txt['ph_premisas_m4'])
-            conclusion = self.extraer_texto_util(self.conclusion_m4, txt['ph_conclusion_m4'])
-            texto_final = self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4) if (premisas or conclusion) else ""
-
-        if not texto_final.strip():
-            self.salida_m4.setPlainText("❌ Error: No hay datos de entrada válidos.")
-            return
-
-        # 1. Bloquear la interfaz visualmente
-        self.btn_m4.setEnabled(False)
-        self.btn_m4.setText("Procesando... (Por favor, espera)")
-        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
-        self.salida_m4.setPlainText(txt['msg_procesando_m4'])
-
-        # 2. Arrancar el obrero en segundo plano
-        self.hilo_m4 = HiloMotor('mace4', texto_final, self.spin_max_seconds_m4.value(), snapshot)
-        self.hilo_m4.resultado_listo.connect(self.al_terminar_m4)
-        self.hilo_m4.start()
-
-    def al_terminar_m4(self, resultado_crudo, hora, snapshot):
-        # 3. Recepción de datos y actualización de interfaz
-        resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
-        
-        self.salida_m4.setPlainText(resultado_traducido)
-        self.agregar_al_historial(hora, "Mace4", tag, snapshot)
-        
-        # Restaurar el botón
-        txt = TRADUCCIONES[self.idioma_actual]
-        self.btn_m4.setEnabled(True)
-        self.btn_m4.setText(txt['btn_buscar_m4'])
-        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #d32f2f; color: white; padding: 10px;")
-
-    def cargar_ejemplo_tipo(self, slot_menu):
-        """Carga problemas específicos calculando si el usuario está en Prover9 o Mace4"""
-        
-        # 1. Comprobamos si hay cambios sin guardar ANTES de cargar el ejemplo
-        if not self.advertir_cambios_sin_guardar():
-            return
-            
-        txt = TRADUCCIONES[self.idioma_actual]
-        pestaña = self.tabs.currentIndex()
-        
-        if pestaña == 0:
-            # Flujo Prover9
-            if slot_menu == 1: tipo = 'silogismo'
-            elif slot_menu == 2: tipo = 'paradoja'
-            else: tipo = 'algebra'  
-            
-            premisas_ej = txt[f'datos_{tipo}_premisas']
-            conclusion_ej = txt[f'datos_{tipo}_conclusion']
-            codigo_completo_libre = self.cocinar_entrada_directa(premisas_ej, conclusion_ej)
-            
-            self.premisas_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            self.conclusion_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            self.entrada_libre_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            self.premisas_p9.setPlainText(premisas_ej)
-            self.conclusion_p9.setPlainText(conclusion_ej)
-            self.entrada_libre_p9.setPlainText(codigo_completo_libre)
-        else:
-            # Flujo Mace4
-            if slot_menu == 1: tipo = 'grupo'
-            elif slot_menu == 2: tipo = 'conmut'
-            else: tipo = 'reticulo' 
-            
-            premisas_ej = txt[f'datos_{tipo}_premisas']
-            conclusion_ej = txt[f'datos_{tipo}_conclusion']
-            codigo_completo_libre = self.cocinar_entrada_directa(premisas_ej, conclusion_ej)
-            
-            self.premisas_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            self.conclusion_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            self.entrada_libre_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            self.premisas_m4.setPlainText(premisas_ej)
-            self.conclusion_m4.setPlainText(conclusion_ej)
-            self.entrada_libre_m4.setPlainText(codigo_completo_libre)
-
-        # 2. Renovamos la foto DESPUÉS de cargar el ejemplo con éxito
-        self.snapshot_guardado = self.obtener_estado_actual()
-
-    def nuevo_proyecto(self):
-        if not self.advertir_cambios_sin_guardar(): return
-        for caja in [self.premisas_p9, self.conclusion_p9, self.entrada_libre_p9, self.premisas_m4, self.conclusion_m4, self.entrada_libre_m4]:
-            caja.clear()
-        self.salida_p9.clear()
-        self.salida_m4.clear()
-        self.ruta_archivo_actual = None
-        self.actualizar_textos_interfaz()
-        self.snapshot_guardado = self.obtener_estado_actual()
-
-    # --- MEJORADO: Abrir archivo con vinculación real ---
-    def abrir_archivo(self):
-        if not self.advertir_cambios_sin_guardar(): return
-        
-        ruta, _ = QFileDialog.getOpenFileName(self, "Abrir / Open", "", "Inputs (*.in *.p9 *.txt)")
-        if ruta:
-            with open(ruta, "r", encoding="utf-8") as f: contenido = f.read()
-            self.ruta_archivo_actual = ruta
-            if self.tabs.currentIndex() == 0:
-                self.chk_modo_p9.setChecked(True)
-                self.entrada_libre_p9.setPlainText(contenido)
-                self.entrada_libre_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            else:
-                self.chk_modo_m4.setChecked(True)
-                self.entrada_libre_m4.setPlainText(contenido)
-                self.entrada_libre_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
-            
-            self.actualizar_textos_interfaz()
-            self.snapshot_guardado = self.obtener_estado_actual()
-
-    # --- MEJORADO: Guardar inteligente (Ctrl+S directo) ---
-    def guardar_archivo(self):
-        txt = TRADUCCIONES[self.idioma_actual]
-        
-        if not self.ruta_archivo_actual:
-            ruta, _ = QFileDialog.getSaveFileName(self, "Guardar / Save", "", "Inputs (*.in)")
-            if not ruta:
-                return False # <--- AÑADIDO: Si cancela, devuelve False
-            self.ruta_archivo_actual = ruta
-
-        p = self.tabs.currentIndex()
-        idioma_txt = TRADUCCIONES[self.idioma_actual]
-        if p == 0:
-            texto = self.extraer_texto_util(self.entrada_libre_p9, idioma_txt['ph_libre_p9']) if self.chk_modo_p9.isChecked() else self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9)
-        else:
-            texto = self.extraer_texto_util(self.entrada_libre_m4, idioma_txt['ph_libre_m4']) if self.chk_modo_m4.isChecked() else self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4)
-        
-        try:
-            with open(self.ruta_archivo_actual, "w", encoding="utf-8") as f: f.write(texto)
-            self.barra_estado.showMessage(f"{txt['status_guardado']}{self.ruta_archivo_actual}", 4000)
-            self.actualizar_titulo_ventana()
-            self.snapshot_guardado = self.obtener_estado_actual() # <--- Renovamos foto tras guardar
-            return True # <--- AÑADIDO: Guardado con éxito
-        except Exception:
-            self.barra_estado.showMessage(txt['status_error_guardar'], 4000)
-            return False # <--- AÑADIDO
-
-    def exportar_salida(self):
-        editor = self.salida_p9 if self.tabs.currentIndex() == 0 else self.salida_m4
-        if editor.toPlainText().strip():
-            ruta, _ = QFileDialog.getSaveFileName(self, "Exportar / Export", "", "Reports (*.out *.txt)")
-            if ruta:
-                with open(ruta, "w", encoding="utf-8") as f: f.write(editor.toPlainText())
+        return grupo, lbl_ops, botones_ops
 
     def crear_panel_opciones_p9(self):
         scroll = QScrollArea()
@@ -1152,29 +576,6 @@ class VentanaPrincipal(QMainWindow):
         scroll.setWidget(contenido)
         return scroll
 
-    def reset_opciones_p9(self):
-        self.spin_max_weight.setValue(100)
-        self.spin_pick_ratio.setValue(-1)
-        self.combo_order.setCurrentText("lpo")
-        self.combo_eq_defs.setCurrentText("unfold")
-        self.chk_expand_relational.setChecked(False)
-        self.chk_restrict_denials.setChecked(False)
-        self.spin_max_seconds_p9.setValue(60)
-        self.chk_prolog_vars.setChecked(False)
-
-    def reset_categoria_p9(self, categoria):
-        """Resetea a valores por defecto solo los widgets de la categoría actual"""
-        for nombre, (chk, por_defecto, cat) in self.all_flags_p9.items():
-            if cat == categoria:
-                chk.setChecked(por_defecto)
-                
-        for nombre, (widget, por_defecto, cat) in self.all_assigns_p9.items():
-            if cat == categoria:
-                if isinstance(widget, QSpinBox):
-                    widget.setValue(por_defecto)
-                elif isinstance(widget, QComboBox):
-                    widget.setCurrentText(por_defecto)
-
     def crear_panel_opciones_m4(self):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -1262,45 +663,290 @@ class VentanaPrincipal(QMainWindow):
         scroll.setWidget(contenido)
         return scroll
 
-    def reset_opciones_m4(self):
-        self.spin_domain_size.setValue(0)
-        self.spin_start_size.setValue(2)
-        self.spin_end_size.setValue(-1)
-        self.spin_increment.setValue(1)
-        self.combo_iterate.setCurrentText("all")
-        self.spin_max_models.setValue(1)
-        self.spin_max_seconds_m4.setValue(60)
-        self.spin_max_seconds_per.setValue(-1)
-        self.chk_prolog_vars_m4.setChecked(False)
+    def cambiar_idioma(self, nuevo_idioma):
+        self.idioma_actual = nuevo_idioma
+        self.crear_barra_menus()         
+        self.actualizar_textos_interfaz()
 
-        self.chk_integer_ring.setChecked(False)
-        self.chk_skolems_last.setChecked(False)
-        self.spin_max_megs.setValue(200)
-        self.chk_print_models.setChecked(True)
-
-        self.chk_lnh.setChecked(True)
-        self.chk_negprop.setChecked(True)
-        self.chk_neg_assign.setChecked(True)
-        self.chk_neg_assign_near.setChecked(True)
-        self.chk_neg_elim.setChecked(True)
-        self.chk_neg_elim_near.setChecked(True)
-        self.spin_selection_order.setValue(2)
-        self.spin_selection_measure.setValue(4)
-
-    def extraer_formulas_regex(self, texto):
-        premisas, conclusion = "", ""
-        # Extraer bloque de premisas (sos)
-        match_sos = re.search(r'formulas\(sos\)\.(.*?)(?:end_of_list\.)', texto, re.DOTALL)
-        if match_sos:
-            # Limpiamos espacios y eliminamos los puntos del final para el modo básico
-            premisas = '\n'.join([l.strip().rstrip('.') for l in match_sos.group(1).strip().split('\n') if l.strip()])
+    def actualizar_textos_interfaz(self):
+        txt = TRADUCCIONES[self.idioma_actual]
+        
+        # Título dinámico respetando el archivo vinculado
+        self.actualizar_titulo_ventana()
+        
+        self.tabs.setTabText(0, txt['tab_p9'])
+        self.tabs.setTabText(1, txt['tab_m4'])
+        
+        self.menu_archivo.setTitle(txt['menu_archivo'])
+        self.accion_nuevo.setText(txt['accion_nuevo'])
+        self.accion_abrir.setText(txt['accion_abrir'])
+        self.accion_guardar.setText(txt['accion_guardar'])
+        self.accion_exportar.setText(txt['accion_exportar'])
+        self.accion_salir.setText(txt['accion_salir'])
+        
+        # Menú de ejemplos contextual según la pestaña activa
+        self.menu_ejemplos.setTitle(txt['menu_ejemplos'])
+        pestaña_activa = self.tabs.currentIndex()
+        if pestaña_activa == 0:
+            self.accion_ej1.setText(txt['ej_p9_1'])
+            self.accion_ej2.setText(txt['ej_p9_2'])
+            self.accion_ej3.setText(txt['ej_p9_3'])
+        else:
+            self.accion_ej1.setText(txt['ej_m4_1'])
+            self.accion_ej2.setText(txt['ej_m4_2'])
+            self.accion_ej3.setText(txt['ej_m4_3'])
+        
+        self.menu_idioma.setTitle(txt['menu_idioma'])
+        
+        # Elementos de la pestaña Prover9
+        self.chk_modo_p9.setText(txt['chk_modo_avanzado'])
+        self.lbl_premisas_p9.setText(txt['lbl_premisas_p9'])
+        self.lbl_conclusion_p9.setText(txt['lbl_conclusion_p9'])
+        self.lbl_libre_p9.setText(txt['lbl_libre_p9'])
+        self.btn_p9.setText(txt['btn_verificar_p9'])
+        self.lbl_res_p9.setText(txt['lbl_resultado'])
+        self.grupo_ins_p9.setTitle(txt['grupo_insercion'])
+        self.lbl_ops_p9.setText(txt['lbl_operadores'])
+        for boton, clave in self.botones_ops_p9:
+            boton.setText(txt[clave])
+        
+        # Elementos de la pestaña Mace4
+        self.chk_modo_m4.setText(txt['chk_modo_avanzado'])
+        self.lbl_premisas_m4.setText(txt['lbl_premisas_m4'])
+        self.lbl_objetivo_m4.setText(txt['lbl_objetivo_m4'])
+        self.lbl_libre_m4.setText(txt['lbl_libre_m4'])
+        self.btn_m4.setText(txt['btn_buscar_m4'])
+        self.lbl_res_m4.setText(txt['lbl_resultado'])
+        self.grupo_ins_m4.setTitle(txt['grupo_insercion'])
+        self.lbl_ops_m4.setText(txt['lbl_operadores'])
+        for boton, clave in self.botones_ops_m4:
+            boton.setText(txt[clave])
             
-        # Extraer bloque de conclusión (goals)
-        match_goals = re.search(r'formulas\(goals\)\.(.*?)(?:end_of_list\.)', texto, re.DOTALL)
-        if match_goals:
-            conclusion = '\n'.join([l.strip().rstrip('.') for l in match_goals.group(1).strip().split('\n') if l.strip()])
+        # Historial y barra de estado
+        self.grupo_historial.setTitle(txt['tit_historial'])
+        self.tabla_historial.setHorizontalHeaderLabels([txt['col_hora'], txt['col_motor'], txt['col_resultado']])
+        if not self.ruta_archivo_actual:
+            self.barra_estado.showMessage(txt['status_sin_archivo'])
+        else:
+            self.barra_estado.showMessage(f"{txt['status_abierto']}{self.ruta_archivo_actual}")
+        
+        # Placeholders dinámicos simulados con control multilínea
+        cajas = [
+            (self.premisas_p9, txt['ph_premisas_p9']), (self.conclusion_p9, txt['ph_conclusion_p9']),
+            (self.entrada_libre_p9, txt['ph_libre_p9']), (self.premisas_m4, txt['ph_premisas_m4']),
+            (self.conclusion_m4, txt['ph_conclusion_m4']), (self.entrada_libre_m4, txt['ph_libre_m4'])
+        ]
+        for caja, texto_ejemplo in cajas:
+            texto_actual = caja.toPlainText().strip()
+            if not texto_actual or texto_actual in [v.strip() for v in TRADUCCIONES['es_ES'].values()] or texto_actual in [v.strip() for v in TRADUCCIONES['en_US'].values()]:
+                caja.setPlainText(texto_ejemplo)
+                caja.setStyleSheet("color: gray; font-family: 'JetBrains Mono'; font-size: 12pt;")
+
+        # --- Traducción en vivo de los paneles laterales ---
+        dic_paneles = DICCIONARIO_PANELES.get(self.idioma_actual, {})
+        def trad(texto_ing): return dic_paneles.get(texto_ing, texto_ing)
+
+        if hasattr(self, 'grupo_basico_p9'):
+            self.grupo_basico_p9.setTitle(trad("Basic Options"))
+            self.grupo_all_options.setTitle(trad("All Options"))
+            self.btn_reset_basico_p9.setText(trad("Reset These to Defaults"))
+
+            self.grupo_basico_m4.setTitle(trad("Basic Options"))
+            self.grupo_otros_m4.setTitle(trad("Other Options"))
+            self.grupo_exp_m4.setTitle(trad("Experimental Options"))
+            self.btn_reset_m4.setText(trad("Reset These to Defaults"))
+
+            for btn in self.botones_reset_cats: btn.setText(trad("Reset These to Defaults"))
+            for lbl, orig_txt in self.labels_subcategorias: lbl.setText(trad(orig_txt))
+
+            for i, nombre_ing in enumerate(self.nombres_categorias):
+                self.combo_grupos_p9.setItemText(i, trad(nombre_ing))
+
+            for combo in self.combos_traducibles:
+                for i in range(combo.count()):
+                    combo.setItemText(i, trad(combo.itemData(i)))
+
+    def actualizar_titulo_ventana(self):
+        """Calcula el título de la barra superior dependiendo del archivo abierto"""
+        txt = TRADUCCIONES[self.idioma_actual]
+        nombre_base = "Prover9-Mace4 GUI"
+        if self.ruta_archivo_actual:
+            nombre_fichero = os.path.basename(self.ruta_archivo_actual)
+            self.setWindowTitle(f"{nombre_base} - [{nombre_fichero}]")
+        else:
+            self.setWindowTitle(nombre_base)
+
+    def nuevo_proyecto(self):
+        if not self.advertir_cambios_sin_guardar(): return
+        for caja in [self.premisas_p9, self.conclusion_p9, self.entrada_libre_p9, self.premisas_m4, self.conclusion_m4, self.entrada_libre_m4]:
+            caja.clear()
+        self.salida_p9.clear()
+        self.salida_m4.clear()
+        self.ruta_archivo_actual = None
+        self.actualizar_textos_interfaz()
+        self.snapshot_guardado = self.obtener_estado_actual()
+
+    def abrir_archivo(self):
+        if not self.advertir_cambios_sin_guardar(): return
+        
+        ruta, _ = QFileDialog.getOpenFileName(self, "Abrir / Open", "", "Inputs (*.in *.p9 *.txt)")
+        if ruta:
+            with open(ruta, "r", encoding="utf-8") as f: contenido = f.read()
+            self.ruta_archivo_actual = ruta
+            if self.tabs.currentIndex() == 0:
+                self.chk_modo_p9.setChecked(True)
+                self.entrada_libre_p9.setPlainText(contenido)
+                self.entrada_libre_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            else:
+                self.chk_modo_m4.setChecked(True)
+                self.entrada_libre_m4.setPlainText(contenido)
+                self.entrada_libre_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
             
-        return premisas, conclusion
+            self.actualizar_textos_interfaz()
+            self.snapshot_guardado = self.obtener_estado_actual()
+
+    def guardar_archivo(self):
+        txt = TRADUCCIONES[self.idioma_actual]
+        
+        if not self.ruta_archivo_actual:
+            ruta, _ = QFileDialog.getSaveFileName(self, "Guardar / Save", "", "Inputs (*.in)")
+            if not ruta:
+                return False # <--- AÑADIDO: Si cancela, devuelve False
+            self.ruta_archivo_actual = ruta
+
+        p = self.tabs.currentIndex()
+        idioma_txt = TRADUCCIONES[self.idioma_actual]
+        if p == 0:
+            texto = self.extraer_texto_util(self.entrada_libre_p9, idioma_txt['ph_libre_p9']) if self.chk_modo_p9.isChecked() else self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9)
+        else:
+            texto = self.extraer_texto_util(self.entrada_libre_m4, idioma_txt['ph_libre_m4']) if self.chk_modo_m4.isChecked() else self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4)
+        
+        try:
+            with open(self.ruta_archivo_actual, "w", encoding="utf-8") as f: f.write(texto)
+            self.barra_estado.showMessage(f"{txt['status_guardado']}{self.ruta_archivo_actual}", 4000)
+            self.actualizar_titulo_ventana()
+            self.snapshot_guardado = self.obtener_estado_actual() # <--- Renovamos foto tras guardar
+            return True # <--- AÑADIDO: Guardado con éxito
+        except Exception:
+            self.barra_estado.showMessage(txt['status_error_guardar'], 4000)
+            return False # <--- AÑADIDO
+
+    def exportar_salida(self):
+        editor = self.salida_p9 if self.tabs.currentIndex() == 0 else self.salida_m4
+        if editor.toPlainText().strip():
+            ruta, _ = QFileDialog.getSaveFileName(self, "Exportar / Export", "", "Reports (*.out *.txt)")
+            if ruta:
+                with open(ruta, "w", encoding="utf-8") as f: f.write(editor.toPlainText())
+
+    def cargar_ejemplo_tipo(self, slot_menu):
+        """Carga problemas específicos calculando si el usuario está en Prover9 o Mace4"""
+        
+        # 1. Comprobamos si hay cambios sin guardar ANTES de cargar el ejemplo
+        if not self.advertir_cambios_sin_guardar():
+            return
+            
+        txt = TRADUCCIONES[self.idioma_actual]
+        pestaña = self.tabs.currentIndex()
+        
+        if pestaña == 0:
+            # Flujo Prover9
+            if slot_menu == 1: tipo = 'silogismo'
+            elif slot_menu == 2: tipo = 'paradoja'
+            else: tipo = 'algebra'  
+            
+            premisas_ej = txt[f'datos_{tipo}_premisas']
+            conclusion_ej = txt[f'datos_{tipo}_conclusion']
+            codigo_completo_libre = self.cocinar_entrada_directa(premisas_ej, conclusion_ej)
+            
+            self.premisas_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.conclusion_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.entrada_libre_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.premisas_p9.setPlainText(premisas_ej)
+            self.conclusion_p9.setPlainText(conclusion_ej)
+            self.entrada_libre_p9.setPlainText(codigo_completo_libre)
+        else:
+            # Flujo Mace4
+            if slot_menu == 1: tipo = 'grupo'
+            elif slot_menu == 2: tipo = 'conmut'
+            else: tipo = 'reticulo' 
+            
+            premisas_ej = txt[f'datos_{tipo}_premisas']
+            conclusion_ej = txt[f'datos_{tipo}_conclusion']
+            codigo_completo_libre = self.cocinar_entrada_directa(premisas_ej, conclusion_ej)
+            
+            self.premisas_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.conclusion_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.entrada_libre_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            self.premisas_m4.setPlainText(premisas_ej)
+            self.conclusion_m4.setPlainText(conclusion_ej)
+            self.entrada_libre_m4.setPlainText(codigo_completo_libre)
+
+        # 2. Renovamos la foto DESPUÉS de cargar el ejemplo con éxito
+        self.snapshot_guardado = self.obtener_estado_actual()
+
+    def obtener_estado_actual(self):
+        """Toma una instantánea de todo el texto actual de la interfaz."""
+        return {
+            'p9_av': self.chk_modo_p9.isChecked(), 'p9_p': self.premisas_p9.toPlainText(),
+            'p9_c': self.conclusion_p9.toPlainText(), 'p9_l': self.entrada_libre_p9.toPlainText(),
+            'm4_av': self.chk_modo_m4.isChecked(), 'm4_p': self.premisas_m4.toPlainText(),
+            'm4_c': self.conclusion_m4.toPlainText(), 'm4_l': self.entrada_libre_m4.toPlainText()
+        }
+
+    def advertir_cambios_sin_guardar(self):
+        """Muestra el diálogo si el estado actual no coincide con la última vez que se guardó."""
+        if getattr(self, 'snapshot_guardado', None) == self.obtener_estado_actual():
+            return True # No hay cambios, damos luz verde para continuar
+
+        es_en = (self.idioma_actual == 'en_US')
+        titulo = "Unsaved Changes" if es_en else "Cambios sin guardar"
+        mensaje = "You have unsaved changes.\nDo you want to save them before proceeding?" if es_en else "Tienes modificaciones sin guardar.\n¿Deseas guardarlas antes de continuar?"
+        
+        msg = QMessageBox(self)
+        msg.setWindowTitle(titulo)
+        msg.setText(mensaje)
+        msg.setIcon(QMessageBox.Icon.Warning)
+        
+        btn_guardar = msg.addButton("Save" if es_en else "Guardar", QMessageBox.ButtonRole.AcceptRole)
+        btn_descartar = msg.addButton("Discard" if es_en else "Descartar", QMessageBox.ButtonRole.DestructiveRole)
+        btn_cancelar = msg.addButton("Cancel" if es_en else "Cancelar", QMessageBox.ButtonRole.RejectRole)
+        
+        msg.exec()
+        
+        if msg.clickedButton() == btn_guardar:
+            return self.guardar_archivo() # Devuelve True si guardó bien, False si canceló el diálogo de guardar
+        elif msg.clickedButton() == btn_descartar:
+            return True # Luz verde para destruir los cambios
+        else:
+            return False # Se arrepintió, bloqueamos la acción
+
+    def closeEvent(self, evento):
+        """Intercepta el momento exacto en que el usuario pulsa la 'X' de la ventana."""
+        if self.advertir_cambios_sin_guardar():
+            evento.accept() # Cierra la app
+        else:
+            evento.ignore() # Aborta el cierre
+
+    def eventFilter(self, objeto, evento):
+        txt = TRADUCCIONES[self.idioma_actual]
+        mapeo_ejemplos = {
+            self.premisas_p9: txt['ph_premisas_p9'],
+            self.conclusion_p9: txt['ph_conclusion_p9'],
+            self.entrada_libre_p9: txt['ph_libre_p9'],
+            self.premisas_m4: txt['ph_premisas_m4'],
+            self.conclusion_m4: txt['ph_conclusion_m4'],
+            self.entrada_libre_m4: txt['ph_libre_m4']
+        }
+        if objeto in mapeo_ejemplos:
+            if evento.type() == QEvent.Type.FocusIn:
+                if objeto.toPlainText().strip() == mapeo_ejemplos[objeto].strip():
+                    objeto.clear()
+                    objeto.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            elif evento.type() == QEvent.Type.FocusOut:
+                if not objeto.toPlainText().strip():
+                    objeto.setPlainText(mapeo_ejemplos[objeto])
+                    objeto.setStyleSheet("color: gray; font-family: 'JetBrains Mono'; font-size: 12pt;")
+        return super().eventFilter(objeto, evento) 
 
     def alternar_modo_p9(self, checked):
         txt = TRADUCCIONES[self.idioma_actual]
@@ -1346,48 +992,400 @@ class VentanaPrincipal(QMainWindow):
                     self.conclusion_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
         self.vista_stack_m4.setCurrentIndex(1 if checked else 0)
 
-    def obtener_estado_actual(self):
-        """Toma una instantánea de todo el texto actual de la interfaz."""
-        return {
-            'p9_av': self.chk_modo_p9.isChecked(), 'p9_p': self.premisas_p9.toPlainText(),
-            'p9_c': self.conclusion_p9.toPlainText(), 'p9_l': self.entrada_libre_p9.toPlainText(),
-            'm4_av': self.chk_modo_m4.isChecked(), 'm4_p': self.premisas_m4.toPlainText(),
-            'm4_c': self.conclusion_m4.toPlainText(), 'm4_l': self.entrada_libre_m4.toPlainText()
+    def inyectar_operador_inteligente(self, simbolo, clave_op):
+        pestaña = self.tabs.currentIndex()
+        caja = None
+        txt = TRADUCCIONES[self.idioma_actual]
+        if pestaña == 0:
+            caja = self.entrada_libre_p9 if self.chk_modo_p9.isChecked() else self.premisas_p9
+            ejemplo = txt['ph_libre_p9'] if self.chk_modo_p9.isChecked() else txt['ph_premisas_p9']
+        else:
+            caja = self.entrada_libre_m4 if self.chk_modo_m4.isChecked() else self.premisas_m4
+            ejemplo = txt['ph_libre_m4'] if self.chk_modo_m4.isChecked() else txt['ph_premisas_m4']
+        if caja:
+            if caja.toPlainText().strip() == ejemplo.strip():
+                caja.clear()
+                caja.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+            caja.insertPlainText(simbolo)
+            caja.setFocus()
+
+    def reset_opciones_p9(self):
+        self.spin_max_weight.setValue(100)
+        self.spin_pick_ratio.setValue(-1)
+        self.combo_order.setCurrentText("lpo")
+        self.combo_eq_defs.setCurrentText("unfold")
+        self.chk_expand_relational.setChecked(False)
+        self.chk_restrict_denials.setChecked(False)
+        self.spin_max_seconds_p9.setValue(60)
+        self.chk_prolog_vars.setChecked(False)
+
+    def reset_categoria_p9(self, categoria):
+        """Resetea a valores por defecto solo los widgets de la categoría actual"""
+        for nombre, (chk, por_defecto, cat) in self.all_flags_p9.items():
+            if cat == categoria:
+                chk.setChecked(por_defecto)
+                
+        for nombre, (widget, por_defecto, cat) in self.all_assigns_p9.items():
+            if cat == categoria:
+                if isinstance(widget, QSpinBox):
+                    widget.setValue(por_defecto)
+                elif isinstance(widget, QComboBox):
+                    widget.setCurrentText(por_defecto)
+
+    def reset_opciones_m4(self):
+        self.spin_domain_size.setValue(0)
+        self.spin_start_size.setValue(2)
+        self.spin_end_size.setValue(-1)
+        self.spin_increment.setValue(1)
+        self.combo_iterate.setCurrentText("all")
+        self.spin_max_models.setValue(1)
+        self.spin_max_seconds_m4.setValue(60)
+        self.spin_max_seconds_per.setValue(-1)
+        self.chk_prolog_vars_m4.setChecked(False)
+
+        self.chk_integer_ring.setChecked(False)
+        self.chk_skolems_last.setChecked(False)
+        self.spin_max_megs.setValue(200)
+        self.chk_print_models.setChecked(True)
+
+        self.chk_lnh.setChecked(True)
+        self.chk_negprop.setChecked(True)
+        self.chk_neg_assign.setChecked(True)
+        self.chk_neg_assign_near.setChecked(True)
+        self.chk_neg_elim.setChecked(True)
+        self.chk_neg_elim_near.setChecked(True)
+        self.spin_selection_order.setValue(2)
+        self.spin_selection_measure.setValue(4)
+
+    def agregar_al_historial(self, hora, motor, tag_resultado, snapshot_datos):
+        txt = TRADUCCIONES[self.idioma_actual]
+        dict_tags = {
+            'proved': txt['hist_proved'], 'no_proved': txt['hist_no_proved'],
+            'counter': txt['hist_counter'], 'no_counter': txt['hist_no_counter'],
+            'timeout': txt['hist_timeout'], 'error': txt['hist_error']
         }
+        
+        # Insertamos siempre en la fila 0 (arriba del todo)
+        self.tabla_historial.insertRow(0)
+        
+        self.tabla_historial.setItem(0, 0, QTableWidgetItem(hora))
+        self.tabla_historial.setItem(0, 1, QTableWidgetItem(motor))
+        self.tabla_historial.setItem(0, 2, QTableWidgetItem(dict_tags.get(tag_resultado, tag_resultado)))
+        
+        # Insertamos el snapshot al principio de la caché para que el índice coincida con la tabla
+        self.datos_historial.insert(0, snapshot_datos)
 
-    def advertir_cambios_sin_guardar(self):
-        """Muestra el diálogo si el estado actual no coincide con la última vez que se guardó."""
-        if getattr(self, 'snapshot_guardado', None) == self.obtener_estado_actual():
-            return True # No hay cambios, damos luz verde para continuar
+    def recuperar_desde_historial(self, item):
+        """Al hacer doble clic en el historial, restaura los editores a ese estado pasado"""
+        fila = item.row()
+        if fila >= len(self.datos_historial):
+            return
+            
+        snap = self.datos_historial[fila]
+        pestaña = snap['pestaña']
+        self.tabs.setCurrentIndex(pestaña)
+        
+        if pestaña == 0:
+            self.chk_modo_p9.setChecked(snap['modo_avanzado'])
+            self.premisas_p9.setPlainText(snap['premisas'])
+            self.conclusion_p9.setPlainText(snap['conclusion'])
+            self.entrada_libre_p9.setPlainText(snap['libre'])
+            # Forzamos estilos negros
+            for c in [self.premisas_p9, self.conclusion_p9, self.entrada_libre_p9]:
+                c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+        else:
+            self.chk_modo_m4.setChecked(snap['modo_avanzado'])
+            self.premisas_m4.setPlainText(snap['premisas'])
+            self.conclusion_m4.setPlainText(snap['conclusion'])
+            self.entrada_libre_m4.setPlainText(snap['libre'])
+            for c in [self.premisas_m4, self.conclusion_m4, self.entrada_libre_m4]:
+                c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
 
+    def procesar_prover9(self):
+        txt = TRADUCCIONES[self.idioma_actual]
+        
+        snapshot = {
+            'pestaña': 0, 'modo_avanzado': self.chk_modo_p9.isChecked(),
+            'premisas': self.premisas_p9.toPlainText(), 'conclusion': self.conclusion_p9.toPlainText(),
+            'libre': self.entrada_libre_p9.toPlainText()
+        }
+        
+        if self.chk_modo_p9.isChecked():
+            texto_final = self.extraer_texto_util(self.entrada_libre_p9, txt['ph_libre_p9'])
+        else:
+            premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
+            conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
+            texto_final = self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9) if (premisas or conclusion) else ""
+            
+        if not texto_final.strip():
+            self.salida_p9.setPlainText("❌ Error: No hay datos de entrada válidos.")
+            return
+
+        # 1. Bloquear la interfaz visualmente para evitar múltiples envíos
+        self.btn_p9.setEnabled(False)
+        self.btn_p9.setText("Procesando... (Por favor, espera)")
+        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;") # Naranja de carga
+        self.salida_p9.setPlainText(txt['msg_procesando_p9'])
+
+        # 2. Arrancar el obrero en segundo plano
+        self.hilo_p9 = HiloMotor('prover9', texto_final, self.spin_max_seconds_p9.value(), snapshot)
+        self.hilo_p9.resultado_listo.connect(self.al_terminar_prover9)
+        self.hilo_p9.start()
+
+    def al_terminar_prover9(self, resultado_crudo, hora, snapshot):
+        # 3. Este método se dispara automáticamente cuando el hilo termina
+        resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
+        
+        self.salida_p9.setPlainText(resultado_traducido)
+        self.agregar_al_historial(hora, "Prover9", tag, snapshot)
+        
+        # Restaurar el botón a su estado original
+        txt = TRADUCCIONES[self.idioma_actual]
+        self.btn_p9.setEnabled(True)
+        self.btn_p9.setText(txt['btn_verificar_p9'])
+        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #2962ff; color: white; padding: 10px;")
+
+    def procesar_mace4(self):
+        txt = TRADUCCIONES[self.idioma_actual]
+        
+        snapshot = {
+            'pestaña': 1, 'modo_avanzado': self.chk_modo_m4.isChecked(),
+            'premisas': self.premisas_m4.toPlainText(), 'conclusion': self.conclusion_m4.toPlainText(),
+            'libre': self.entrada_libre_m4.toPlainText()
+        }
+        
+        if self.chk_modo_m4.isChecked():
+            texto_final = self.extraer_texto_util(self.entrada_libre_m4, txt['ph_libre_m4'])
+        else:
+            premisas = self.extraer_texto_util(self.premisas_m4, txt['ph_premisas_m4'])
+            conclusion = self.extraer_texto_util(self.conclusion_m4, txt['ph_conclusion_m4'])
+            texto_final = self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4) if (premisas or conclusion) else ""
+
+        if not texto_final.strip():
+            self.salida_m4.setPlainText("❌ Error: No hay datos de entrada válidos.")
+            return
+
+        # 1. Bloquear la interfaz visualmente
+        self.btn_m4.setEnabled(False)
+        self.btn_m4.setText("Procesando... (Por favor, espera)")
+        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
+        self.salida_m4.setPlainText(txt['msg_procesando_m4'])
+
+        # 2. Arrancar el obrero en segundo plano
+        self.hilo_m4 = HiloMotor('mace4', texto_final, self.spin_max_seconds_m4.value(), snapshot)
+        self.hilo_m4.resultado_listo.connect(self.al_terminar_m4)
+        self.hilo_m4.start()
+
+    def al_terminar_m4(self, resultado_crudo, hora, snapshot):
+        # 3. Recepción de datos y actualización de interfaz
+        resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
+        
+        self.salida_m4.setPlainText(resultado_traducido)
+        self.agregar_al_historial(hora, "Mace4", tag, snapshot)
+        
+        # Restaurar el botón
+        txt = TRADUCCIONES[self.idioma_actual]
+        self.btn_m4.setEnabled(True)
+        self.btn_m4.setText(txt['btn_buscar_m4'])
+        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #d32f2f; color: white; padding: 10px;")
+
+    def cocinar_entrada_p9(self, caja_premisas, caja_conclusion):
+        texto_cocinado = ""
+        
+        # Si 'All Options' está activado, volcamos TODA la base de datos de configuraciones.
+        if hasattr(self, 'grupo_all_options') and self.grupo_all_options.isChecked():
+            # Parámetros numéricos y textos (assign)
+            for nombre, (widget, _, _) in self.all_assigns_p9.items():
+                val = widget.value() if isinstance(widget, QSpinBox) else widget.currentData()
+                
+                # --- PARCHE PROVER9: Evitar bug interno de pick_given_ratio = -1 ---
+                if nombre == "pick_given_ratio" and val == -1:
+                    continue
+                    
+                texto_cocinado += f"assign({nombre}, {val}).\n"
+                
+            # Parámetros booleanos (set/clear)
+            for nombre, (chk, _, _) in self.all_flags_p9.items():
+                if chk.isChecked(): texto_cocinado += f"set({nombre}).\n"
+                else: texto_cocinado += f"clear({nombre}).\n"
+        
+        # Si NO está activado, inyectamos solo lo visible en "Basic Options"
+        else:
+            texto_cocinado += f"assign(max_weight, {self.spin_max_weight.value()}).\n"
+            
+            # --- PARCHE PROVER9: Evitar bug interno de pick_given_ratio = -1 ---
+            if self.spin_pick_ratio.value() != -1:
+                texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
+                
+            texto_cocinado += f"assign(order, {self.combo_order.currentData()}).\n"
+            texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentData()}).\n"
+            texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
+            
+            flags_basicos = [
+                ('expand_relational_defs', self.chk_expand_relational),
+                ('restrict_denials', self.chk_restrict_denials),
+                ('prolog_style_variables', self.chk_prolog_vars)
+            ]
+            for nombre, widget in flags_basicos:
+                if widget.isChecked(): texto_cocinado += f"set({nombre}).\n"
+                else: texto_cocinado += f"clear({nombre}).\n"
+                
+        texto_cocinado += "\n"
+        
+        # 3. Bloque de fórmulas
+        lineas_premisas = caja_premisas.toPlainText().split('\n')
+        conclusion = caja_conclusion.toPlainText().strip()
+        
+        texto_cocinado += "formulas(sos).\n"
+        for linea in lineas_premisas:
+            linea_limpia = linea.strip()
+            if linea_limpia:
+                if not linea_limpia.endswith('.'):
+                    linea_limpia += '.'
+                texto_cocinado += f"  {linea_limpia}\n"
+        texto_cocinado += "end_of_list.\n\n"
+        
+        if conclusion:
+            if not conclusion.endswith('.'):
+                conclusion += '.'
+            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
+            
+        return texto_cocinado
+
+    def cocinar_entrada_m4(self, caja_premisas, caja_conclusion):
+        texto_cocinado = ""
+
+        # 1. Parámetros assign
+        # --- PARCHE MACE4: Si domain_size es 0, no lo enviamos para evitar que machaque el start_size interno ---
+        if self.spin_domain_size.value() > 0:
+            texto_cocinado += f"assign(domain_size, {self.spin_domain_size.value()}).\n"
+            
+        texto_cocinado += f"assign(start_size, {self.spin_start_size.value()}).\n"
+        texto_cocinado += f"assign(end_size, {self.spin_end_size.value()}).\n"
+        texto_cocinado += f"assign(increment, {self.spin_increment.value()}).\n"
+        texto_cocinado += f"assign(iterate, {self.combo_iterate.currentData()}).\n"
+        texto_cocinado += f"assign(max_models, {self.spin_max_models.value()}).\n"
+        texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_m4.value()}).\n"
+        texto_cocinado += f"assign(max_seconds_per, {self.spin_max_seconds_per.value()}).\n"
+        texto_cocinado += f"assign(max_megs, {self.spin_max_megs.value()}).\n"
+        texto_cocinado += f"assign(selection_order, {self.spin_selection_order.value()}).\n"
+        texto_cocinado += f"assign(selection_measure, {self.spin_selection_measure.value()}).\n"
+
+        # 2. Flags booleanos
+        flags_m4 = {
+            'prolog_style_variables': self.chk_prolog_vars_m4, 'integer_ring': self.chk_integer_ring,
+            'skolems_last': self.chk_skolems_last, 'print_models': self.chk_print_models,
+            'lnh': self.chk_lnh, 'negprop': self.chk_negprop, 'neg_assign': self.chk_neg_assign,
+            'neg_assign_near': self.chk_neg_assign_near, 'neg_elim': self.chk_neg_elim,
+            'neg_elim_near': self.chk_neg_elim_near
+        }
+        for flag, widget in flags_m4.items():
+            if widget.isChecked(): texto_cocinado += f"set({flag}).\n"
+            else: texto_cocinado += f"clear({flag}).\n"
+
+        texto_cocinado += "\n"
+
+        # 3. Fórmulas
+        lineas_premisas = caja_premisas.toPlainText().split('\n')
+        conclusion = caja_conclusion.toPlainText().strip()
+        texto_cocinado += "formulas(sos).\n"
+        for linea in lineas_premisas:
+            linea_limpia = linea.strip()
+            if linea_limpia:
+                if not linea_limpia.endswith('.'): linea_limpia += '.'
+                texto_cocinado += f"  {linea_limpia}\n"
+        texto_cocinado += "end_of_list.\n\n"
+
+        if conclusion:
+            if not conclusion.endswith('.'): conclusion += '.'
+            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
+
+        return texto_cocinado
+
+    def cocinar_entrada_directa(self, texto_premisas, texto_conclusion):
+        lineas_premisas = texto_premisas.split('\n')
+        conclusion = texto_conclusion.strip()
+        texto_cocinado = "formulas(sos).\n"
+        for linea in lineas_premisas:
+            linea_limpia = linea.strip()
+            if linea_limpia:
+                if not linea_limpia.endswith('.'):
+                    linea_limpia += '.'
+                texto_cocinado += f"  {linea_limpia}\n"
+        texto_cocinado += "end_of_list.\n\n"
+        if conclusion:
+            if not conclusion.endswith('.'):
+                conclusion += '.'
+            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
+        return texto_cocinado
+
+    def extraer_texto_util(self, caja, ejemplo_plantilla):
+        t = caja.toPlainText().strip()
+        if t == ejemplo_plantilla.strip():
+            return ""
+        return t
+
+    def extraer_formulas_regex(self, texto):
+        premisas, conclusion = "", ""
+        # Extraer bloque de premisas (sos)
+        match_sos = re.search(r'formulas\(sos\)\.(.*?)(?:end_of_list\.)', texto, re.DOTALL)
+        if match_sos:
+            # Limpiamos espacios y eliminamos los puntos del final para el modo básico
+            premisas = '\n'.join([l.strip().rstrip('.') for l in match_sos.group(1).strip().split('\n') if l.strip()])
+            
+        # Extraer bloque de conclusión (goals)
+        match_goals = re.search(r'formulas\(goals\)\.(.*?)(?:end_of_list\.)', texto, re.DOTALL)
+        if match_goals:
+            conclusion = '\n'.join([l.strip().rstrip('.') for l in match_goals.group(1).strip().split('\n') if l.strip()])
+            
+        return premisas, conclusion
+
+    def limpiar_y_traducir_error(self, salida_cruda):
+        texto = salida_cruda.strip()
+        pestaña_activa = self.tabs.currentIndex()
         es_en = (self.idioma_actual == 'en_US')
-        titulo = "Unsaved Changes" if es_en else "Cambios sin guardar"
-        mensaje = "You have unsaved changes.\nDo you want to save them before proceeding?" if es_en else "Tienes modificaciones sin guardar.\n¿Deseas guardarlas antes de continuar?"
         
-        msg = QMessageBox(self)
-        msg.setWindowTitle(titulo)
-        msg.setText(mensaje)
-        msg.setIcon(QMessageBox.Icon.Warning)
-        
-        btn_guardar = msg.addButton("Save" if es_en else "Guardar", QMessageBox.ButtonRole.AcceptRole)
-        btn_descartar = msg.addButton("Discard" if es_en else "Descartar", QMessageBox.ButtonRole.DestructiveRole)
-        btn_cancelar = msg.addButton("Cancel" if es_en else "Cancelar", QMessageBox.ButtonRole.RejectRole)
-        
-        msg.exec()
-        
-        if msg.clickedButton() == btn_guardar:
-            return self.guardar_archivo() # Devuelve True si guardó bien, False si canceló el diálogo de guardar
-        elif msg.clickedButton() == btn_descartar:
-            return True # Luz verde para destruir los cambios
-        else:
-            return False # Se arrepintió, bloqueamos la acción
+        if not texto or "Error" in texto:
+            return f"❌ ERROR:\n{salida_cruda}", 'error'
 
-    def closeEvent(self, evento):
-        """Intercepta el momento exacto en que el usuario pulsa la 'X' de la ventana."""
-        if self.advertir_cambios_sin_guardar():
-            evento.accept() # Cierra la app
+        patrones_error = ["fatal_error", "LABEL: syntax error", "syn_err", "cloffset", "appears more than once", "error"]
+        if any(patron in texto for patron in patrones_error):
+            if es_en:
+                return f"❌ DETECTED SYNTAX ERROR\n---------------------------------\nReview operators.\n\n=== ENGINE LOG ===\n{salida_cruda}", 'error'
+            return f"❌ ERROR DE SINTAXIS DETECTADO\n---------------------------------\nRevisa conectivas.\n\n=== DETALLE TÉCNICO ===\n{salida_cruda}", 'error'
+
+        if "TIMEOUT_EXPIRED" in texto:
+            return salida_cruda, 'timeout'
+
+        if pestaña_activa == 0:
+            if "THEOREM PROVED" in texto:
+                prueba_limpia = ""
+                for linea in texto.split('\n'):
+                    if "=== PROOF ===" in linea or "SUBPROOF" in linea or prueba_limpia:
+                        prueba_limpia += linea + "\n"
+                    if "end of proof" in linea: break
+                if es_en:
+                    return f"✅ THEOREM PROVED SUCCESSFULLY!\n---------------------------------\n=== PROOF STEPS ===\n{prueba_limpia.strip()}\n\n=== FULL LOG ===\n{salida_cruda}", 'proved'
+                return f"✅ ¡TEOREMA DEMOSTRADO CON ÉXITO!\n---------------------------------\n=== PASOS DEDUCTIVOS ===\n{prueba_limpia.strip()}\n\n=== LOG COMPLETO ===\n{salida_cruda}", 'proved'
+            else:
+                if es_en:
+                    return f"⚠️ THEOREM COULD NOT BE PROVED\n---------------------------------\n=== ENGINE LOG ===\n{salida_cruda}", 'no_proved'
+                return f"⚠️ EL TEOREMA NO SE PUDO DEMOSTRAR\n---------------------------------\n=== DETALLE TÉCNICO ===\n{salida_cruda}", 'no_proved'
         else:
-            evento.ignore() # Aborta el cierre
+            if "model(s) found" in texto or "Exiting with 1 model" in texto or "interpretation" in texto:
+                modelo_limpio = ""
+                for linea in texto.split('\n'):
+                    if "interpretation(" in linea or modelo_limpio:
+                        modelo_limpio += linea + "\n"
+                    if "end_of_interpretation" in linea: break
+                if es_en:
+                    return f"🔮 COUNTEREXAMPLE FOUND\n---------------------------------\n=== MATRIX STRUCT ===\n{modelo_limpio.strip()}\n\n=== FULL LOG ===\n{salida_cruda}", 'counter'
+                return f"🔮 CONTRAEJEMPLO ENCONTRADO (EL TEOREMA ES FALSO)\n---------------------------------\n=== MATRIZ SEMÁNTICA ===\n{modelo_limpio.strip()}\n\n=== LOG COMPLETO ===\n{salida_cruda}", 'counter'
+            else:
+                if es_en:
+                    return f"ℹ️ NO COUNTEREXAMPLES FOUND\n---------------------------------\n=== ENGINE LOG ===\n{salida_cruda}", 'no_counter'
+                return f"ℹ️ MACE4 NO ENCONTRÓ CONTRAEJEMPLOS\n---------------------------------\n=== DETALLE TÉCNICO ===\n{salida_cruda}", 'no_counter'
+
 
 if __name__ == "__main__":
     # --- TRUCO PARA LA BARRA DE TAREAS DE WINDOWS ---
