@@ -1356,6 +1356,6 @@ if __name__ == "__main__":
     apply_stylesheet(app, theme='dark_lightgreen.xml', extra=extra_config)
     
     ventana = VentanaPrincipal()
-    ventana.show() 
+    ventana.showMaximized()
     
     sys.exit(app.exec())
