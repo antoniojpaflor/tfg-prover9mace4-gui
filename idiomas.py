@@ -44,17 +44,23 @@ TRADUCCIONES = {
         'ej_p9_2': "Dilema Constructivo",
         'ej_m4_1': "Teoría de Grupos (Buscar Orden)",
         'ej_m4_2': "No-Conmutatividad (Contraejemplo)",
+        'ej_p9_3': "Álgebra: Grupo Booleano",
+        'ej_m4_3': "Axiomas: Retículo No Distributivo",
         
         # Contenidos de los ejemplos
         'datos_silogismo_premisas': "todos_los_hombres_son_mortales -> aristoteles_es_mortal\ntodos_los_hombres_son_mortales",
         'datos_silogismo_conclusion': "aristoteles_es_mortal",
         'datos_paradoja_premisas': "(p -> q) & (r -> s)\np | r",
         'datos_paradoja_conclusion': "q | s" ,
+        'datos_algebra_premisas': "f(e, x) = x.\nf(g(x), x) = e.\nf(f(x, y), z) = f(x, f(y, z)).\n\n% Propiedad del Grupo Booleano\nf(x, x) = e.",
+        'datos_algebra_conclusion': "f(x, y) = f(y, x).",
 
-        'datos_grupo_premisas': "f(x,e) = x.\nf(e,x) = x.\n f(x,g(x)) = e.\nf(g(x),x) = e.\nf(f(x,y),z) = f(x,f(y,z)).",
+        'datos_grupo_premisas': "f(x,e) = x\nf(e,x) = x\n f(x,g(x)) = e\nf(g(x),x) = e\nf(f(x,y),z) = f(x,f(y,z))",
         'datos_grupo_conclusion': "", # Dejar vacío para que Mace4 busque modelos generales de la teoría
-        'datos_conmut_premisas': "f(x,e) = x.\nf(e,x) = x.\nf(f(x,y),z) = f(x,f(y,z)).",
+        'datos_conmut_premisas': "f(x,e) = x\nf(e,x) = x\nf(f(x,y),z) = f(x,f(y,z))",
         'datos_conmut_conclusion': "f(x,y) = f(y,x)", # Buscaremos un contraejemplo donde no se cumpla
+        'datos_reticulo_premisas': "% Axiomas de un retículo (Lattice)\nv(x,y) = v(y,x).\nn(x,y) = n(y,x).\nv(x, v(y,z)) = v(v(x,y), z).\nn(x, n(y,z)) = n(n(x,y), z).\nv(x, n(x,y)) = x.\nn(x, v(x,y)) = x.",
+        'datos_reticulo_conclusion': "% Ley distributiva (Mace4 generará un contraejemplo)\nv(x, n(y,z)) = n(v(x,y), v(x,z)).",
 
         'tit_historial': "Historial de Ejecuciones",
         'col_hora': "Hora",
@@ -118,17 +124,23 @@ TRADUCCIONES = {
         'ej_p9_2': "Constructive Dilemma",
         'ej_m4_1': "Group Theory (Search Models)",
         'ej_m4_2': "Non-Commutativity (Counterexample)",
+        'ej_p9_3': "Algebra: Boolean Group",
+        'ej_m4_3': "Axioms: Non-Distributive Lattice",
         
         # Contenidos (los mantenemos iguales porque la lógica formal es universal, ¡como mi planta!)
         'datos_silogismo_premisas': "all_men_are_mortal -> aristotle_is_mortal\nall_men_are_mortal",
         'datos_silogismo_conclusion': "aristotle_is_mortal",
         'datos_paradoja_premisas': "(p -> q) & (r -> s)\np | r",
         'datos_paradoja_conclusion': "q | s",
+        'datos_algebra_premisas': "f(e, x) = x.\nf(g(x), x) = e.\nf(f(x, y), z) = f(x, f(y, z)).\n\n% Boolean Group Property\nf(x, x) = e.",
+        'datos_algebra_conclusion': "f(x, y) = f(y, x).",
 
-        'datos_grupo_premisas': "f(x,e) = x.\nf(e,x) = x.\nf(x,g(x)) = e.\nf(g(x),x) = e.\nf(f(x,y),z) = f(x,f(y,z)).",
+        'datos_grupo_premisas': "f(x,e) = x\nf(e,x) = x\nf(x,g(x)) = e\nf(g(x),x) = e\nf(f(x,y),z) = f(x,f(y,z))",
         'datos_grupo_conclusion': "",
-        'datos_conmut_premisas': "f(x,e) = x.\nf(e,x) = x.\nf(f(x,y),z) = f(x,f(y,z)).",
+        'datos_conmut_premisas': "f(x,e) = x\nf(e,x) = x\nf(f(x,y),z) = f(x,f(y,z))",
         'datos_conmut_conclusion': "f(x,y) = f(y,x)",
+        'datos_reticulo_premisas': "% Lattice Axioms\nv(x,y) = v(y,x).\nn(x,y) = n(y,x).\nv(x, v(y,z)) = v(v(x,y), z).\nn(x, n(y,z)) = n(n(x,y), z).\nv(x, n(x,y)) = x.\nn(x, v(x,y)) = x.",
+        'datos_reticulo_conclusion': "% Distributive law (Mace4 will find a countermodel)\nv(x, n(y,z)) = n(v(x,y), v(x,z)).",
 
         'tit_historial': "Execution History",
         'col_hora': "Time",

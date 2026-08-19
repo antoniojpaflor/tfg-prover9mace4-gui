@@ -209,8 +209,11 @@ class VentanaPrincipal(QMainWindow):
         self.accion_ej1.triggered.connect(lambda: self.cargar_ejemplo_tipo(1))
         self.accion_ej2 = QAction("", self)
         self.accion_ej2.triggered.connect(lambda: self.cargar_ejemplo_tipo(2))
+        self.accion_ej3 = QAction("", self)
+        self.accion_ej3.triggered.connect(lambda: self.cargar_ejemplo_tipo(3))
         self.menu_ejemplos.addAction(self.accion_ej1)
         self.menu_ejemplos.addAction(self.accion_ej2)
+        self.menu_ejemplos.addAction(self.accion_ej3)
         
         # Menú Idioma
         self.menu_idioma = barra_menus.addMenu("")
@@ -248,9 +251,11 @@ class VentanaPrincipal(QMainWindow):
         if pestaña_activa == 0:
             self.accion_ej1.setText(txt['ej_p9_1'])
             self.accion_ej2.setText(txt['ej_p9_2'])
+            self.accion_ej3.setText(txt['ej_p9_3'])
         else:
             self.accion_ej1.setText(txt['ej_m4_1'])
             self.accion_ej2.setText(txt['ej_m4_2'])
+            self.accion_ej3.setText(txt['ej_m4_3'])
         
         self.menu_idioma.setTitle(txt['menu_idioma'])
         
@@ -818,7 +823,10 @@ class VentanaPrincipal(QMainWindow):
         
         if pestaña == 0:
             # Flujo Prover9
-            tipo = 'silogismo' if slot_menu == 1 else 'paradoja'
+            if slot_menu == 1: tipo = 'silogismo'
+            elif slot_menu == 2: tipo = 'paradoja'
+            else: tipo = 'algebra'  # <--- GESTIONAMOS EL EJEMPLO 3
+            
             premisas_ej = txt[f'datos_{tipo}_premisas']
             conclusion_ej = txt[f'datos_{tipo}_conclusion']
             codigo_completo_libre = self.cocinar_entrada_directa(premisas_ej, conclusion_ej)
@@ -831,7 +839,10 @@ class VentanaPrincipal(QMainWindow):
             self.entrada_libre_p9.setPlainText(codigo_completo_libre)
         else:
             # Flujo Mace4
-            tipo = 'grupo' if slot_menu == 1 else 'conmut'
+            if slot_menu == 1: tipo = 'grupo'
+            elif slot_menu == 2: tipo = 'conmut'
+            else: tipo = 'reticulo' # <--- GESTIONAMOS EL EJEMPLO 3
+            
             premisas_ej = txt[f'datos_{tipo}_premisas']
             conclusion_ej = txt[f'datos_{tipo}_conclusion']
             codigo_completo_libre = self.cocinar_entrada_directa(premisas_ej, conclusion_ej)
