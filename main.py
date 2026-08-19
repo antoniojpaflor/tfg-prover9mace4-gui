@@ -420,7 +420,7 @@ class VentanaPrincipal(QMainWindow):
         columna_derecha.addWidget(self.vista_stack_p9)
         
         self.btn_p9 = QPushButton("")
-        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #1e3d59; color: white; padding: 10px;")
+        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #2962ff; color: white; padding: 10px;")
         self.btn_p9.clicked.connect(self.procesar_prover9)
         columna_derecha.addWidget(self.btn_p9)
         self.lbl_res_p9 = QLabel("")
@@ -482,7 +482,7 @@ class VentanaPrincipal(QMainWindow):
         columna_derecha.addWidget(self.vista_stack_m4)
         
         self.btn_m4 = QPushButton("")
-        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #17b978; color: white; padding: 10px;")
+        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #d32f2f; color: white; padding: 10px;")
         self.btn_m4.clicked.connect(self.procesar_mace4)
         columna_derecha.addWidget(self.btn_m4)
         self.lbl_res_m4 = QLabel("")
@@ -770,7 +770,7 @@ class VentanaPrincipal(QMainWindow):
         txt = TRADUCCIONES[self.idioma_actual]
         self.btn_p9.setEnabled(True)
         self.btn_p9.setText(txt['btn_verificar_p9'])
-        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #1e3d59; color: white; padding: 10px;")
+        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #2962ff; color: white; padding: 10px;")
 
     def procesar_mace4(self):
         txt = TRADUCCIONES[self.idioma_actual]
@@ -814,7 +814,7 @@ class VentanaPrincipal(QMainWindow):
         txt = TRADUCCIONES[self.idioma_actual]
         self.btn_m4.setEnabled(True)
         self.btn_m4.setText(txt['btn_buscar_m4'])
-        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #17b978; color: white; padding: 10px;")
+        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #d32f2f; color: white; padding: 10px;")
 
     def cargar_ejemplo_tipo(self, slot_menu):
         """Carga problemas específicos calculando si el usuario está en Prover9 o Mace4"""
