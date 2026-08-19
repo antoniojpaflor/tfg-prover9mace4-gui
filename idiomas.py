@@ -1,5 +1,3 @@
-# idiomas.py
-
 TRADUCCIONES = {
     'es_ES': {
         'titulo': "Prover9-Mace4 GUI",
@@ -37,7 +35,6 @@ TRADUCCIONES = {
         'ph_premisas_m4': "Ejemplo:\np -> q",
         'ph_conclusion_m4': "Ejemplo:\nq",
         'ph_libre_m4': "Ejemplo:\nformulas(sos).\n  p -> q.\nend_of_list.\n\nformulas(goals).\n  q.\nend_of_list.",
-        
         'menu_ejemplos': "&Ejemplos",
         'ej_p9_1': "1. Silogismo Clásico (Modus Ponens)",
         'datos_silogismo_premisas': "% Regla de implicación\np -> q.\n% Hecho conocido\np.",
@@ -57,7 +54,6 @@ TRADUCCIONES = {
         'ej_m4_3': "3. Axiomas: Retículo No Distributivo",
         'datos_reticulo_premisas': "% Axiomas de un retículo (Lattice)\nv(x,y) = v(y,x).\nn(x,y) = n(y,x).\nv(x, v(y,z)) = v(v(x,y), z).\nn(x, n(y,z)) = n(n(x,y), z).\nv(x, n(x,y)) = x.\nn(x, v(x,y)) = x.",
         'datos_reticulo_conclusion': "% Ley distributiva\n% Mace4 generará un contraejemplo\nv(x, n(y,z)) = n(v(x,y), v(x,z)).",
-
         'tit_historial': "Historial de Ejecuciones",
         'col_hora': "Hora",
         'col_motor': "Motor",
@@ -72,7 +68,6 @@ TRADUCCIONES = {
         'hist_no_counter': "Sin contraejemplo",
         'hist_timeout': "Tiempo agotado",
         'hist_error': "Error sintaxis/entorno",
-
         'menu_config': "&Configuración",
         'lbl_timeout': "Tiempo límite (seg):"
     },
@@ -112,7 +107,6 @@ TRADUCCIONES = {
         'ph_premisas_m4': "Example:\np -> q",
         'ph_conclusion_m4': "Example:\nq",
         'ph_libre_m4': "Example:\nformulas(sos).\n  p -> q.\nend_of_list.\n\nformulas(goals).\n  q.\nend_of_list.",
-        
         'menu_ejemplos': "&Examples",
         'ej_p9_1': "1. Classical Syllogism (Modus Ponens)",
         'datos_silogismo_premisas': "% Implication rule\np -> q.\n% Known fact\np.",
@@ -132,7 +126,6 @@ TRADUCCIONES = {
         'ej_m4_3': "3. Axioms: Non-Distributive Lattice",
         'datos_reticulo_premisas': "% Lattice axioms\nv(x,y) = v(y,x).\nn(x,y) = n(y,x).\nv(x, v(y,z)) = v(v(x,y), z).\nn(x, n(y,z)) = n(n(x,y), z).\nv(x, n(x,y)) = x.\nn(x, v(x,y)) = x.",
         'datos_reticulo_conclusion': "% Distributive law\n% Mace4 will find a countermodel\nv(x, n(y,z)) = n(v(x,y), v(x,z)).",
-
         'tit_historial': "Execution History",
         'col_hora': "Time",
         'col_motor': "Engine",
@@ -147,7 +140,6 @@ TRADUCCIONES = {
         'hist_no_counter': "No counterexample",
         'hist_timeout': "Timeout",
         'hist_error': "Syntax/Env Error",
-
         'menu_config': "&Settings",
         'lbl_timeout': "Timeout limit (sec):"
     }
@@ -161,7 +153,6 @@ DICCIONARIO_PANELES = {
         'Other Options': "Otras Opciones",
         'Experimental Options': "Opciones Experimentales",
         'Reset These to Defaults': "Restablecer por defecto",
-        
         'Meta Options': "Opciones Meta",
         'Term Ordering': "Orden de Términos",
         'Limits': "Límites",
@@ -174,7 +165,6 @@ DICCIONARIO_PANELES = {
         'Process Inferred': "Proceso Inferido",
         'Input/Output': "Entrada/Salida",
         'Hints': "Pistas",
-        
         'Search Limits': "Límites de Búsqueda",
         'Limits on Kept Clauses': "Límites de Cláusulas",
         'Sos Control': "Control SOS",
@@ -190,7 +180,6 @@ DICCIONARIO_PANELES = {
         'Lex-Dependent Rewriting': "Reescritura Dependiente Lex",
         'Symbol Weights': "Pesos de Símbolos",
         'Penalties': "Penalizaciones",
-        
         'none': "ninguno",
         'some': "algunos",
         'lots': "muchos",
@@ -208,7 +197,6 @@ DICCIONARIO_PANELES = {
         'Other Options': "Other Options",
         'Experimental Options': "Experimental Options",
         'Reset These to Defaults': "Reset These to Defaults",
-        
         'Meta Options': "Meta Options",
         'Term Ordering': "Term Ordering",
         'Limits': "Limits",
@@ -221,7 +209,6 @@ DICCIONARIO_PANELES = {
         'Process Inferred': "Process Inferred",
         'Input/Output': "Input/Output",
         'Hints': "Hints",
-        
         'Search Limits': "Search Limits",
         'Limits on Kept Clauses': "Limits on Kept Clauses",
         'Sos Control': "Sos Control",
@@ -237,7 +224,6 @@ DICCIONARIO_PANELES = {
         'Lex-Dependent Rewriting': "Lex-Dependent Rewriting",
         'Symbol Weights': "Symbol Weights",
         'Penalties': "Penalties",
-        
         'none': "none",
         'some': "some",
         'lots': "lots",

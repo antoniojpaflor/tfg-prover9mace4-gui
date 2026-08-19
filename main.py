@@ -25,23 +25,19 @@ class HiloMotor(QThread):
         self.snapshot = snapshot
 
     def run(self):
-        # Este método se ejecuta en un núcleo secundario del procesador
         if self.motor == 'prover9':
             resultado_crudo, hora = ejecutar_prover9(self.texto_final, tiempo_limite=self.tiempo_limite)
         else:
             resultado_crudo, hora = ejecutar_mace4(self.texto_final, tiempo_limite=self.tiempo_limite)
-        
-        # Al terminar, emitimos los datos de vuelta al hilo principal
         self.resultado_listo.emit(resultado_crudo, hora, self.snapshot)
 
 
 class ResaltadorProver9(QSyntaxHighlighter):
     def __init__(self, editor):
-        super().__init__(editor.document()) # Inicializamos con el documento
-        self.editor = editor # Guardamos la referencia directa a la caja de texto
+        super().__init__(editor.document())
+        self.editor = editor
         self.reglas = []
 
-        # 1. Operadores Lógicos (Púrpura claro)
         formato_operador = QTextCharFormat()
         formato_operador.setForeground(QColor("#C586C0"))
         formato_operador.setFontWeight(QFont.Weight.Bold)
@@ -49,7 +45,6 @@ class ResaltadorProver9(QSyntaxHighlighter):
         for op in operadores:
             self.reglas.append((QRegularExpression(op), formato_operador))
 
-        # 2. Palabras Clave del Sistema (Azul claro)
         formato_clave = QTextCharFormat()
         formato_clave.setForeground(QColor("#569CD6"))
         formato_clave.setFontWeight(QFont.Weight.Bold)
@@ -57,25 +52,21 @@ class ResaltadorProver9(QSyntaxHighlighter):
         for clave in claves:
             self.reglas.append((QRegularExpression(clave), formato_clave))
 
-        # 3. Nombres de Bloques / Entornos (Naranja tierra)
         formato_bloque = QTextCharFormat()
         formato_bloque.setForeground(QColor("#CE9178"))
         bloques = [r"\bsos\b", r"\bgoals\b", r"\busable\b", r"\bdemodulators\b", r"\bassumptions\b"]
         for bloque in bloques:
             self.reglas.append((QRegularExpression(bloque), formato_bloque))
 
-        # 4. Comentarios (Verde claro)
         formato_comentario = QTextCharFormat()
         formato_comentario.setForeground(QColor("#6A9955"))
         self.reglas.append((QRegularExpression(r"%.*"), formato_comentario))
 
     def highlightBlock(self, text):
-        # --- PARCHE ESTÉTICO: Ignorar placeholders ---
         texto_completo = self.editor.toPlainText().strip()
         if texto_completo.startswith("Ejemplo:") or texto_completo.startswith("Example:"):
-            return # Abortamos el coloreado, dejando el gris intacto
+            return
             
-        # Si no es un placeholder, aplicamos la pintura normalmente
         for expresion, formato in self.reglas:
             iterador = expresion.globalMatch(text)
             while iterador.hasNext():
@@ -87,9 +78,8 @@ class VentanaPrincipal(QMainWindow):
     def __init__(self):
         super().__init__()
         self.idioma_actual = 'es_ES'
-        self.ruta_archivo_actual = None  # Almacena la ruta del archivo vinculado (.in)
-        self.datos_historial = []        # Caché para restaurar fórmulas del historial
-        # NUEVO: Rastreadores para la traducción en vivo de los paneles laterales
+        self.ruta_archivo_actual = None
+        self.datos_historial = []
         self.labels_subcategorias = []
         self.botones_reset_cats = []
         self.nombres_categorias = []
@@ -98,14 +88,11 @@ class VentanaPrincipal(QMainWindow):
 
     def init_ui(self):
         self.setGeometry(100, 100, 1100, 900)
-
         self.setWindowIcon(QIcon("icono_app.png"))
         
-        # Widget Central y Layout Principal de la ventana (Vertical)
         widget_central = QWidget()
         layout_central_ventana = QVBoxLayout(widget_central)
         
-        # 1. Contenedor de Pestañas
         self.tabs = QTabWidget()
         self.tab_prover9 = QWidget()
         self.tab_mace4 = QWidget()
@@ -113,33 +100,26 @@ class VentanaPrincipal(QMainWindow):
         self.tabs.addTab(self.tab_mace4, "")
         self.tabs.currentChanged.connect(self.actualizar_textos_interfaz)
         
-        # Configuración de contenidos de las pestañas
         self.configurar_tab_prover9()
         self.configurar_tab_mace4()
-        
         layout_central_ventana.addWidget(self.tabs, stretch=3)
         
-        # 2. PANEL DEL HISTORIAL (Fondo de la aplicación)
         self.grupo_historial = QGroupBox("")
         layout_historial = QVBoxLayout(self.grupo_historial)
-        
-        self.tabla_historial = QTableWidget(0, 3) # 0 filas iniciales, 3 columnas
+        self.tabla_historial = QTableWidget(0, 3)
         self.tabla_historial.setFont(QFont("Segoe UI", 9))
         self.tabla_historial.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.tabla_historial.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.tabla_historial.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.tabla_historial.itemDoubleClicked.connect(self.recuperar_desde_historial)
-        
         layout_historial.addWidget(self.tabla_historial)
         layout_central_ventana.addWidget(self.grupo_historial, stretch=1)
         
         self.setCentralWidget(widget_central)
         
-        # 3. Barra de Estado (Status Bar)
         self.barra_estado = QStatusBar()
         self.setStatusBar(self.barra_estado)
         
-        # 4. Filtros de eventos de foco para placeholders simulados
         self.premisas_p9.installEventFilter(self)
         self.conclusion_p9.installEventFilter(self)
         self.entrada_libre_p9.installEventFilter(self)
@@ -147,32 +127,25 @@ class VentanaPrincipal(QMainWindow):
         self.conclusion_m4.installEventFilter(self)
         self.entrada_libre_m4.installEventFilter(self)
         
-        # 5. Menús y traducción inicial
         self.crear_barra_menus()
         self.actualizar_textos_interfaz()
-
         self.snapshot_guardado = self.obtener_estado_actual()
 
     def crear_barra_menus(self):
         self.menuBar().clear()
         barra_menus = self.menuBar()
         
-        # Menú Archivo
         self.menu_archivo = barra_menus.addMenu("")
         self.accion_nuevo = QAction("", self)
         self.accion_nuevo.triggered.connect(self.nuevo_proyecto)
-        
         self.accion_abrir = QAction("", self)
         self.accion_abrir.setShortcut("Ctrl+O")
         self.accion_abrir.triggered.connect(self.abrir_archivo)
-        
         self.accion_guardar = QAction("", self)
         self.accion_guardar.setShortcut("Ctrl+S")
         self.accion_guardar.triggered.connect(self.guardar_archivo)
-        
         self.accion_exportar = QAction("", self)
         self.accion_exportar.triggered.connect(self.exportar_salida)
-        
         self.accion_salir = QAction("", self)
         self.accion_salir.triggered.connect(self.close)
         
@@ -185,7 +158,6 @@ class VentanaPrincipal(QMainWindow):
         self.menu_archivo.addSeparator()
         self.menu_archivo.addAction(self.accion_salir)
         
-        # Menú Ejemplos
         self.menu_ejemplos = barra_menus.addMenu("")
         self.accion_ej1 = QAction("", self)
         self.accion_ej1.triggered.connect(lambda: self.cargar_ejemplo_tipo(1))
@@ -197,7 +169,6 @@ class VentanaPrincipal(QMainWindow):
         self.menu_ejemplos.addAction(self.accion_ej2)
         self.menu_ejemplos.addAction(self.accion_ej3)
         
-        # Menú Idioma
         self.menu_idioma = barra_menus.addMenu("")
         accion_es = QAction("Español (es-ES)", self)
         accion_es.triggered.connect(lambda: self.cambiar_idioma('es_ES'))
@@ -256,16 +227,12 @@ class VentanaPrincipal(QMainWindow):
         self.salida_p9.setReadOnly(True)
         columna_derecha.addWidget(self.salida_p9)
         
-        # (Final de configurar_tab_prover9)
         self.grupo_ins_p9, self.lbl_ops_p9, self.botones_ops_p9 = self.crear_panel_insercion(self.entrada_libre_p9)
-        
-        # Ensamblaje de las 3 columnas: Izquierda (Inserción) - Centro (Editor) - Derecha (Opciones)
         layout_principal.addWidget(self.grupo_ins_p9)
         layout_principal.addLayout(columna_derecha)
         
         self.grupo_opciones_p9 = self.crear_panel_opciones_p9()
         layout_principal.addWidget(self.grupo_opciones_p9)
-        
         self.tab_prover9.setLayout(layout_principal)
 
     def configurar_tab_mace4(self):
@@ -322,15 +289,12 @@ class VentanaPrincipal(QMainWindow):
         layout_principal.addWidget(self.grupo_ins_m4)
         layout_principal.addLayout(columna_derecha)
         
-        # NUEVO: Integrar el panel lateral de Mace4
         self.grupo_opciones_m4 = self.crear_panel_opciones_m4()
         layout_principal.addWidget(self.grupo_opciones_m4)
-        
         self.tab_mace4.setLayout(layout_principal)
 
     def crear_panel_insercion(self, editor_destino):
         grupo = QGroupBox("")
-        # ELIMINADA la línea de grupo.setStyleSheet(...)
         layout_grupo = QVBoxLayout()
         lbl_ops = QLabel("")
         layout_grupo.addWidget(lbl_ops)
@@ -341,16 +305,12 @@ class VentanaPrincipal(QMainWindow):
         ]
         for clave, simbolo in operadores_config:
             btn = QPushButton("") 
-            # ELIMINADA la línea de btn.setStyleSheet(...) para que qt-material lo pinte bien
             btn.clicked.connect(lambda checked, s=simbolo, c_clave=clave: self.inyectar_operador_inteligente(s, c_clave))
             layout_grupo.addWidget(btn)
             botones_ops.append((btn, clave))
         layout_grupo.addStretch()
         grupo.setLayout(layout_grupo)
-        
-        # AUMENTADO el ancho a 220 para que quepa "EQUIVALENCIA"
         grupo.setFixedWidth(230) 
-        
         return grupo, lbl_ops, botones_ops
 
     def crear_panel_opciones_p9(self):
@@ -358,18 +318,15 @@ class VentanaPrincipal(QMainWindow):
         scroll.setWidgetResizable(True)
         scroll.setFixedWidth(385)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        #scroll.setStyleSheet("QScrollArea { background-color: white; }")
 
         contenido = QWidget()
         contenido.setObjectName("fondo_blanco_p9")
-        #contenido.setStyleSheet("#fondo_blanco_p9 { background-color: white; }")
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
         self.all_flags_p9 = {}
         self.all_assigns_p9 = {}
 
-        # --- Basic Options ---
         self.grupo_basico_p9 = QGroupBox("Basic Options")
         form_basico = QFormLayout()
 
@@ -400,11 +357,9 @@ class VentanaPrincipal(QMainWindow):
         self.btn_reset_basico_p9 = QPushButton("Reset These to Defaults")
         self.btn_reset_basico_p9.clicked.connect(self.reset_opciones_p9)
         form_basico.addRow(self.btn_reset_basico_p9)
-
         self.grupo_basico_p9.setLayout(form_basico)
         layout_principal.addWidget(self.grupo_basico_p9)
 
-        # --- All Options ---
         self.grupo_all_options = QGroupBox("All Options")
         self.grupo_all_options.setCheckable(True)
         self.grupo_all_options.setChecked(False)
@@ -414,7 +369,6 @@ class VentanaPrincipal(QMainWindow):
         layout_all.addWidget(self.combo_grupos_p9)
         self.stack_opciones_p9 = QStackedWidget()
 
-        # Copia el bloque SCHEMA exactamente como lo tenías antes de este paso...
         SCHEMA = [
             ("Meta Options", [
                 ('flag', 'auto', True), ('flag', 'auto_setup', True), ('flag', 'auto_limits', True),
@@ -524,7 +478,6 @@ class VentanaPrincipal(QMainWindow):
             ])
         ]
 
-        # Constructor automático de interfaz
         for nombre_grupo, elementos in SCHEMA:
             self.combo_grupos_p9.addItem(nombre_grupo, nombre_grupo)
             self.nombres_categorias.append(nombre_grupo)
@@ -555,7 +508,7 @@ class VentanaPrincipal(QMainWindow):
                 elif tipo == 'combo':
                     _, nombre, opciones, por_defecto = elemento
                     combo = QComboBox()
-                    for opc in opciones: combo.addItem(opc, opc) # Se inyecta data interna
+                    for opc in opciones: combo.addItem(opc, opc)
                     combo.setCurrentText(por_defecto)
                     form.addRow(f"{nombre}:", combo)
                     self.all_assigns_p9[nombre] = (combo, por_defecto, nombre_grupo)
@@ -581,15 +534,12 @@ class VentanaPrincipal(QMainWindow):
         scroll.setWidgetResizable(True)
         scroll.setFixedWidth(385)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
-        #scroll.setStyleSheet("QScrollArea { background-color: white; }")
 
         contenido = QWidget()
         contenido.setObjectName("fondo_blanco_m4")
-        #contenido.setStyleSheet("#fondo_blanco_m4 { background-color: white; }")
         layout_principal = QVBoxLayout(contenido)
         layout_principal.setContentsMargins(5, 0, 5, 0)
 
-        # --- Basic Options ---
         self.grupo_basico_m4 = QGroupBox("Basic Options")
         form_basico = QFormLayout()
 
@@ -620,7 +570,6 @@ class VentanaPrincipal(QMainWindow):
         self.grupo_basico_m4.setLayout(form_basico)
         layout_principal.addWidget(self.grupo_basico_m4)
 
-        # --- Other Options ---
         self.grupo_otros_m4 = QGroupBox("Other Options")
         form_otros = QFormLayout()
         self.chk_integer_ring = QCheckBox()
@@ -634,7 +583,6 @@ class VentanaPrincipal(QMainWindow):
         self.grupo_otros_m4.setLayout(form_otros)
         layout_principal.addWidget(self.grupo_otros_m4)
 
-        # --- Experimental Options ---
         self.grupo_exp_m4 = QGroupBox("Experimental Options")
         form_exp = QFormLayout()
         self.chk_lnh = QCheckBox(); self.chk_lnh.setChecked(True)
@@ -670,10 +618,7 @@ class VentanaPrincipal(QMainWindow):
 
     def actualizar_textos_interfaz(self):
         txt = TRADUCCIONES[self.idioma_actual]
-        
-        # Título dinámico respetando el archivo vinculado
         self.actualizar_titulo_ventana()
-        
         self.tabs.setTabText(0, txt['tab_p9'])
         self.tabs.setTabText(1, txt['tab_m4'])
         
@@ -684,7 +629,6 @@ class VentanaPrincipal(QMainWindow):
         self.accion_exportar.setText(txt['accion_exportar'])
         self.accion_salir.setText(txt['accion_salir'])
         
-        # Menú de ejemplos contextual según la pestaña activa
         self.menu_ejemplos.setTitle(txt['menu_ejemplos'])
         pestaña_activa = self.tabs.currentIndex()
         if pestaña_activa == 0:
@@ -698,7 +642,6 @@ class VentanaPrincipal(QMainWindow):
         
         self.menu_idioma.setTitle(txt['menu_idioma'])
         
-        # Elementos de la pestaña Prover9
         self.chk_modo_p9.setText(txt['chk_modo_avanzado'])
         self.lbl_premisas_p9.setText(txt['lbl_premisas_p9'])
         self.lbl_conclusion_p9.setText(txt['lbl_conclusion_p9'])
@@ -710,7 +653,6 @@ class VentanaPrincipal(QMainWindow):
         for boton, clave in self.botones_ops_p9:
             boton.setText(txt[clave])
         
-        # Elementos de la pestaña Mace4
         self.chk_modo_m4.setText(txt['chk_modo_avanzado'])
         self.lbl_premisas_m4.setText(txt['lbl_premisas_m4'])
         self.lbl_objetivo_m4.setText(txt['lbl_objetivo_m4'])
@@ -722,7 +664,6 @@ class VentanaPrincipal(QMainWindow):
         for boton, clave in self.botones_ops_m4:
             boton.setText(txt[clave])
             
-        # Historial y barra de estado
         self.grupo_historial.setTitle(txt['tit_historial'])
         self.tabla_historial.setHorizontalHeaderLabels([txt['col_hora'], txt['col_motor'], txt['col_resultado']])
         if not self.ruta_archivo_actual:
@@ -730,7 +671,6 @@ class VentanaPrincipal(QMainWindow):
         else:
             self.barra_estado.showMessage(f"{txt['status_abierto']}{self.ruta_archivo_actual}")
         
-        # Placeholders dinámicos simulados con control multilínea
         cajas = [
             (self.premisas_p9, txt['ph_premisas_p9']), (self.conclusion_p9, txt['ph_conclusion_p9']),
             (self.entrada_libre_p9, txt['ph_libre_p9']), (self.premisas_m4, txt['ph_premisas_m4']),
@@ -742,7 +682,6 @@ class VentanaPrincipal(QMainWindow):
                 caja.setPlainText(texto_ejemplo)
                 caja.setStyleSheet("color: gray; font-family: 'JetBrains Mono'; font-size: 12pt;")
 
-        # --- Traducción en vivo de los paneles laterales ---
         dic_paneles = DICCIONARIO_PANELES.get(self.idioma_actual, {})
         def trad(texto_ing): return dic_paneles.get(texto_ing, texto_ing)
 
@@ -767,7 +706,6 @@ class VentanaPrincipal(QMainWindow):
                     combo.setItemText(i, trad(combo.itemData(i)))
 
     def actualizar_titulo_ventana(self):
-        """Calcula el título de la barra superior dependiendo del archivo abierto"""
         txt = TRADUCCIONES[self.idioma_actual]
         nombre_base = "Prover9-Mace4 GUI"
         if self.ruta_archivo_actual:
@@ -788,7 +726,6 @@ class VentanaPrincipal(QMainWindow):
 
     def abrir_archivo(self):
         if not self.advertir_cambios_sin_guardar(): return
-        
         ruta, _ = QFileDialog.getOpenFileName(self, "Abrir / Open", "", "Inputs (*.in *.p9 *.txt)")
         if ruta:
             with open(ruta, "r", encoding="utf-8") as f: contenido = f.read()
@@ -807,11 +744,10 @@ class VentanaPrincipal(QMainWindow):
 
     def guardar_archivo(self):
         txt = TRADUCCIONES[self.idioma_actual]
-        
         if not self.ruta_archivo_actual:
             ruta, _ = QFileDialog.getSaveFileName(self, "Guardar / Save", "", "Inputs (*.in)")
             if not ruta:
-                return False # <--- AÑADIDO: Si cancela, devuelve False
+                return False
             self.ruta_archivo_actual = ruta
 
         p = self.tabs.currentIndex()
@@ -825,11 +761,11 @@ class VentanaPrincipal(QMainWindow):
             with open(self.ruta_archivo_actual, "w", encoding="utf-8") as f: f.write(texto)
             self.barra_estado.showMessage(f"{txt['status_guardado']}{self.ruta_archivo_actual}", 4000)
             self.actualizar_titulo_ventana()
-            self.snapshot_guardado = self.obtener_estado_actual() # <--- Renovamos foto tras guardar
-            return True # <--- AÑADIDO: Guardado con éxito
+            self.snapshot_guardado = self.obtener_estado_actual()
+            return True
         except Exception:
             self.barra_estado.showMessage(txt['status_error_guardar'], 4000)
-            return False # <--- AÑADIDO
+            return False
 
     def exportar_salida(self):
         editor = self.salida_p9 if self.tabs.currentIndex() == 0 else self.salida_m4
@@ -839,9 +775,6 @@ class VentanaPrincipal(QMainWindow):
                 with open(ruta, "w", encoding="utf-8") as f: f.write(editor.toPlainText())
 
     def cargar_ejemplo_tipo(self, slot_menu):
-        """Carga problemas específicos calculando si el usuario está en Prover9 o Mace4"""
-        
-        # 1. Comprobamos si hay cambios sin guardar ANTES de cargar el ejemplo
         if not self.advertir_cambios_sin_guardar():
             return
             
@@ -849,7 +782,6 @@ class VentanaPrincipal(QMainWindow):
         pestaña = self.tabs.currentIndex()
         
         if pestaña == 0:
-            # Flujo Prover9
             if slot_menu == 1: tipo = 'silogismo'
             elif slot_menu == 2: tipo = 'paradoja'
             else: tipo = 'algebra'  
@@ -865,7 +797,6 @@ class VentanaPrincipal(QMainWindow):
             self.conclusion_p9.setPlainText(conclusion_ej)
             self.entrada_libre_p9.setPlainText(codigo_completo_libre)
         else:
-            # Flujo Mace4
             if slot_menu == 1: tipo = 'grupo'
             elif slot_menu == 2: tipo = 'conmut'
             else: tipo = 'reticulo' 
@@ -881,11 +812,9 @@ class VentanaPrincipal(QMainWindow):
             self.conclusion_m4.setPlainText(conclusion_ej)
             self.entrada_libre_m4.setPlainText(codigo_completo_libre)
 
-        # 2. Renovamos la foto DESPUÉS de cargar el ejemplo con éxito
         self.snapshot_guardado = self.obtener_estado_actual()
 
     def obtener_estado_actual(self):
-        """Toma una instantánea de todo el texto actual de la interfaz."""
         return {
             'p9_av': self.chk_modo_p9.isChecked(), 'p9_p': self.premisas_p9.toPlainText(),
             'p9_c': self.conclusion_p9.toPlainText(), 'p9_l': self.entrada_libre_p9.toPlainText(),
@@ -894,9 +823,8 @@ class VentanaPrincipal(QMainWindow):
         }
 
     def advertir_cambios_sin_guardar(self):
-        """Muestra el diálogo si el estado actual no coincide con la última vez que se guardó."""
         if getattr(self, 'snapshot_guardado', None) == self.obtener_estado_actual():
-            return True # No hay cambios, damos luz verde para continuar
+            return True
 
         es_en = (self.idioma_actual == 'en_US')
         titulo = "Unsaved Changes" if es_en else "Cambios sin guardar"
@@ -914,18 +842,17 @@ class VentanaPrincipal(QMainWindow):
         msg.exec()
         
         if msg.clickedButton() == btn_guardar:
-            return self.guardar_archivo() # Devuelve True si guardó bien, False si canceló el diálogo de guardar
+            return self.guardar_archivo()
         elif msg.clickedButton() == btn_descartar:
-            return True # Luz verde para destruir los cambios
+            return True
         else:
-            return False # Se arrepintió, bloqueamos la acción
+            return False
 
     def closeEvent(self, evento):
-        """Intercepta el momento exacto en que el usuario pulsa la 'X' de la ventana."""
         if self.advertir_cambios_sin_guardar():
-            evento.accept() # Cierra la app
+            evento.accept()
         else:
-            evento.ignore() # Aborta el cierre
+            evento.ignore()
 
     def eventFilter(self, objeto, evento):
         txt = TRADUCCIONES[self.idioma_actual]
@@ -951,7 +878,6 @@ class VentanaPrincipal(QMainWindow):
     def alternar_modo_p9(self, checked):
         txt = TRADUCCIONES[self.idioma_actual]
         if checked: 
-            # BÁSICO -> AVANZADO: Generamos el código a partir de las cajas
             premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
             conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
             if premisas or conclusion:
@@ -959,7 +885,6 @@ class VentanaPrincipal(QMainWindow):
                 self.entrada_libre_p9.setPlainText(codigo)
                 self.entrada_libre_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
         else: 
-            # AVANZADO -> BÁSICO: Extraemos las fórmulas del código
             texto_libre = self.extraer_texto_util(self.entrada_libre_p9, txt['ph_libre_p9'])
             if texto_libre:
                 p, c = self.extraer_formulas_regex(texto_libre)
@@ -1020,11 +945,9 @@ class VentanaPrincipal(QMainWindow):
         self.chk_prolog_vars.setChecked(False)
 
     def reset_categoria_p9(self, categoria):
-        """Resetea a valores por defecto solo los widgets de la categoría actual"""
         for nombre, (chk, por_defecto, cat) in self.all_flags_p9.items():
             if cat == categoria:
                 chk.setChecked(por_defecto)
-                
         for nombre, (widget, por_defecto, cat) in self.all_assigns_p9.items():
             if cat == categoria:
                 if isinstance(widget, QSpinBox):
@@ -1042,12 +965,10 @@ class VentanaPrincipal(QMainWindow):
         self.spin_max_seconds_m4.setValue(60)
         self.spin_max_seconds_per.setValue(-1)
         self.chk_prolog_vars_m4.setChecked(False)
-
         self.chk_integer_ring.setChecked(False)
         self.chk_skolems_last.setChecked(False)
         self.spin_max_megs.setValue(200)
         self.chk_print_models.setChecked(True)
-
         self.chk_lnh.setChecked(True)
         self.chk_negprop.setChecked(True)
         self.chk_neg_assign.setChecked(True)
@@ -1064,23 +985,16 @@ class VentanaPrincipal(QMainWindow):
             'counter': txt['hist_counter'], 'no_counter': txt['hist_no_counter'],
             'timeout': txt['hist_timeout'], 'error': txt['hist_error']
         }
-        
-        # Insertamos siempre en la fila 0 (arriba del todo)
         self.tabla_historial.insertRow(0)
-        
         self.tabla_historial.setItem(0, 0, QTableWidgetItem(hora))
         self.tabla_historial.setItem(0, 1, QTableWidgetItem(motor))
         self.tabla_historial.setItem(0, 2, QTableWidgetItem(dict_tags.get(tag_resultado, tag_resultado)))
-        
-        # Insertamos el snapshot al principio de la caché para que el índice coincida con la tabla
         self.datos_historial.insert(0, snapshot_datos)
 
     def recuperar_desde_historial(self, item):
-        """Al hacer doble clic en el historial, restaura los editores a ese estado pasado"""
         fila = item.row()
         if fila >= len(self.datos_historial):
             return
-            
         snap = self.datos_historial[fila]
         pestaña = snap['pestaña']
         self.tabs.setCurrentIndex(pestaña)
@@ -1090,7 +1004,6 @@ class VentanaPrincipal(QMainWindow):
             self.premisas_p9.setPlainText(snap['premisas'])
             self.conclusion_p9.setPlainText(snap['conclusion'])
             self.entrada_libre_p9.setPlainText(snap['libre'])
-            # Forzamos estilos negros
             for c in [self.premisas_p9, self.conclusion_p9, self.entrada_libre_p9]:
                 c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
         else:
@@ -1103,7 +1016,6 @@ class VentanaPrincipal(QMainWindow):
 
     def procesar_prover9(self):
         txt = TRADUCCIONES[self.idioma_actual]
-        
         snapshot = {
             'pestaña': 0, 'modo_avanzado': self.chk_modo_p9.isChecked(),
             'premisas': self.premisas_p9.toPlainText(), 'conclusion': self.conclusion_p9.toPlainText(),
@@ -1121,25 +1033,20 @@ class VentanaPrincipal(QMainWindow):
             self.salida_p9.setPlainText("❌ Error: No hay datos de entrada válidos.")
             return
 
-        # 1. Bloquear la interfaz visualmente para evitar múltiples envíos
         self.btn_p9.setEnabled(False)
         self.btn_p9.setText("Procesando... (Por favor, espera)")
-        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;") # Naranja de carga
+        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
         self.salida_p9.setPlainText(txt['msg_procesando_p9'])
 
-        # 2. Arrancar el obrero en segundo plano
         self.hilo_p9 = HiloMotor('prover9', texto_final, self.spin_max_seconds_p9.value(), snapshot)
         self.hilo_p9.resultado_listo.connect(self.al_terminar_prover9)
         self.hilo_p9.start()
 
     def al_terminar_prover9(self, resultado_crudo, hora, snapshot):
-        # 3. Este método se dispara automáticamente cuando el hilo termina
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
-        
         self.salida_p9.setPlainText(resultado_traducido)
         self.agregar_al_historial(hora, "Prover9", tag, snapshot)
         
-        # Restaurar el botón a su estado original
         txt = TRADUCCIONES[self.idioma_actual]
         self.btn_p9.setEnabled(True)
         self.btn_p9.setText(txt['btn_verificar_p9'])
@@ -1147,7 +1054,6 @@ class VentanaPrincipal(QMainWindow):
 
     def procesar_mace4(self):
         txt = TRADUCCIONES[self.idioma_actual]
-        
         snapshot = {
             'pestaña': 1, 'modo_avanzado': self.chk_modo_m4.isChecked(),
             'premisas': self.premisas_m4.toPlainText(), 'conclusion': self.conclusion_m4.toPlainText(),
@@ -1165,25 +1071,20 @@ class VentanaPrincipal(QMainWindow):
             self.salida_m4.setPlainText("❌ Error: No hay datos de entrada válidos.")
             return
 
-        # 1. Bloquear la interfaz visualmente
         self.btn_m4.setEnabled(False)
         self.btn_m4.setText("Procesando... (Por favor, espera)")
         self.btn_m4.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
         self.salida_m4.setPlainText(txt['msg_procesando_m4'])
 
-        # 2. Arrancar el obrero en segundo plano
         self.hilo_m4 = HiloMotor('mace4', texto_final, self.spin_max_seconds_m4.value(), snapshot)
         self.hilo_m4.resultado_listo.connect(self.al_terminar_m4)
         self.hilo_m4.start()
 
     def al_terminar_m4(self, resultado_crudo, hora, snapshot):
-        # 3. Recepción de datos y actualización de interfaz
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
-        
         self.salida_m4.setPlainText(resultado_traducido)
         self.agregar_al_historial(hora, "Mace4", tag, snapshot)
         
-        # Restaurar el botón
         txt = TRADUCCIONES[self.idioma_actual]
         self.btn_m4.setEnabled(True)
         self.btn_m4.setText(txt['btn_buscar_m4'])
@@ -1191,32 +1092,19 @@ class VentanaPrincipal(QMainWindow):
 
     def cocinar_entrada_p9(self, caja_premisas, caja_conclusion):
         texto_cocinado = ""
-        
-        # Si 'All Options' está activado, volcamos TODA la base de datos de configuraciones.
         if hasattr(self, 'grupo_all_options') and self.grupo_all_options.isChecked():
-            # Parámetros numéricos y textos (assign)
             for nombre, (widget, _, _) in self.all_assigns_p9.items():
                 val = widget.value() if isinstance(widget, QSpinBox) else widget.currentData()
-                
-                # --- PARCHE PROVER9: Evitar bug interno de pick_given_ratio = -1 ---
                 if nombre == "pick_given_ratio" and val == -1:
                     continue
-                    
                 texto_cocinado += f"assign({nombre}, {val}).\n"
-                
-            # Parámetros booleanos (set/clear)
             for nombre, (chk, _, _) in self.all_flags_p9.items():
                 if chk.isChecked(): texto_cocinado += f"set({nombre}).\n"
                 else: texto_cocinado += f"clear({nombre}).\n"
-        
-        # Si NO está activado, inyectamos solo lo visible en "Basic Options"
         else:
             texto_cocinado += f"assign(max_weight, {self.spin_max_weight.value()}).\n"
-            
-            # --- PARCHE PROVER9: Evitar bug interno de pick_given_ratio = -1 ---
             if self.spin_pick_ratio.value() != -1:
                 texto_cocinado += f"assign(pick_given_ratio, {self.spin_pick_ratio.value()}).\n"
-                
             texto_cocinado += f"assign(order, {self.combo_order.currentData()}).\n"
             texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentData()}).\n"
             texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
@@ -1231,8 +1119,6 @@ class VentanaPrincipal(QMainWindow):
                 else: texto_cocinado += f"clear({nombre}).\n"
                 
         texto_cocinado += "\n"
-        
-        # 3. Bloque de fórmulas
         lineas_premisas = caja_premisas.toPlainText().split('\n')
         conclusion = caja_conclusion.toPlainText().strip()
         
@@ -1249,17 +1135,12 @@ class VentanaPrincipal(QMainWindow):
             if not conclusion.endswith('.'):
                 conclusion += '.'
             texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
-            
         return texto_cocinado
 
     def cocinar_entrada_m4(self, caja_premisas, caja_conclusion):
         texto_cocinado = ""
-
-        # 1. Parámetros assign
-        # --- PARCHE MACE4: Si domain_size es 0, no lo enviamos para evitar que machaque el start_size interno ---
         if self.spin_domain_size.value() > 0:
             texto_cocinado += f"assign(domain_size, {self.spin_domain_size.value()}).\n"
-            
         texto_cocinado += f"assign(start_size, {self.spin_start_size.value()}).\n"
         texto_cocinado += f"assign(end_size, {self.spin_end_size.value()}).\n"
         texto_cocinado += f"assign(increment, {self.spin_increment.value()}).\n"
@@ -1271,7 +1152,6 @@ class VentanaPrincipal(QMainWindow):
         texto_cocinado += f"assign(selection_order, {self.spin_selection_order.value()}).\n"
         texto_cocinado += f"assign(selection_measure, {self.spin_selection_measure.value()}).\n"
 
-        # 2. Flags booleanos
         flags_m4 = {
             'prolog_style_variables': self.chk_prolog_vars_m4, 'integer_ring': self.chk_integer_ring,
             'skolems_last': self.chk_skolems_last, 'print_models': self.chk_print_models,
@@ -1284,10 +1164,9 @@ class VentanaPrincipal(QMainWindow):
             else: texto_cocinado += f"clear({flag}).\n"
 
         texto_cocinado += "\n"
-
-        # 3. Fórmulas
         lineas_premisas = caja_premisas.toPlainText().split('\n')
         conclusion = caja_conclusion.toPlainText().strip()
+        
         texto_cocinado += "formulas(sos).\n"
         for linea in lineas_premisas:
             linea_limpia = linea.strip()
@@ -1299,7 +1178,6 @@ class VentanaPrincipal(QMainWindow):
         if conclusion:
             if not conclusion.endswith('.'): conclusion += '.'
             texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
-
         return texto_cocinado
 
     def cocinar_entrada_directa(self, texto_premisas, texto_conclusion):
@@ -1327,13 +1205,10 @@ class VentanaPrincipal(QMainWindow):
 
     def extraer_formulas_regex(self, texto):
         premisas, conclusion = "", ""
-        # Extraer bloque de premisas (sos)
         match_sos = re.search(r'formulas\(sos\)\.(.*?)(?:end_of_list\.)', texto, re.DOTALL)
         if match_sos:
-            # Limpiamos espacios y eliminamos los puntos del final para el modo básico
             premisas = '\n'.join([l.strip().rstrip('.') for l in match_sos.group(1).strip().split('\n') if l.strip()])
             
-        # Extraer bloque de conclusión (goals)
         match_goals = re.search(r'formulas\(goals\)\.(.*?)(?:end_of_list\.)', texto, re.DOTALL)
         if match_goals:
             conclusion = '\n'.join([l.strip().rstrip('.') for l in match_goals.group(1).strip().split('\n') if l.strip()])
@@ -1388,25 +1263,20 @@ class VentanaPrincipal(QMainWindow):
 
 
 if __name__ == "__main__":
-    # --- TRUCO PARA LA BARRA DE TAREAS DE WINDOWS ---
     import ctypes
-    # Creamos un identificador único para el proyecto (puede ser cualquier texto)
     myappid = 'ugr.tfg.prover9mace4.gui' 
     try:
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     except Exception:
-        pass # Si no estamos en Windows, simplemente lo ignora
+        pass
 
     app = QApplication(sys.argv)
-
     QFontDatabase.addApplicationFont("Nexa-Heavy.ttf")
     
-    # 1. Definimos las variables extra para qt-material
     extra_config = {
-        'font_family': 'Nexa',  # Puedes cambiarlo a 'Roboto', 'Inter', etc.
+        'font_family': 'Nexa',
     }
     
-    # 2. Se las pasamos a la función apply_stylesheet
     apply_stylesheet(app, theme='dark_lightgreen.xml', extra=extra_config)
     
     ventana = VentanaPrincipal()
