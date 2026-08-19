@@ -5,7 +5,8 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QTextEdit, QPushButton, QLabel, 
                              QTabWidget, QFileDialog, QGroupBox, QCheckBox, QStackedWidget,
                              QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
-                             QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea)
+                             QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea,
+                             QMessageBox)
 from PyQt6.QtGui import QFont, QAction, QSyntaxHighlighter, QTextCharFormat, QColor, QFontDatabase, QIcon
 from PyQt6.QtCore import QEvent, QThread, pyqtSignal, QRegularExpression
 from qt_material import apply_stylesheet
@@ -149,6 +150,8 @@ class VentanaPrincipal(QMainWindow):
         # 5. Menús y traducción inicial
         self.crear_barra_menus()
         self.actualizar_textos_interfaz()
+
+        self.snapshot_guardado = self.obtener_estado_actual()
 
     def eventFilter(self, objeto, evento):
         txt = TRADUCCIONES[self.idioma_actual]
@@ -818,6 +821,11 @@ class VentanaPrincipal(QMainWindow):
 
     def cargar_ejemplo_tipo(self, slot_menu):
         """Carga problemas específicos calculando si el usuario está en Prover9 o Mace4"""
+        
+        # 1. Comprobamos si hay cambios sin guardar ANTES de cargar el ejemplo
+        if not self.advertir_cambios_sin_guardar():
+            return
+            
         txt = TRADUCCIONES[self.idioma_actual]
         pestaña = self.tabs.currentIndex()
         
@@ -825,7 +833,7 @@ class VentanaPrincipal(QMainWindow):
             # Flujo Prover9
             if slot_menu == 1: tipo = 'silogismo'
             elif slot_menu == 2: tipo = 'paradoja'
-            else: tipo = 'algebra'  # <--- GESTIONAMOS EL EJEMPLO 3
+            else: tipo = 'algebra'  
             
             premisas_ej = txt[f'datos_{tipo}_premisas']
             conclusion_ej = txt[f'datos_{tipo}_conclusion']
@@ -841,7 +849,7 @@ class VentanaPrincipal(QMainWindow):
             # Flujo Mace4
             if slot_menu == 1: tipo = 'grupo'
             elif slot_menu == 2: tipo = 'conmut'
-            else: tipo = 'reticulo' # <--- GESTIONAMOS EL EJEMPLO 3
+            else: tipo = 'reticulo' 
             
             premisas_ej = txt[f'datos_{tipo}_premisas']
             conclusion_ej = txt[f'datos_{tipo}_conclusion']
@@ -854,23 +862,27 @@ class VentanaPrincipal(QMainWindow):
             self.conclusion_m4.setPlainText(conclusion_ej)
             self.entrada_libre_m4.setPlainText(codigo_completo_libre)
 
+        # 2. Renovamos la foto DESPUÉS de cargar el ejemplo con éxito
+        self.snapshot_guardado = self.obtener_estado_actual()
+
     def nuevo_proyecto(self):
+        if not self.advertir_cambios_sin_guardar(): return
         for caja in [self.premisas_p9, self.conclusion_p9, self.entrada_libre_p9, self.premisas_m4, self.conclusion_m4, self.entrada_libre_m4]:
             caja.clear()
         self.salida_p9.clear()
         self.salida_m4.clear()
-        self.ruta_archivo_actual = None # Desvinculamos el archivo
+        self.ruta_archivo_actual = None
         self.actualizar_textos_interfaz()
+        self.snapshot_guardado = self.obtener_estado_actual()
 
     # --- MEJORADO: Abrir archivo con vinculación real ---
     def abrir_archivo(self):
+        if not self.advertir_cambios_sin_guardar(): return
+        
         ruta, _ = QFileDialog.getOpenFileName(self, "Abrir / Open", "", "Inputs (*.in *.p9 *.txt)")
         if ruta:
-            with open(ruta, "r", encoding="utf-8") as f: 
-                contenido = f.read()
-            
-            self.ruta_archivo_actual = ruta # Guardamos la referencia persistente
-            
+            with open(ruta, "r", encoding="utf-8") as f: contenido = f.read()
+            self.ruta_archivo_actual = ruta
             if self.tabs.currentIndex() == 0:
                 self.chk_modo_p9.setChecked(True)
                 self.entrada_libre_p9.setPlainText(contenido)
@@ -881,19 +893,18 @@ class VentanaPrincipal(QMainWindow):
                 self.entrada_libre_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
             
             self.actualizar_textos_interfaz()
+            self.snapshot_guardado = self.obtener_estado_actual()
 
     # --- MEJORADO: Guardar inteligente (Ctrl+S directo) ---
     def guardar_archivo(self):
         txt = TRADUCCIONES[self.idioma_actual]
         
-        # Si NO hay archivo guardado previamente, abrimos el diálogo para elegir ruta (Guardar como)
         if not self.ruta_archivo_actual:
             ruta, _ = QFileDialog.getSaveFileName(self, "Guardar / Save", "", "Inputs (*.in)")
             if not ruta:
-                return
+                return False # <--- AÑADIDO: Si cancela, devuelve False
             self.ruta_archivo_actual = ruta
 
-        # Si ya hay archivo vinculado, guardamos directamente sobre él silenciosamente
         p = self.tabs.currentIndex()
         idioma_txt = TRADUCCIONES[self.idioma_actual]
         if p == 0:
@@ -902,12 +913,14 @@ class VentanaPrincipal(QMainWindow):
             texto = self.extraer_texto_util(self.entrada_libre_m4, idioma_txt['ph_libre_m4']) if self.chk_modo_m4.isChecked() else self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4)
         
         try:
-            with open(self.ruta_archivo_actual, "w", encoding="utf-8") as f: 
-                f.write(texto)
+            with open(self.ruta_archivo_actual, "w", encoding="utf-8") as f: f.write(texto)
             self.barra_estado.showMessage(f"{txt['status_guardado']}{self.ruta_archivo_actual}", 4000)
             self.actualizar_titulo_ventana()
+            self.snapshot_guardado = self.obtener_estado_actual() # <--- Renovamos foto tras guardar
+            return True # <--- AÑADIDO: Guardado con éxito
         except Exception:
             self.barra_estado.showMessage(txt['status_error_guardar'], 4000)
+            return False # <--- AÑADIDO
 
     def exportar_salida(self):
         editor = self.salida_p9 if self.tabs.currentIndex() == 0 else self.salida_m4
@@ -1332,6 +1345,49 @@ class VentanaPrincipal(QMainWindow):
                     self.conclusion_m4.setPlainText(c)
                     self.conclusion_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
         self.vista_stack_m4.setCurrentIndex(1 if checked else 0)
+
+    def obtener_estado_actual(self):
+        """Toma una instantánea de todo el texto actual de la interfaz."""
+        return {
+            'p9_av': self.chk_modo_p9.isChecked(), 'p9_p': self.premisas_p9.toPlainText(),
+            'p9_c': self.conclusion_p9.toPlainText(), 'p9_l': self.entrada_libre_p9.toPlainText(),
+            'm4_av': self.chk_modo_m4.isChecked(), 'm4_p': self.premisas_m4.toPlainText(),
+            'm4_c': self.conclusion_m4.toPlainText(), 'm4_l': self.entrada_libre_m4.toPlainText()
+        }
+
+    def advertir_cambios_sin_guardar(self):
+        """Muestra el diálogo si el estado actual no coincide con la última vez que se guardó."""
+        if getattr(self, 'snapshot_guardado', None) == self.obtener_estado_actual():
+            return True # No hay cambios, damos luz verde para continuar
+
+        es_en = (self.idioma_actual == 'en_US')
+        titulo = "Unsaved Changes" if es_en else "Cambios sin guardar"
+        mensaje = "You have unsaved changes.\nDo you want to save them before proceeding?" if es_en else "Tienes modificaciones sin guardar.\n¿Deseas guardarlas antes de continuar?"
+        
+        msg = QMessageBox(self)
+        msg.setWindowTitle(titulo)
+        msg.setText(mensaje)
+        msg.setIcon(QMessageBox.Icon.Warning)
+        
+        btn_guardar = msg.addButton("Save" if es_en else "Guardar", QMessageBox.ButtonRole.AcceptRole)
+        btn_descartar = msg.addButton("Discard" if es_en else "Descartar", QMessageBox.ButtonRole.DestructiveRole)
+        btn_cancelar = msg.addButton("Cancel" if es_en else "Cancelar", QMessageBox.ButtonRole.RejectRole)
+        
+        msg.exec()
+        
+        if msg.clickedButton() == btn_guardar:
+            return self.guardar_archivo() # Devuelve True si guardó bien, False si canceló el diálogo de guardar
+        elif msg.clickedButton() == btn_descartar:
+            return True # Luz verde para destruir los cambios
+        else:
+            return False # Se arrepintió, bloqueamos la acción
+
+    def closeEvent(self, evento):
+        """Intercepta el momento exacto en que el usuario pulsa la 'X' de la ventana."""
+        if self.advertir_cambios_sin_guardar():
+            evento.accept() # Cierra la app
+        else:
+            evento.ignore() # Aborta el cierre
 
 if __name__ == "__main__":
     # --- TRUCO PARA LA BARRA DE TAREAS DE WINDOWS ---
