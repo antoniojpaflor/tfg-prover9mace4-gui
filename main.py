@@ -1,11 +1,12 @@
 import sys
 import os
+import re
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QTextEdit, QPushButton, QLabel, 
                              QTabWidget, QFileDialog, QGroupBox, QCheckBox, QStackedWidget,
                              QTableWidget, QTableWidgetItem, QHeaderView, QStatusBar,
                              QWidgetAction, QSpinBox, QFormLayout, QComboBox, QScrollArea)
-from PyQt6.QtGui import QFont, QAction, QSyntaxHighlighter, QTextCharFormat, QColor, QFontDatabase
+from PyQt6.QtGui import QFont, QAction, QSyntaxHighlighter, QTextCharFormat, QColor, QFontDatabase, QIcon
 from PyQt6.QtCore import QEvent, QThread, pyqtSignal, QRegularExpression
 from qt_material import apply_stylesheet
 
@@ -96,6 +97,8 @@ class VentanaPrincipal(QMainWindow):
         
     def init_ui(self):
         self.setGeometry(100, 100, 1100, 900)
+
+        self.setWindowIcon(QIcon("icono_app.png"))
         
         # Widget Central y Layout Principal de la ventana (Vertical)
         widget_central = QWidget()
@@ -376,7 +379,7 @@ class VentanaPrincipal(QMainWindow):
         layout_principal = QHBoxLayout()
         columna_derecha = QVBoxLayout()
         self.chk_modo_p9 = QCheckBox("")
-        self.chk_modo_p9.toggled.connect(lambda checked: self.vista_stack_p9.setCurrentIndex(1 if checked else 0))
+        self.chk_modo_p9.toggled.connect(self.alternar_modo_p9)
         columna_derecha.addWidget(self.chk_modo_p9)
         self.vista_stack_p9 = QStackedWidget()
         
@@ -438,7 +441,7 @@ class VentanaPrincipal(QMainWindow):
         layout_principal = QHBoxLayout()
         columna_derecha = QVBoxLayout()
         self.chk_modo_m4 = QCheckBox("")
-        self.chk_modo_m4.toggled.connect(lambda checked: self.vista_stack_m4.setCurrentIndex(1 if checked else 0))
+        self.chk_modo_m4.toggled.connect(self.alternar_modo_m4)
         columna_derecha.addWidget(self.chk_modo_m4)
         self.vista_stack_m4 = QStackedWidget()
         
@@ -684,15 +687,15 @@ class VentanaPrincipal(QMainWindow):
             'timeout': txt['hist_timeout'], 'error': txt['hist_error']
         }
         
-        fila = self.tabla_historial.rowCount()
-        self.tabla_historial.insertRow(fila)
+        # Insertamos siempre en la fila 0 (arriba del todo)
+        self.tabla_historial.insertRow(0)
         
-        self.tabla_historial.setItem(fila, 0, QTableWidgetItem(hora))
-        self.tabla_historial.setItem(fila, 1, QTableWidgetItem(motor))
-        self.tabla_historial.setItem(fila, 2, QTableWidgetItem(dict_tags.get(tag_resultado, tag_resultado)))
+        self.tabla_historial.setItem(0, 0, QTableWidgetItem(hora))
+        self.tabla_historial.setItem(0, 1, QTableWidgetItem(motor))
+        self.tabla_historial.setItem(0, 2, QTableWidgetItem(dict_tags.get(tag_resultado, tag_resultado)))
         
-        # Guardamos el snapshot en la caché indexado por la fila
-        self.datos_historial.append(snapshot_datos)
+        # Insertamos el snapshot al principio de la caché para que el índice coincida con la tabla
+        self.datos_historial.insert(0, snapshot_datos)
 
     def recuperar_desde_historial(self, item):
         """Al hacer doble clic en el historial, restaura los editores a ese estado pasado"""
@@ -730,7 +733,7 @@ class VentanaPrincipal(QMainWindow):
         }
         
         if self.chk_modo_p9.isChecked():
-            texto_final = self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9) if (self.premisas_p9.toPlainText() or self.conclusion_p9.toPlainText()) else ""
+            texto_final = self.extraer_texto_util(self.entrada_libre_p9, txt['ph_libre_p9'])
         else:
             premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
             conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
@@ -774,7 +777,7 @@ class VentanaPrincipal(QMainWindow):
         }
         
         if self.chk_modo_m4.isChecked():
-            texto_final = self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4) if (self.premisas_m4.toPlainText() or self.conclusion_m4.toPlainText()) else ""
+            texto_final = self.extraer_texto_util(self.entrada_libre_m4, txt['ph_libre_m4'])
         else:
             premisas = self.extraer_texto_util(self.premisas_m4, txt['ph_premisas_m4'])
             conclusion = self.extraer_texto_util(self.conclusion_m4, txt['ph_conclusion_m4'])
@@ -1260,7 +1263,75 @@ class VentanaPrincipal(QMainWindow):
         self.spin_selection_order.setValue(2)
         self.spin_selection_measure.setValue(4)
 
+    def extraer_formulas_regex(self, texto):
+        premisas, conclusion = "", ""
+        # Extraer bloque de premisas (sos)
+        match_sos = re.search(r'formulas\(sos\)\.(.*?)(?:end_of_list\.)', texto, re.DOTALL)
+        if match_sos:
+            # Limpiamos espacios y eliminamos los puntos del final para el modo básico
+            premisas = '\n'.join([l.strip().rstrip('.') for l in match_sos.group(1).strip().split('\n') if l.strip()])
+            
+        # Extraer bloque de conclusión (goals)
+        match_goals = re.search(r'formulas\(goals\)\.(.*?)(?:end_of_list\.)', texto, re.DOTALL)
+        if match_goals:
+            conclusion = '\n'.join([l.strip().rstrip('.') for l in match_goals.group(1).strip().split('\n') if l.strip()])
+            
+        return premisas, conclusion
+
+    def alternar_modo_p9(self, checked):
+        txt = TRADUCCIONES[self.idioma_actual]
+        if checked: 
+            # BÁSICO -> AVANZADO: Generamos el código a partir de las cajas
+            premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
+            conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
+            if premisas or conclusion:
+                codigo = self.cocinar_entrada_directa(premisas, conclusion)
+                self.entrada_libre_p9.setPlainText(codigo)
+                self.entrada_libre_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+        else: 
+            # AVANZADO -> BÁSICO: Extraemos las fórmulas del código
+            texto_libre = self.extraer_texto_util(self.entrada_libre_p9, txt['ph_libre_p9'])
+            if texto_libre:
+                p, c = self.extraer_formulas_regex(texto_libre)
+                if p: 
+                    self.premisas_p9.setPlainText(p)
+                    self.premisas_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+                if c: 
+                    self.conclusion_p9.setPlainText(c)
+                    self.conclusion_p9.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+        self.vista_stack_p9.setCurrentIndex(1 if checked else 0)
+
+    def alternar_modo_m4(self, checked):
+        txt = TRADUCCIONES[self.idioma_actual]
+        if checked:
+            premisas = self.extraer_texto_util(self.premisas_m4, txt['ph_premisas_m4'])
+            conclusion = self.extraer_texto_util(self.conclusion_m4, txt['ph_conclusion_m4'])
+            if premisas or conclusion:
+                codigo = self.cocinar_entrada_directa(premisas, conclusion)
+                self.entrada_libre_m4.setPlainText(codigo)
+                self.entrada_libre_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+        else:
+            texto_libre = self.extraer_texto_util(self.entrada_libre_m4, txt['ph_libre_m4'])
+            if texto_libre:
+                p, c = self.extraer_formulas_regex(texto_libre)
+                if p: 
+                    self.premisas_m4.setPlainText(p)
+                    self.premisas_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+                if c: 
+                    self.conclusion_m4.setPlainText(c)
+                    self.conclusion_m4.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
+        self.vista_stack_m4.setCurrentIndex(1 if checked else 0)
+
 if __name__ == "__main__":
+    # --- TRUCO PARA LA BARRA DE TAREAS DE WINDOWS ---
+    import ctypes
+    # Creamos un identificador único para el proyecto (puede ser cualquier texto)
+    myappid = 'ugr.tfg.prover9mace4.gui' 
+    try:
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    except Exception:
+        pass # Si no estamos en Windows, simplemente lo ignora
+
     app = QApplication(sys.argv)
 
     QFontDatabase.addApplicationFont("Nexa-Heavy.ttf")
