@@ -15,7 +15,7 @@ jobs:
           curl -O https://www.cs.unm.edu/~mccune/prover9/download/LADR-2009-11A.tar.gz
           tar -xzf LADR-2009-11A.tar.gz
           cd LADR-2009-11A
-          make all
+          make all CFLAGS="-O -Wall -Wno-implicit-int -Wno-implicit-function-declaration"
           cd ..
           cp LADR-2009-11A/bin/prover9 bin/prover9_mac
           cp LADR-2009-11A/bin/mace4 bin/mace4_mac
