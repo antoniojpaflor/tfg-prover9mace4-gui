@@ -1,3 +1,11 @@
+"""
+@file launcher.py
+@brief Módulo de ejecución y comunicación con los motores lógicos Prover9 y Mace4.
+
+Este módulo abstrae la capa del sistema operativo, encargándose de localizar
+los binarios adecuados según la plataforma (Windows, Linux, macOS) y lanzar 
+los subprocesos de manera segura controlando los tiempos de ejecución.
+"""
 import subprocess
 import platform
 import os
@@ -6,6 +14,12 @@ from datetime import datetime
 
 
 def obtener_ruta_recurso(nombre_archivo):
+    """
+    @brief Obtiene la ruta absoluta al recurso, compatible con desarrollo y con PyInstaller.
+    
+    @param nombre_archivo Nombre del archivo binario a buscar (con o sin extensión .exe).
+    @return Ruta completa y segura al ejecutable dentro de la carpeta 'bin'.
+    """
     try:
         ruta_base = sys._MEIPASS
     except Exception:
@@ -14,6 +28,17 @@ def obtener_ruta_recurso(nombre_archivo):
 
 
 def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
+    """
+    @brief Ejecuta un motor lógico como subproceso y captura su salida.
+    
+    Configura el entorno según el sistema operativo, busca el binario 
+    correspondiente y maneja los tiempos de espera y errores del sistema.
+    
+    @param comando_base Lista con el nombre del motor (ej. ['prover9']).
+    @param texto_entrada Código fuente en formato cadena para ser procesado.
+    @param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 3).
+    @return Salida estándar (stdout) del motor lógico o mensaje de error formateado.
+    """
     sistema = platform.system()
     nombre_binario = comando_base[0]
     
@@ -64,12 +89,26 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
 
 
 def ejecutar_prover9(texto_entrada, tiempo_limite=5):
+    """
+    @brief Envoltorio específico para ejecutar el demostrador de teoremas Prover9.
+    
+    @param texto_entrada Código fuente de Prover9 listo para ser procesado.
+    @param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 5).
+    @return Tupla que contiene la cadena de texto con el resultado crudo y la hora de ejecución.
+    """
     hora_ejecucion = datetime.now().strftime("%H:%M:%S")
     resultado = ejecutar_motor_logico(['prover9'], texto_entrada, tiempo_limite=tiempo_limite)
     return resultado, hora_ejecucion
 
 
 def ejecutar_mace4(texto_entrada, tiempo_limite=3):
+    """
+    @brief Envoltorio específico para ejecutar el buscador de modelos finitos Mace4.
+    
+    @param texto_entrada Código fuente de Mace4 listo para ser procesado.
+    @param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 3).
+    @return Tupla que contiene la cadena de texto con el resultado crudo y la hora de ejecución.
+    """
     hora_ejecucion = datetime.now().strftime("%H:%M:%S")
     resultado = ejecutar_motor_logico(['mace4'], texto_entrada, tiempo_limite=tiempo_limite)
     return resultado, hora_ejecucion

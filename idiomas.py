@@ -1,3 +1,17 @@
+"""
+@file idiomas.py
+@brief Diccionarios de internacionalización y traducción para la interfaz gráfica.
+
+Contiene las bases de datos locales para permitir el cambio dinámico de idioma 
+entre Español (es_ES) e Inglés (en_US) en toda la aplicación.
+"""
+
+##
+# @brief Diccionario principal con los textos estáticos de la interfaz en múltiples idiomas.
+# 
+# Almacena las traducciones para la barra de menús, pestañas, botones, 
+# placeholders, historial de ejecuciones y problemas de ejemplo predefinidos.
+# Las claves utilizan un formato de variable abstracta (ej. 'btn_verificar_p9').
 TRADUCCIONES = {
     'es_ES': {
         'titulo': "Prover9-Mace4 GUI",
@@ -146,6 +160,11 @@ TRADUCCIONES = {
 }
 
 
+##
+# @brief Diccionario para la traducción en vivo de los paneles de opciones avanzadas.
+# 
+# A diferencia de TRADUCCIONES, aquí las claves deben corresponder obligatoriamente 
+# a los comandos literales esperados por los binarios (por ejemplo, 'lpo' o 'unfold').
 DICCIONARIO_PANELES = {
     'es_ES': {
         'Basic Options': "Opciones Básicas",
@@ -236,3 +255,118 @@ DICCIONARIO_PANELES = {
         'nonprimes': "nonprimes"
     }
 }
+
+
+##
+# @brief Esquema estructural de las opciones avanzadas de Prover9.
+# 
+# Define la jerarquía de pestañas, categorías y widgets (spinboxes, comboboxes, 
+# checkboxes) y sus valores por defecto. La GUI lee esta lista para auto-construirse.
+SCHEMA_PROVER9 = [
+    ("Meta Options", [
+        ('flag', 'auto', True), ('flag', 'auto_setup', True), ('flag', 'auto_limits', True),
+        ('flag', 'auto_denials', True), ('flag', 'auto_inference', True), ('flag', 'auto_process', True),
+        ('flag', 'auto2', False), ('flag', 'raw', False)
+    ]),
+    ("Term Ordering", [
+        ('combo', 'order', ["lpo", "rpo", "kbo"], "lpo"),
+        ('combo', 'eq_defs', ["unfold", "fold", "pass"], "unfold"),
+        ('flag', 'inverse_order', True)
+    ]),
+    ("Limits", [
+        ('sub', 'Search Limits'),
+        ('spin', 'max_given', -1, 100000, -1), ('spin', 'max_kept', -1, 100000, -1),
+        ('spin', 'max_proofs', -1, 100000, 1), ('spin', 'max_megs', -1, 100000, 200),
+        ('spin', 'max_seconds', -1, 100000, 60), ('spin', 'max_minutes', -1, 100000, -1),
+        ('spin', 'max_hours', -1, 1000, -1), ('spin', 'max_days', -1, 100, -1),
+        ('sub', 'Limits on Kept Clauses'),
+        ('spin', 'max_weight', -1000, 100000, 100), ('spin', 'max_depth', -1, 1000, -1),
+        ('spin', 'max_literals', -1, 1000, -1), ('spin', 'max_vars', -1, 1000, -1),
+        ('sub', 'Sos Control'),
+        ('spin', 'sos_limit', -1, 2147483647, 20000)
+    ]),
+    ("Search Prep", [
+        ('flag', 'expand_relational_defs', False), ('flag', 'dont_flip_input', False),
+        ('flag', 'process_initial_sos', True), ('flag', 'sort_initial_sos', False),
+        ('flag', 'predicate_elim', True), ('spin', 'fold_denial_max', -1, 1000, 0)
+    ]),
+    ("Goals/Denials", [
+        ('flag', 'restrict_denials', False), ('flag', 'reuse_denials', False)
+    ]),
+    ("Select Given", [
+        ('sub', 'Selection Ratio'),
+        ('spin', 'hints_part', 0, 2147483647, 2147483647),
+        ('spin', 'age_part', 0, 1000, 1),
+        ('spin', 'weight_part', 0, 1000, 0),
+        ('spin', 'false_part', 0, 1000, 4),
+        ('spin', 'true_part', 0, 1000, 4),
+        ('spin', 'random_part', 0, 1000, 0),
+        ('sub', 'Semantic Guidance'),
+        ('combo', 'multiple_interps', ["false_in_all", "false_in_some"], "false_in_all"),
+        ('spin', 'eval_limit', -1, 100000, 1024),
+        ('sub', 'Meta Options'),
+        ('spin', 'pick_given_ratio', -1, 1000, -1),
+        ('flag', 'breadth_first', False),
+        ('flag', 'lightest_first', False), ('flag', 'random_given', False),
+        ('sub', 'Others'),
+        ('flag', 'input_sos_first', True), ('flag', 'breadth_first_hints', False)
+    ]),
+    ("Inference Rules", [
+        ('sub', 'Ordinary Rules'),
+        ('flag', 'binary_resolution', False), ('flag', 'neg_binary_resolution', False),
+        ('flag', 'hyper_resolution', False), ('flag', 'pos_hyper_resolution', False),
+        ('flag', 'neg_hyper_resolution', False), ('flag', 'ur_resolution', False),
+        ('flag', 'pos_ur_resolution', False), ('flag', 'neg_ur_resolution', False),
+        ('flag', 'paramodulation', False),
+        ('sub', 'Other Rules'),
+        ('spin', 'new_constants', 0, 10000, 0), ('flag', 'factor', False),
+        ('sub', 'General Restrictions'),
+        ('combo', 'literal_selection', ["max_negative", "all_negative", "none"], "max_negative"),
+        ('sub', 'Resolution Restrictions'),
+        ('flag', 'ordered_res', True), ('flag', 'check_res_instances', False),
+        ('flag', 'initial_nuclei', False), ('spin', 'ur_nucleus_limit', -1, 10000, -1),
+        ('sub', 'Paramodulation Restrictions'),
+        ('flag', 'ordered_para', True), ('flag', 'check_para_instances', False),
+        ('flag', 'para_from_vars', True), ('flag', 'para_units_only', False),
+        ('spin', 'para_lit_limit', -1, 10000, -1)
+    ]),
+    ("Rewriting", [
+        ('sub', 'Term Rewriting Limits'),
+        ('spin', 'demod_step_limit', -1, 100000, 1000), ('spin', 'demod_size_limit', -1, 100000, 1000),
+        ('sub', 'Others'),
+        ('flag', 'back_demod', True), ('flag', 'unit_deletion', False), ('flag', 'cac_redundancy', True),
+        ('sub', 'Lex-Dependent Rewriting'),
+        ('flag', 'lex_dep_demod', True), ('flag', 'lex_dep_demod_sane', True),
+        ('spin', 'lex_dep_demod_lim', -1, 10000, 11), ('flag', 'lex_order_vars', False)
+    ]),
+    ("Weighting", [
+        ('sub', 'Symbol Weights'),
+        ('spin', 'variable_weight', -1000, 1000, 1), ('spin', 'constant_weight', -1000, 1000, 1),
+        ('spin', 'not_weight', -1000, 1000, 0), ('spin', 'or_weight', -1000, 1000, 0),
+        ('spin', 'sk_constant_weight', -1000, 1000, 1), ('spin', 'prop_atom_weight', -1000, 1000, 1),
+        ('sub', 'Penalties'),
+        ('spin', 'skolem_penalty', -1000, 1000, 1), ('spin', 'nest_penalty', -1000, 1000, 0),
+        ('spin', 'depth_penalty', -1000, 1000, 0), ('spin', 'var_penalty', -1000, 1000, 0),
+        ('sub', 'Others'),
+        ('spin', 'default_weight', -1000, 2147483647, 2147483647)
+    ]),
+    ("Process Inferred", [
+        ('flag', 'safe_unit_conflict', False), ('flag', 'back_subsume', True),
+        ('spin', 'backsub_check', -1, 100000, 500)
+    ]),
+    ("Input/Output", [
+        ('flag', 'print_initial_clauses', True), ('flag', 'print_given', True),
+        ('flag', 'print_gen', False), ('flag', 'print_kept', False),
+        ('flag', 'print_labeled', False), ('flag', 'print_proofs', True),
+        ('flag', 'print_clause_properties', False),
+        ('combo', 'stats', ["none", "some", "lots", "all"], "lots"),
+        ('spin', 'report', -1, 100000, -1), ('flag', 'prolog_style_variables', False)
+    ]),
+    ("Hints", [
+        ('flag', 'limit_hint_matchers', False), ('flag', 'collect_hint_labels', False),
+        ('flag', 'degrade_hints', True), ('flag', 'back_demod_hints', True)
+    ]),
+    ("Other Options", [
+        ('spin', 'random_seed', -1, 100000, 0)
+    ])
+]
