@@ -1,0 +1,46 @@
+name: Compilar macOS
+
+on:
+  workflow_dispatch: # Permite ejecutar el script manualmente
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - name: 1. Descargar tu repositorio
+        uses: actions/checkout@v4
+
+      - name: 2. Compilar motores lógicos en C
+        run: |
+          curl -O https://www.cs.unm.edu/~mccune/prover9/download/LADR-2009-11A.tar.gz
+          tar -xzf LADR-2009-11A.tar.gz
+          cd LADR-2009-11A
+          make all
+          cd ..
+          cp LADR-2009-11A/bin/prover9 bin/prover9_mac
+          cp LADR-2009-11A/bin/mace4 bin/mace4_mac
+
+      - name: 3. Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 4. Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller PyQt6 qt-material
+
+      - name: 5. Empaquetar GUI con PyInstaller
+        run: |
+          pyinstaller --noconsole --onefile --windowed --name "Prover9-Mace4-GUI_v1.0.0_macOS" --add-data "bin:bin" --add-data "icono_app.ico:." --add-data "Nexa-Heavy.ttf:." main.py
+
+      - name: 6. Comprimir aplicación (.app) en ZIP
+        run: |
+          cd dist
+          zip -r Prover9-Mace4-GUI_v1.0.0_macOS.zip Prover9-Mace4-GUI_v1.0.0_macOS.app
+
+      - name: 7. Entregar resultado
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ejecutable-macOS
+          path: dist/Prover9-Mace4-GUI_v1.0.0_macOS.zip
