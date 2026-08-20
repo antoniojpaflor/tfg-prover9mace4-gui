@@ -1,0 +1,54 @@
+\doxysection{idiomas Namespace Reference}
+\hypertarget{namespaceidiomas}{}\label{namespaceidiomas}\index{idiomas@{idiomas}}
+\doxysubsubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+dict \mbox{\hyperlink{namespaceidiomas_a774c57e5b3a94c10db5e6a17e585d9f4}{TRADUCCIONES}}
+\begin{DoxyCompactList}\small\item\em Diccionario principal con los textos estáticos de la interfaz en múltiples idiomas. \end{DoxyCompactList}\item 
+dict \mbox{\hyperlink{namespaceidiomas_a49a80a4fb1d8ebef49226611c41bbc9e}{DICCIONARIO\+\_\+\+PANELES}}
+\begin{DoxyCompactList}\small\item\em Diccionario para la traducción en vivo de los paneles de opciones avanzadas. \end{DoxyCompactList}\item 
+list \mbox{\hyperlink{namespaceidiomas_ad38a61c4f99b6397a0386f710e09e03f}{SCHEMA\+\_\+\+PROVER9}}
+\begin{DoxyCompactList}\small\item\em Esquema estructural de las opciones avanzadas de Prover9. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}@file idiomas.py
+@brief Diccionarios de internacionalización y traducción para la interfaz gráfica.
+
+Contiene las bases de datos locales para permitir el cambio dinámico de idioma 
+entre Español (es_ES) e Inglés (en_US) en toda la aplicación.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Variable Documentation}
+\Hypertarget{namespaceidiomas_a49a80a4fb1d8ebef49226611c41bbc9e}\label{namespaceidiomas_a49a80a4fb1d8ebef49226611c41bbc9e} 
+\index{idiomas@{idiomas}!DICCIONARIO\_PANELES@{DICCIONARIO\_PANELES}}
+\index{DICCIONARIO\_PANELES@{DICCIONARIO\_PANELES}!idiomas@{idiomas}}
+\doxysubsubsection{\texorpdfstring{DICCIONARIO\_PANELES}{DICCIONARIO\_PANELES}}
+{\footnotesize\ttfamily dict idiomas.\+DICCIONARIO\+\_\+\+PANELES}
+
+
+
+Diccionario para la traducción en vivo de los paneles de opciones avanzadas. 
+
+A diferencia de TRADUCCIONES, aquí las claves deben corresponder obligatoriamente a los comandos literales esperados por los binarios (por ejemplo, \textquotesingle{}lpo\textquotesingle{} o \textquotesingle{}unfold\textquotesingle{}). \Hypertarget{namespaceidiomas_ad38a61c4f99b6397a0386f710e09e03f}\label{namespaceidiomas_ad38a61c4f99b6397a0386f710e09e03f} 
+\index{idiomas@{idiomas}!SCHEMA\_PROVER9@{SCHEMA\_PROVER9}}
+\index{SCHEMA\_PROVER9@{SCHEMA\_PROVER9}!idiomas@{idiomas}}
+\doxysubsubsection{\texorpdfstring{SCHEMA\_PROVER9}{SCHEMA\_PROVER9}}
+{\footnotesize\ttfamily list idiomas.\+SCHEMA\+\_\+\+PROVER9}
+
+
+
+Esquema estructural de las opciones avanzadas de Prover9. 
+
+Define la jerarquía de pestañas, categorías y widgets (spinboxes, comboboxes, checkboxes) y sus valores por defecto. La GUI lee esta lista para auto-\/construirse. \Hypertarget{namespaceidiomas_a774c57e5b3a94c10db5e6a17e585d9f4}\label{namespaceidiomas_a774c57e5b3a94c10db5e6a17e585d9f4} 
+\index{idiomas@{idiomas}!TRADUCCIONES@{TRADUCCIONES}}
+\index{TRADUCCIONES@{TRADUCCIONES}!idiomas@{idiomas}}
+\doxysubsubsection{\texorpdfstring{TRADUCCIONES}{TRADUCCIONES}}
+{\footnotesize\ttfamily dict idiomas.\+TRADUCCIONES}
+
+
+
+Diccionario principal con los textos estáticos de la interfaz en múltiples idiomas. 
+
+Almacena las traducciones para la barra de menús, pestañas, botones, placeholders, historial de ejecuciones y problemas de ejemplo predefinidos. Las claves utilizan un formato de variable abstracta (ej. \textquotesingle{}btn\+\_\+verificar\+\_\+p9\textquotesingle{}). 

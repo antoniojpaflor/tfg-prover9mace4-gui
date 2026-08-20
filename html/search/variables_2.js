@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['chk_5fexpand_5frelational_0',['chk_expand_relational',['../classmain_1_1VentanaPrincipal.html#a514c29f70cdd956e63d245023a72a78d',1,'main::VentanaPrincipal']]],
+  ['chk_5finteger_5fring_1',['chk_integer_ring',['../classmain_1_1VentanaPrincipal.html#a7d06d8e6f3ba2fdff0c1c512391b4480',1,'main::VentanaPrincipal']]],
+  ['chk_5flnh_2',['chk_lnh',['../classmain_1_1VentanaPrincipal.html#a3f3a9d39243a22ab10cb8c0808782c98',1,'main::VentanaPrincipal']]],
+  ['chk_5fmodo_5fm4_3',['chk_modo_m4',['../classmain_1_1VentanaPrincipal.html#a5d6c03e794d53295faa856424f7043aa',1,'main::VentanaPrincipal']]],
+  ['chk_5fmodo_5fp9_4',['chk_modo_p9',['../classmain_1_1VentanaPrincipal.html#ad94aab4af83be3de706a046855273fad',1,'main::VentanaPrincipal']]],
+  ['chk_5fneg_5fassign_5',['chk_neg_assign',['../classmain_1_1VentanaPrincipal.html#a683b2c2fa54f1b94b5e03e63a2ae1eab',1,'main::VentanaPrincipal']]],
+  ['chk_5fneg_5fassign_5fnear_6',['chk_neg_assign_near',['../classmain_1_1VentanaPrincipal.html#aa57042229cb84ba47fe60c70178d2c54',1,'main::VentanaPrincipal']]],
+  ['chk_5fneg_5felim_7',['chk_neg_elim',['../classmain_1_1VentanaPrincipal.html#a0d0709ce78c5ddab24d2028631db4b95',1,'main::VentanaPrincipal']]],
+  ['chk_5fneg_5felim_5fnear_8',['chk_neg_elim_near',['../classmain_1_1VentanaPrincipal.html#aaec1ed7f2d11e4a7efadca4fc8bbeaa3',1,'main::VentanaPrincipal']]],
+  ['chk_5fnegprop_9',['chk_negprop',['../classmain_1_1VentanaPrincipal.html#a558030503606208b70a35d1e3e0fc30e',1,'main::VentanaPrincipal']]],
+  ['chk_5fprint_5fmodels_10',['chk_print_models',['../classmain_1_1VentanaPrincipal.html#a962fd4d494eff70bbd370f415b9f1495',1,'main::VentanaPrincipal']]],
+  ['chk_5fprolog_5fvars_11',['chk_prolog_vars',['../classmain_1_1VentanaPrincipal.html#a48be6557385d462a10bef6bbb7ad1682',1,'main::VentanaPrincipal']]],
+  ['chk_5fprolog_5fvars_5fm4_12',['chk_prolog_vars_m4',['../classmain_1_1VentanaPrincipal.html#ac612767ec5fb929beea9b3be652ba9e4',1,'main::VentanaPrincipal']]],
+  ['chk_5frestrict_5fdenials_13',['chk_restrict_denials',['../classmain_1_1VentanaPrincipal.html#a15aa99c3b76f99af50cf8099e6c21f2c',1,'main::VentanaPrincipal']]],
+  ['chk_5fskolems_5flast_14',['chk_skolems_last',['../classmain_1_1VentanaPrincipal.html#a94682ace679452a9e5af70e87273bd68',1,'main::VentanaPrincipal']]],
+  ['close_15',['close',['../classmain_1_1VentanaPrincipal.html#af328794235dd7f11d805bfe567ec8d4b',1,'main::VentanaPrincipal']]],
+  ['combo_5feq_5fdefs_16',['combo_eq_defs',['../classmain_1_1VentanaPrincipal.html#ac8ae15bc04adcd1685f7728d1edefb20',1,'main::VentanaPrincipal']]],
+  ['combo_5fgrupos_5fp9_17',['combo_grupos_p9',['../classmain_1_1VentanaPrincipal.html#a4a172e96daee0e9cb31c87094cbc10de',1,'main::VentanaPrincipal']]],
+  ['combo_5fiterate_18',['combo_iterate',['../classmain_1_1VentanaPrincipal.html#a2c0874ee5f8f4d3b78e2b5f2115ee3bc',1,'main::VentanaPrincipal']]],
+  ['combo_5forder_19',['combo_order',['../classmain_1_1VentanaPrincipal.html#ae8b9464d47e41df985f1b68c854d230f',1,'main::VentanaPrincipal']]],
+  ['combos_5ftraducibles_20',['combos_traducibles',['../classmain_1_1VentanaPrincipal.html#ab4c389d096fb6b9fca238fb2408b1d57',1,'main::VentanaPrincipal']]],
+  ['conclusion_5fm4_21',['conclusion_m4',['../classmain_1_1VentanaPrincipal.html#ae29f56bcd035f89d658ae01866842d94',1,'main::VentanaPrincipal']]],
+  ['conclusion_5fp9_22',['conclusion_p9',['../classmain_1_1VentanaPrincipal.html#a0076298a7d9569606932ae67d669949f',1,'main::VentanaPrincipal']]]
+];

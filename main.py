@@ -1,3 +1,18 @@
+## @mainpage Prover9-Mace4 GUI - Documentación Técnica
+#
+# @section intro_sec Introducción
+# Bienvenido a la documentación técnica de la Interfaz Gráfica de Usuario para los motores lógicos Prover9 y Mace4. 
+# Este software ha sido desarrollado como Trabajo de Fin de Grado para el Grado en Ingeniería Informática de la Universidad de Granada (UGR).
+#
+# @section arch_sec Arquitectura del Sistema
+# La aplicación está construida utilizando Python y PyQt6, siguiendo un patrón modular y escalable:
+# - <b>main.py</b>: Orquestación central, resaltado de sintaxis y gestión de eventos de la interfaz.
+# - <b>launcher.py</b>: Capa de abstracción para la ejecución segura de subprocesos multiplataforma.
+# - <b>idiomas.py</b>: Base de datos estática para la internacionalización y configuración estructural.
+#
+# @section author_sec Autor
+# Desarrollado por Antonio José Parras Flores.
+
 """
 @file main.py
 @brief Punto de entrada principal y definición de la interfaz gráfica de usuario (GUI).
@@ -9,6 +24,7 @@ y la orquestación entre la vista y los motores subyacentes.
 import sys
 import os
 import re
+
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QTextEdit, QPushButton, QLabel, 
                              QTabWidget, QFileDialog, QGroupBox, QCheckBox, QStackedWidget,
@@ -20,6 +36,15 @@ from qt_material import apply_stylesheet
 
 from launcher import ejecutar_prover9, ejecutar_mace4
 from idiomas import TRADUCCIONES, DICCIONARIO_PANELES, SCHEMA_PROVER9
+
+
+def ruta_recurso(ruta_relativa):
+    """Obtiene la ruta absoluta segura para PyInstaller"""
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, ruta_relativa)
 
 
 class HiloMotor(QThread):
@@ -141,7 +166,7 @@ class VentanaPrincipal(QMainWindow):
         @brief Construye la jerarquía visual de componentes (Layouts y Widgets).
         """
         self.setGeometry(100, 100, 1100, 900)
-        self.setWindowIcon(QIcon("icono_app.png"))
+        self.setWindowIcon(QIcon(ruta_recurso("icono_app.ico")))
         
         widget_central = QWidget()
         layout_central_ventana = QVBoxLayout(widget_central)
@@ -1397,7 +1422,7 @@ if __name__ == "__main__":
         pass
 
     app = QApplication(sys.argv)
-    QFontDatabase.addApplicationFont("Nexa-Heavy.ttf")
+    QFontDatabase.addApplicationFont(ruta_recurso("Nexa-Heavy.ttf"))
     
     extra_config = {
         'font_family': 'Nexa',

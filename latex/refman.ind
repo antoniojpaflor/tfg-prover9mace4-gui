@@ -1,0 +1,569 @@
+\begin{theindex}
+
+  \item {\_\_init\_\_}
+    \subitem {main.HiloMotor}, \hyperpage{19}
+    \subitem {main.ResaltadorProver9}, \hyperpage{21}
+    \subitem {main.VentanaPrincipal}, \hyperpage{27}
+
+  \indexspace
+
+  \item {abrir\_archivo}
+    \subitem {main.VentanaPrincipal}, \hyperpage{27}, \hyperpage{34}
+  \item {accion\_abrir}
+    \subitem {main.VentanaPrincipal}, \hyperpage{34}
+  \item {accion\_ej1}
+    \subitem {main.VentanaPrincipal}, \hyperpage{34}
+  \item {accion\_ej2}
+    \subitem {main.VentanaPrincipal}, \hyperpage{35}
+  \item {accion\_ej3}
+    \subitem {main.VentanaPrincipal}, \hyperpage{35}
+  \item {accion\_exportar}
+    \subitem {main.VentanaPrincipal}, \hyperpage{35}
+  \item {accion\_guardar}
+    \subitem {main.VentanaPrincipal}, \hyperpage{35}
+  \item {accion\_nuevo}
+    \subitem {main.VentanaPrincipal}, \hyperpage{35}
+  \item {accion\_salir}
+    \subitem {main.VentanaPrincipal}, \hyperpage{35}
+  \item {actualizar\_textos\_interfaz}
+    \subitem {main.VentanaPrincipal}, \hyperpage{27}, \hyperpage{35}
+  \item {actualizar\_titulo\_ventana}
+    \subitem {main.VentanaPrincipal}, \hyperpage{27}
+  \item {advertir\_cambios\_sin\_guardar}
+    \subitem {main.VentanaPrincipal}, \hyperpage{27}
+  \item {agregar\_al\_historial}
+    \subitem {main.VentanaPrincipal}, \hyperpage{27}
+  \item {al\_terminar\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{28}, \hyperpage{35}
+  \item {al\_terminar\_prover9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{28}, \hyperpage{35}
+  \item {all\_assigns\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{35}
+  \item {all\_flags\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{36}
+  \item {alternar\_modo\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{28}, \hyperpage{36}
+  \item {alternar\_modo\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{28}, \hyperpage{36}
+  \item {app}
+    \subitem {main}, \hyperpage{16}
+
+  \indexspace
+
+  \item {barra\_estado}
+    \subitem {main.VentanaPrincipal}, \hyperpage{36}
+  \item {botones\_ops\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{36}
+  \item {botones\_ops\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{36}
+  \item {botones\_reset\_cats}
+    \subitem {main.VentanaPrincipal}, \hyperpage{36}
+  \item {btn\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{36}
+  \item {btn\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{36}
+  \item {btn\_reset\_basico\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{36}
+  \item {btn\_reset\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+
+  \indexspace
+
+  \item {cambiar\_idioma}
+    \subitem {main.VentanaPrincipal}, \hyperpage{29}
+  \item {cargar\_ejemplo\_tipo}
+    \subitem {main.VentanaPrincipal}, \hyperpage{29}
+  \item {chk\_expand\_relational}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_integer\_ring}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_lnh}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_modo\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_modo\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_neg\_assign}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_neg\_assign\_near}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_neg\_elim}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_neg\_elim\_near}
+    \subitem {main.VentanaPrincipal}, \hyperpage{37}
+  \item {chk\_negprop}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {chk\_print\_models}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {chk\_prolog\_vars}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {chk\_prolog\_vars\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {chk\_restrict\_denials}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {chk\_skolems\_last}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {close}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {closeEvent}
+    \subitem {main.VentanaPrincipal}, \hyperpage{29}
+  \item {cocinar\_entrada\_directa}
+    \subitem {main.VentanaPrincipal}, \hyperpage{29}
+  \item {cocinar\_entrada\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{29}
+  \item {cocinar\_entrada\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{30}
+  \item {combo\_eq\_defs}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {combo\_grupos\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {combo\_iterate}
+    \subitem {main.VentanaPrincipal}, \hyperpage{38}
+  \item {combo\_order}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {combos\_traducibles}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {conclusion\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {conclusion\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {configurar\_tab\_mace4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{30}
+  \item {configurar\_tab\_prover9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{30}
+  \item {crear\_barra\_menus}
+    \subitem {main.VentanaPrincipal}, \hyperpage{30}
+  \item {crear\_panel\_insercion}
+    \subitem {main.VentanaPrincipal}, \hyperpage{30}
+  \item {crear\_panel\_opciones\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{31}
+  \item {crear\_panel\_opciones\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{31}
+
+  \indexspace
+
+  \item {datos\_historial}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {DICCIONARIO\_PANELES}
+    \subitem {idiomas}, \hyperpage{13}
+
+  \indexspace
+
+  \item {editor}
+    \subitem {main.ResaltadorProver9}, \hyperpage{21}
+  \item {ejecutar\_mace4}
+    \subitem {launcher}, \hyperpage{14}
+  \item {ejecutar\_motor\_logico}
+    \subitem {launcher}, \hyperpage{14}
+  \item {ejecutar\_prover9}
+    \subitem {launcher}, \hyperpage{15}
+  \item {entrada\_libre\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {entrada\_libre\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {eventFilter}
+    \subitem {main.VentanaPrincipal}, \hyperpage{31}
+  \item {exportar\_salida}
+    \subitem {main.VentanaPrincipal}, \hyperpage{31}, \hyperpage{39}
+  \item {extra}
+    \subitem {main}, \hyperpage{16}
+  \item {extra\_config}
+    \subitem {main}, \hyperpage{16}
+  \item {extraer\_formulas\_regex}
+    \subitem {main.VentanaPrincipal}, \hyperpage{31}
+  \item {extraer\_texto\_util}
+    \subitem {main.VentanaPrincipal}, \hyperpage{32}
+
+  \indexspace
+
+  \item {grupo\_all\_options}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {grupo\_basico\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{39}
+  \item {grupo\_basico\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {grupo\_exp\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {grupo\_historial}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {grupo\_ins\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {grupo\_ins\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {grupo\_opciones\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {grupo\_opciones\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {grupo\_otros\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {guardar\_archivo}
+    \subitem {main.VentanaPrincipal}, \hyperpage{32}, \hyperpage{40}
+
+  \indexspace
+
+  \item {highlightBlock}
+    \subitem {main.ResaltadorProver9}, \hyperpage{21}
+  \item {hilo\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{40}
+  \item {hilo\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+
+  \indexspace
+
+  \item {idioma\_actual}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {idiomas}, \hyperpage{13}
+    \subitem {DICCIONARIO\_PANELES}, \hyperpage{13}
+    \subitem {SCHEMA\_PROVER9}, \hyperpage{13}
+    \subitem {TRADUCCIONES}, \hyperpage{14}
+  \item {idiomas.py}, \hyperpage{47}
+  \item {init\_ui}
+    \subitem {main.VentanaPrincipal}, \hyperpage{32}
+  \item {inyectar\_operador\_inteligente}
+    \subitem {main.VentanaPrincipal}, \hyperpage{32}
+
+  \indexspace
+
+  \item {labels\_subcategorias}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {launcher}, \hyperpage{14}
+    \subitem {ejecutar\_mace4}, \hyperpage{14}
+    \subitem {ejecutar\_motor\_logico}, \hyperpage{14}
+    \subitem {ejecutar\_prover9}, \hyperpage{15}
+    \subitem {obtener\_ruta\_recurso}, \hyperpage{15}
+  \item {launcher.py}, \hyperpage{47}
+  \item {lbl\_conclusion\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {lbl\_libre\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {lbl\_libre\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {lbl\_objetivo\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {lbl\_ops\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {lbl\_ops\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {lbl\_premisas\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{41}
+  \item {lbl\_premisas\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {lbl\_res\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {lbl\_res\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {limpiar\_y\_traducir\_error}
+    \subitem {main.VentanaPrincipal}, \hyperpage{32}
+
+  \indexspace
+
+  \item {main}, \hyperpage{15}
+    \subitem {app}, \hyperpage{16}
+    \subitem {extra}, \hyperpage{16}
+    \subitem {extra\_config}, \hyperpage{16}
+    \subitem {myappid}, \hyperpage{16}
+    \subitem {ruta\_recurso}, \hyperpage{16}
+    \subitem {theme}, \hyperpage{16}
+    \subitem {ventana}, \hyperpage{16}
+  \item {main.HiloMotor}, \hyperpage{17}
+    \subitem {\_\_init\_\_}, \hyperpage{19}
+    \subitem {motor}, \hyperpage{19}
+    \subitem {resultado\_listo}, \hyperpage{19}
+    \subitem {run}, \hyperpage{19}
+    \subitem {snapshot}, \hyperpage{19}
+    \subitem {texto\_final}, \hyperpage{19}
+    \subitem {tiempo\_limite}, \hyperpage{19}
+  \item {main.py}, \hyperpage{48}
+  \item {main.ResaltadorProver9}, \hyperpage{20}
+    \subitem {\_\_init\_\_}, \hyperpage{21}
+    \subitem {editor}, \hyperpage{21}
+    \subitem {highlightBlock}, \hyperpage{21}
+    \subitem {reglas}, \hyperpage{21}
+  \item {main.VentanaPrincipal}, \hyperpage{22}
+    \subitem {\_\_init\_\_}, \hyperpage{27}
+    \subitem {abrir\_archivo}, \hyperpage{27}, \hyperpage{34}
+    \subitem {accion\_abrir}, \hyperpage{34}
+    \subitem {accion\_ej1}, \hyperpage{34}
+    \subitem {accion\_ej2}, \hyperpage{35}
+    \subitem {accion\_ej3}, \hyperpage{35}
+    \subitem {accion\_exportar}, \hyperpage{35}
+    \subitem {accion\_guardar}, \hyperpage{35}
+    \subitem {accion\_nuevo}, \hyperpage{35}
+    \subitem {accion\_salir}, \hyperpage{35}
+    \subitem {actualizar\_textos\_interfaz}, \hyperpage{27}, 
+		\hyperpage{35}
+    \subitem {actualizar\_titulo\_ventana}, \hyperpage{27}
+    \subitem {advertir\_cambios\_sin\_guardar}, \hyperpage{27}
+    \subitem {agregar\_al\_historial}, \hyperpage{27}
+    \subitem {al\_terminar\_m4}, \hyperpage{28}, \hyperpage{35}
+    \subitem {al\_terminar\_prover9}, \hyperpage{28}, \hyperpage{35}
+    \subitem {all\_assigns\_p9}, \hyperpage{35}
+    \subitem {all\_flags\_p9}, \hyperpage{36}
+    \subitem {alternar\_modo\_m4}, \hyperpage{28}, \hyperpage{36}
+    \subitem {alternar\_modo\_p9}, \hyperpage{28}, \hyperpage{36}
+    \subitem {barra\_estado}, \hyperpage{36}
+    \subitem {botones\_ops\_m4}, \hyperpage{36}
+    \subitem {botones\_ops\_p9}, \hyperpage{36}
+    \subitem {botones\_reset\_cats}, \hyperpage{36}
+    \subitem {btn\_m4}, \hyperpage{36}
+    \subitem {btn\_p9}, \hyperpage{36}
+    \subitem {btn\_reset\_basico\_p9}, \hyperpage{36}
+    \subitem {btn\_reset\_m4}, \hyperpage{37}
+    \subitem {cambiar\_idioma}, \hyperpage{29}
+    \subitem {cargar\_ejemplo\_tipo}, \hyperpage{29}
+    \subitem {chk\_expand\_relational}, \hyperpage{37}
+    \subitem {chk\_integer\_ring}, \hyperpage{37}
+    \subitem {chk\_lnh}, \hyperpage{37}
+    \subitem {chk\_modo\_m4}, \hyperpage{37}
+    \subitem {chk\_modo\_p9}, \hyperpage{37}
+    \subitem {chk\_neg\_assign}, \hyperpage{37}
+    \subitem {chk\_neg\_assign\_near}, \hyperpage{37}
+    \subitem {chk\_neg\_elim}, \hyperpage{37}
+    \subitem {chk\_neg\_elim\_near}, \hyperpage{37}
+    \subitem {chk\_negprop}, \hyperpage{38}
+    \subitem {chk\_print\_models}, \hyperpage{38}
+    \subitem {chk\_prolog\_vars}, \hyperpage{38}
+    \subitem {chk\_prolog\_vars\_m4}, \hyperpage{38}
+    \subitem {chk\_restrict\_denials}, \hyperpage{38}
+    \subitem {chk\_skolems\_last}, \hyperpage{38}
+    \subitem {close}, \hyperpage{38}
+    \subitem {closeEvent}, \hyperpage{29}
+    \subitem {cocinar\_entrada\_directa}, \hyperpage{29}
+    \subitem {cocinar\_entrada\_m4}, \hyperpage{29}
+    \subitem {cocinar\_entrada\_p9}, \hyperpage{30}
+    \subitem {combo\_eq\_defs}, \hyperpage{38}
+    \subitem {combo\_grupos\_p9}, \hyperpage{38}
+    \subitem {combo\_iterate}, \hyperpage{38}
+    \subitem {combo\_order}, \hyperpage{39}
+    \subitem {combos\_traducibles}, \hyperpage{39}
+    \subitem {conclusion\_m4}, \hyperpage{39}
+    \subitem {conclusion\_p9}, \hyperpage{39}
+    \subitem {configurar\_tab\_mace4}, \hyperpage{30}
+    \subitem {configurar\_tab\_prover9}, \hyperpage{30}
+    \subitem {crear\_barra\_menus}, \hyperpage{30}
+    \subitem {crear\_panel\_insercion}, \hyperpage{30}
+    \subitem {crear\_panel\_opciones\_m4}, \hyperpage{31}
+    \subitem {crear\_panel\_opciones\_p9}, \hyperpage{31}
+    \subitem {datos\_historial}, \hyperpage{39}
+    \subitem {entrada\_libre\_m4}, \hyperpage{39}
+    \subitem {entrada\_libre\_p9}, \hyperpage{39}
+    \subitem {eventFilter}, \hyperpage{31}
+    \subitem {exportar\_salida}, \hyperpage{31}, \hyperpage{39}
+    \subitem {extraer\_formulas\_regex}, \hyperpage{31}
+    \subitem {extraer\_texto\_util}, \hyperpage{32}
+    \subitem {grupo\_all\_options}, \hyperpage{39}
+    \subitem {grupo\_basico\_m4}, \hyperpage{39}
+    \subitem {grupo\_basico\_p9}, \hyperpage{40}
+    \subitem {grupo\_exp\_m4}, \hyperpage{40}
+    \subitem {grupo\_historial}, \hyperpage{40}
+    \subitem {grupo\_ins\_m4}, \hyperpage{40}
+    \subitem {grupo\_ins\_p9}, \hyperpage{40}
+    \subitem {grupo\_opciones\_m4}, \hyperpage{40}
+    \subitem {grupo\_opciones\_p9}, \hyperpage{40}
+    \subitem {grupo\_otros\_m4}, \hyperpage{40}
+    \subitem {guardar\_archivo}, \hyperpage{32}, \hyperpage{40}
+    \subitem {hilo\_m4}, \hyperpage{40}
+    \subitem {hilo\_p9}, \hyperpage{41}
+    \subitem {idioma\_actual}, \hyperpage{41}
+    \subitem {init\_ui}, \hyperpage{32}
+    \subitem {inyectar\_operador\_inteligente}, \hyperpage{32}
+    \subitem {labels\_subcategorias}, \hyperpage{41}
+    \subitem {lbl\_conclusion\_p9}, \hyperpage{41}
+    \subitem {lbl\_libre\_m4}, \hyperpage{41}
+    \subitem {lbl\_libre\_p9}, \hyperpage{41}
+    \subitem {lbl\_objetivo\_m4}, \hyperpage{41}
+    \subitem {lbl\_ops\_m4}, \hyperpage{41}
+    \subitem {lbl\_ops\_p9}, \hyperpage{41}
+    \subitem {lbl\_premisas\_m4}, \hyperpage{41}
+    \subitem {lbl\_premisas\_p9}, \hyperpage{42}
+    \subitem {lbl\_res\_m4}, \hyperpage{42}
+    \subitem {lbl\_res\_p9}, \hyperpage{42}
+    \subitem {limpiar\_y\_traducir\_error}, \hyperpage{32}
+    \subitem {menu\_archivo}, \hyperpage{42}
+    \subitem {menu\_ejemplos}, \hyperpage{42}
+    \subitem {menu\_idioma}, \hyperpage{42}
+    \subitem {nombres\_categorias}, \hyperpage{42}
+    \subitem {nuevo\_proyecto}, \hyperpage{33}, \hyperpage{42}
+    \subitem {obtener\_estado\_actual}, \hyperpage{33}
+    \subitem {premisas\_m4}, \hyperpage{42}
+    \subitem {premisas\_p9}, \hyperpage{42}
+    \subitem {procesar\_mace4}, \hyperpage{33}, \hyperpage{43}
+    \subitem {procesar\_prover9}, \hyperpage{33}, \hyperpage{43}
+    \subitem {recuperar\_desde\_historial}, \hyperpage{33}, 
+		\hyperpage{43}
+    \subitem {resaltador\_conclusion\_m4}, \hyperpage{43}
+    \subitem {resaltador\_conclusion\_p9}, \hyperpage{43}
+    \subitem {resaltador\_libre\_m4}, \hyperpage{43}
+    \subitem {resaltador\_libre\_p9}, \hyperpage{43}
+    \subitem {resaltador\_premisas\_m4}, \hyperpage{43}
+    \subitem {resaltador\_premisas\_p9}, \hyperpage{43}
+    \subitem {reset\_categoria\_p9}, \hyperpage{34}
+    \subitem {reset\_opciones\_m4}, \hyperpage{34}, \hyperpage{43}
+    \subitem {reset\_opciones\_p9}, \hyperpage{34}, \hyperpage{44}
+    \subitem {ruta\_archivo\_actual}, \hyperpage{44}
+    \subitem {salida\_m4}, \hyperpage{44}
+    \subitem {salida\_p9}, \hyperpage{44}
+    \subitem {snapshot\_guardado}, \hyperpage{44}
+    \subitem {spin\_domain\_size}, \hyperpage{44}
+    \subitem {spin\_end\_size}, \hyperpage{44}
+    \subitem {spin\_increment}, \hyperpage{44}
+    \subitem {spin\_max\_megs}, \hyperpage{44}
+    \subitem {spin\_max\_models}, \hyperpage{44}
+    \subitem {spin\_max\_seconds\_m4}, \hyperpage{45}
+    \subitem {spin\_max\_seconds\_p9}, \hyperpage{45}
+    \subitem {spin\_max\_seconds\_per}, \hyperpage{45}
+    \subitem {spin\_max\_weight}, \hyperpage{45}
+    \subitem {spin\_pick\_ratio}, \hyperpage{45}
+    \subitem {spin\_selection\_measure}, \hyperpage{45}
+    \subitem {spin\_selection\_order}, \hyperpage{45}
+    \subitem {spin\_start\_size}, \hyperpage{45}
+    \subitem {stack\_opciones\_p9}, \hyperpage{45}
+    \subitem {tab\_mace4}, \hyperpage{45}
+    \subitem {tab\_prover9}, \hyperpage{46}
+    \subitem {tabla\_historial}, \hyperpage{46}
+    \subitem {tabs}, \hyperpage{46}
+    \subitem {vista\_stack\_m4}, \hyperpage{46}
+    \subitem {vista\_stack\_p9}, \hyperpage{46}
+  \item {menu\_archivo}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {menu\_ejemplos}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {menu\_idioma}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {motor}
+    \subitem {main.HiloMotor}, \hyperpage{19}
+  \item {myappid}
+    \subitem {main}, \hyperpage{16}
+
+  \indexspace
+
+  \item {nombres\_categorias}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {nuevo\_proyecto}
+    \subitem {main.VentanaPrincipal}, \hyperpage{33}, \hyperpage{42}
+
+  \indexspace
+
+  \item {obtener\_estado\_actual}
+    \subitem {main.VentanaPrincipal}, \hyperpage{33}
+  \item {obtener\_ruta\_recurso}
+    \subitem {launcher}, \hyperpage{15}
+
+  \indexspace
+
+  \item {premisas\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {premisas\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{42}
+  \item {procesar\_mace4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{33}, \hyperpage{43}
+  \item {procesar\_prover9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{33}, \hyperpage{43}
+  \item {Prover9-\/Mace4 GUI -\/ Documentación Técnica}, 
+		\hyperpage{1}
+
+  \indexspace
+
+  \item {README.md}, \hyperpage{48}
+  \item {recuperar\_desde\_historial}
+    \subitem {main.VentanaPrincipal}, \hyperpage{33}, \hyperpage{43}
+  \item {reglas}
+    \subitem {main.ResaltadorProver9}, \hyperpage{21}
+  \item {resaltador\_conclusion\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{43}
+  \item {resaltador\_conclusion\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{43}
+  \item {resaltador\_libre\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{43}
+  \item {resaltador\_libre\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{43}
+  \item {resaltador\_premisas\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{43}
+  \item {resaltador\_premisas\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{43}
+  \item {reset\_categoria\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{34}
+  \item {reset\_opciones\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{34}, \hyperpage{43}
+  \item {reset\_opciones\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{34}, \hyperpage{44}
+  \item {resultado\_listo}
+    \subitem {main.HiloMotor}, \hyperpage{19}
+  \item {run}
+    \subitem {main.HiloMotor}, \hyperpage{19}
+  \item {ruta\_archivo\_actual}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {ruta\_recurso}
+    \subitem {main}, \hyperpage{16}
+
+  \indexspace
+
+  \item {salida\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {salida\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {SCHEMA\_PROVER9}
+    \subitem {idiomas}, \hyperpage{13}
+  \item {snapshot}
+    \subitem {main.HiloMotor}, \hyperpage{19}
+  \item {snapshot\_guardado}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {spin\_domain\_size}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {spin\_end\_size}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {spin\_increment}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {spin\_max\_megs}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {spin\_max\_models}
+    \subitem {main.VentanaPrincipal}, \hyperpage{44}
+  \item {spin\_max\_seconds\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {spin\_max\_seconds\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {spin\_max\_seconds\_per}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {spin\_max\_weight}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {spin\_pick\_ratio}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {spin\_selection\_measure}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {spin\_selection\_order}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {spin\_start\_size}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {stack\_opciones\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+
+  \indexspace
+
+  \item {tab\_mace4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{45}
+  \item {tab\_prover9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{46}
+  \item {tabla\_historial}
+    \subitem {main.VentanaPrincipal}, \hyperpage{46}
+  \item {tabs}
+    \subitem {main.VentanaPrincipal}, \hyperpage{46}
+  \item {texto\_final}
+    \subitem {main.HiloMotor}, \hyperpage{19}
+  \item {tfg-\/prover9mace4-\/gui}, \hyperpage{3}
+  \item {theme}
+    \subitem {main}, \hyperpage{16}
+  \item {tiempo\_limite}
+    \subitem {main.HiloMotor}, \hyperpage{19}
+  \item {TRADUCCIONES}
+    \subitem {idiomas}, \hyperpage{14}
+
+  \indexspace
+
+  \item {ventana}
+    \subitem {main}, \hyperpage{16}
+  \item {vista\_stack\_m4}
+    \subitem {main.VentanaPrincipal}, \hyperpage{46}
+  \item {vista\_stack\_p9}
+    \subitem {main.VentanaPrincipal}, \hyperpage{46}
+
+\end{theindex}

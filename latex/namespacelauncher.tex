@@ -1,0 +1,78 @@
+\doxysection{launcher Namespace Reference}
+\hypertarget{namespacelauncher}{}\label{namespacelauncher}\index{launcher@{launcher}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacelauncher_a364b9d9271bcee1fa213e418d0367b8e}{obtener\+\_\+ruta\+\_\+recurso}} (nombre\+\_\+archivo)
+\item 
+\mbox{\hyperlink{namespacelauncher_a3ba03c61c6f6fee02abbc07b926b48bf}{ejecutar\+\_\+motor\+\_\+logico}} (comando\+\_\+base, texto\+\_\+entrada, tiempo\+\_\+limite=3)
+\item 
+\mbox{\hyperlink{namespacelauncher_a1894d213d11811b141c6926dde8b4ef5}{ejecutar\+\_\+prover9}} (texto\+\_\+entrada, tiempo\+\_\+limite=5)
+\item 
+\mbox{\hyperlink{namespacelauncher_a57255712975de413219ee3a32c44a390}{ejecutar\+\_\+mace4}} (texto\+\_\+entrada, tiempo\+\_\+limite=3)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}@file launcher.py
+@brief Módulo de ejecución y comunicación con los motores lógicos Prover9 y Mace4.
+
+Este módulo abstrae la capa del sistema operativo, encargándose de localizar
+los binarios adecuados según la plataforma (Windows, Linux, macOS) y lanzar 
+los subprocesos de manera segura controlando los tiempos de ejecución.
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespacelauncher_a57255712975de413219ee3a32c44a390}\label{namespacelauncher_a57255712975de413219ee3a32c44a390} 
+\index{launcher@{launcher}!ejecutar\_mace4@{ejecutar\_mace4}}
+\index{ejecutar\_mace4@{ejecutar\_mace4}!launcher@{launcher}}
+\doxysubsubsection{\texorpdfstring{ejecutar\_mace4()}{ejecutar\_mace4()}}
+{\footnotesize\ttfamily launcher.\+ejecutar\+\_\+mace4 (\begin{DoxyParamCaption}\item[{}]{texto\+\_\+entrada,  }\item[{}]{tiempo\+\_\+limite = {\ttfamily 3} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Envoltorio específico para ejecutar el buscador de modelos finitos Mace4.
+
+@param texto_entrada Código fuente de Mace4 listo para ser procesado.
+@param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 3).
+@return Tupla que contiene la cadena de texto con el resultado crudo y la hora de ejecución.
+\end{DoxyVerb}
+ \Hypertarget{namespacelauncher_a3ba03c61c6f6fee02abbc07b926b48bf}\label{namespacelauncher_a3ba03c61c6f6fee02abbc07b926b48bf} 
+\index{launcher@{launcher}!ejecutar\_motor\_logico@{ejecutar\_motor\_logico}}
+\index{ejecutar\_motor\_logico@{ejecutar\_motor\_logico}!launcher@{launcher}}
+\doxysubsubsection{\texorpdfstring{ejecutar\_motor\_logico()}{ejecutar\_motor\_logico()}}
+{\footnotesize\ttfamily launcher.\+ejecutar\+\_\+motor\+\_\+logico (\begin{DoxyParamCaption}\item[{}]{comando\+\_\+base,  }\item[{}]{texto\+\_\+entrada,  }\item[{}]{tiempo\+\_\+limite = {\ttfamily 3} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Ejecuta un motor lógico como subproceso y captura su salida.
+
+Configura el entorno según el sistema operativo, busca el binario 
+correspondiente y maneja los tiempos de espera y errores del sistema.
+
+@param comando_base Lista con el nombre del motor (ej. ['prover9']).
+@param texto_entrada Código fuente en formato cadena para ser procesado.
+@param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 3).
+@return Salida estándar (stdout) del motor lógico o mensaje de error formateado.
+\end{DoxyVerb}
+ \Hypertarget{namespacelauncher_a1894d213d11811b141c6926dde8b4ef5}\label{namespacelauncher_a1894d213d11811b141c6926dde8b4ef5} 
+\index{launcher@{launcher}!ejecutar\_prover9@{ejecutar\_prover9}}
+\index{ejecutar\_prover9@{ejecutar\_prover9}!launcher@{launcher}}
+\doxysubsubsection{\texorpdfstring{ejecutar\_prover9()}{ejecutar\_prover9()}}
+{\footnotesize\ttfamily launcher.\+ejecutar\+\_\+prover9 (\begin{DoxyParamCaption}\item[{}]{texto\+\_\+entrada,  }\item[{}]{tiempo\+\_\+limite = {\ttfamily 5} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Envoltorio específico para ejecutar el demostrador de teoremas Prover9.
+
+@param texto_entrada Código fuente de Prover9 listo para ser procesado.
+@param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 5).
+@return Tupla que contiene la cadena de texto con el resultado crudo y la hora de ejecución.
+\end{DoxyVerb}
+ \Hypertarget{namespacelauncher_a364b9d9271bcee1fa213e418d0367b8e}\label{namespacelauncher_a364b9d9271bcee1fa213e418d0367b8e} 
+\index{launcher@{launcher}!obtener\_ruta\_recurso@{obtener\_ruta\_recurso}}
+\index{obtener\_ruta\_recurso@{obtener\_ruta\_recurso}!launcher@{launcher}}
+\doxysubsubsection{\texorpdfstring{obtener\_ruta\_recurso()}{obtener\_ruta\_recurso()}}
+{\footnotesize\ttfamily launcher.\+obtener\+\_\+ruta\+\_\+recurso (\begin{DoxyParamCaption}\item[{}]{nombre\+\_\+archivo }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Obtiene la ruta absoluta al recurso, compatible con desarrollo y con PyInstaller.
+
+@param nombre_archivo Nombre del archivo binario a buscar (con o sin extensión .exe).
+@return Ruta completa y segura al ejecutable dentro de la carpeta 'bin'.
+\end{DoxyVerb}
+ 

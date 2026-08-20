@@ -42,21 +42,32 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
     sistema = platform.system()
     nombre_binario = comando_base[0]
     
+    # Asignación dinámica del nombre del binario según el Sistema Operativo
     if sistema == 'Windows':
         nombre_binario += '.exe'
+    elif sistema == 'Linux':
+        nombre_binario += '_linux'
+    elif sistema == 'Darwin':
+        nombre_binario += '_mac'
         
     ruta_binario = obtener_ruta_recurso(nombre_binario)
     comando_final = [ruta_binario] + comando_base[1:]
     proceso = None
     
+    # Preparar parámetros del subproceso
+    opciones_subproceso = {
+        'stdin': subprocess.PIPE,
+        'stdout': subprocess.PIPE,
+        'stderr': subprocess.PIPE,
+        'text': True
+    }
+    
+    # Evitar el parpadeo de la consola negra en Windows
+    if sistema == 'Windows':
+        opciones_subproceso['creationflags'] = subprocess.CREATE_NO_WINDOW
+    
     try:
-        proceso = subprocess.Popen(
-            comando_final,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+        proceso = subprocess.Popen(comando_final, **opciones_subproceso)
         stdout, stderr = proceso.communicate(input=texto_entrada, timeout=tiempo_limite)
         
         if proceso.returncode != 0 and not stdout:
@@ -85,7 +96,7 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
         return f"Error crítico: No se encuentra el ejecutable en la ruta {ruta_binario}. Revisa la carpeta 'bin/'."
         
     except OSError as e:
-        return f"Error del sistema operativo (¿es un .exe válido?):\n{str(e)}"
+        return f"Error del sistema operativo:\n{str(e)}"
 
 
 def ejecutar_prover9(texto_entrada, tiempo_limite=5):

@@ -1,0 +1,20 @@
+var searchData=
+[
+  ['abrir_5farchivo_0',['abrir_archivo',['../classmain_1_1VentanaPrincipal.html#a722b06a42a8e6a8eff619c2bb95633bd',1,'main::VentanaPrincipal']]],
+  ['accion_5fabrir_1',['accion_abrir',['../classmain_1_1VentanaPrincipal.html#a9770a3cefc9c7033058e1d053ec29a71',1,'main::VentanaPrincipal']]],
+  ['accion_5fej1_2',['accion_ej1',['../classmain_1_1VentanaPrincipal.html#a33b32cde9b2d3ccc8af184ea770915dd',1,'main::VentanaPrincipal']]],
+  ['accion_5fej2_3',['accion_ej2',['../classmain_1_1VentanaPrincipal.html#ac3bcf4e244db3abe4a27b977a625e46b',1,'main::VentanaPrincipal']]],
+  ['accion_5fej3_4',['accion_ej3',['../classmain_1_1VentanaPrincipal.html#aa2f40b1d4875e2d1d224b0a93fcbe69f',1,'main::VentanaPrincipal']]],
+  ['accion_5fexportar_5',['accion_exportar',['../classmain_1_1VentanaPrincipal.html#a9e3b3dbf464eeeeb72e84b724c5eff31',1,'main::VentanaPrincipal']]],
+  ['accion_5fguardar_6',['accion_guardar',['../classmain_1_1VentanaPrincipal.html#a54b26ee84994a7e28f272d638ae61ad3',1,'main::VentanaPrincipal']]],
+  ['accion_5fnuevo_7',['accion_nuevo',['../classmain_1_1VentanaPrincipal.html#a2bbf2703ca5d0c2bf019afd10f81d399',1,'main::VentanaPrincipal']]],
+  ['accion_5fsalir_8',['accion_salir',['../classmain_1_1VentanaPrincipal.html#a0627ca402022d6e16f074f633ccb4664',1,'main::VentanaPrincipal']]],
+  ['actualizar_5ftextos_5finterfaz_9',['actualizar_textos_interfaz',['../classmain_1_1VentanaPrincipal.html#a076c05286dcbdd6b846a8b9f1da92d7c',1,'main::VentanaPrincipal']]],
+  ['al_5fterminar_5fm4_10',['al_terminar_m4',['../classmain_1_1VentanaPrincipal.html#a14aeba2daa4cc01e140ec56b603011b0',1,'main::VentanaPrincipal']]],
+  ['al_5fterminar_5fprover9_11',['al_terminar_prover9',['../classmain_1_1VentanaPrincipal.html#acdfdde35ea20a09484551aaa8bc985b0',1,'main::VentanaPrincipal']]],
+  ['all_5fassigns_5fp9_12',['all_assigns_p9',['../classmain_1_1VentanaPrincipal.html#addda20ac5f534d0864d93c545e83c57f',1,'main::VentanaPrincipal']]],
+  ['all_5fflags_5fp9_13',['all_flags_p9',['../classmain_1_1VentanaPrincipal.html#adc6ef70b016f04492cfdc17fb7721e18',1,'main::VentanaPrincipal']]],
+  ['alternar_5fmodo_5fm4_14',['alternar_modo_m4',['../classmain_1_1VentanaPrincipal.html#aef4320a8a518b0f4dd3ad0111e7bc077',1,'main::VentanaPrincipal']]],
+  ['alternar_5fmodo_5fp9_15',['alternar_modo_p9',['../classmain_1_1VentanaPrincipal.html#a3f057cfa5eccf754fe710b9622abd1b8',1,'main::VentanaPrincipal']]],
+  ['app_16',['app',['../namespacemain.html#a5fa94f0581009434c7a63791944d6ff4',1,'main']]]
+];

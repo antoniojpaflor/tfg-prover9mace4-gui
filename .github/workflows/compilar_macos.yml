@@ -44,3 +44,11 @@ jobs:
         with:
           name: Ejecutable-macOS
           path: dist/Prover9-Mace4-GUI_v1.0.0_macOS.zip
+      
+      - name: 8. Rescatar binarios sueltos de macOS
+        uses: actions/upload-artifact@v4
+        with:
+          name: Binarios-macOS
+          path: |
+            bin/prover9_mac
+            bin/mace4_mac
