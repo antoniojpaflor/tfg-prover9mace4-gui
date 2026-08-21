@@ -42,7 +42,6 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
     sistema = platform.system()
     nombre_binario = comando_base[0]
     
-    # Asignación dinámica del nombre del binario según el Sistema Operativo
     if sistema == 'Windows':
         nombre_binario += '.exe'
     elif sistema == 'Linux':
@@ -54,7 +53,6 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
     comando_final = [ruta_binario] + comando_base[1:]
     proceso = None
     
-    # Preparar parámetros del subproceso
     opciones_subproceso = {
         'stdin': subprocess.PIPE,
         'stdout': subprocess.PIPE,
@@ -62,7 +60,6 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
         'text': True
     }
     
-    # Evitar el parpadeo de la consola negra en Windows
     if sistema == 'Windows':
         opciones_subproceso['creationflags'] = subprocess.CREATE_NO_WINDOW
     
