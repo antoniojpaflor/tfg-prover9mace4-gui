@@ -11,7 +11,7 @@
 # - <b>idiomas.py</b>: Base de datos estática para la internacionalización y configuración estructural.
 #
 # @section author_sec Autor
-# Desarrollado por Antonio José Parras Flores.
+# Desarrollado por Antonio Jose Parras Flores.
 
 """
 @file main.py
@@ -20,6 +20,10 @@
 Este archivo contiene la lógica principal de la aplicación, definiendo la ventana
 principal, el resaltado de sintaxis, la gestión asíncrona de procesos lógicos 
 y la orquestación entre la vista y los motores subyacentes.
+
+@author Antonio Jose Parras Flores
+@date Septiembre 2026
+@version 1.0.0
 """
 import sys
 import os
@@ -39,7 +43,12 @@ from idiomas import TRADUCCIONES, DICCIONARIO_PANELES, SCHEMA_PROVER9
 
 
 def ruta_recurso(ruta_relativa):
-    """Obtiene la ruta absoluta segura para PyInstaller"""
+    """
+    @brief Obtiene la ruta absoluta segura para PyInstaller.
+    
+    @param ruta_relativa Cadena con el nombre del recurso a buscar.
+    @return Ruta absoluta generada dinámicamente por el sistema operativo.
+    """
     try:
         base_path = sys._MEIPASS
     except Exception:
