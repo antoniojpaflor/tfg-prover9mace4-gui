@@ -13,7 +13,7 @@
 # @section author_sec Autor
 # Desarrollado por Antonio Jose Parras Flores.
 
-"""
+"""!
 @file main.py
 @brief Punto de entrada principal y definición de la interfaz gráfica de usuario (GUI).
 
@@ -43,7 +43,7 @@ from idiomas import TRADUCCIONES, DICCIONARIO_PANELES, SCHEMA_PROVER9
 
 
 def ruta_recurso(ruta_relativa):
-    """
+    """!
     @brief Obtiene la ruta absoluta segura para PyInstaller.
     
     @param ruta_relativa Cadena con el nombre del recurso a buscar.
@@ -57,7 +57,7 @@ def ruta_recurso(ruta_relativa):
 
 
 class HiloMotor(QThread):
-    """
+    """!
     @brief Hilo secundario para ejecutar los motores lógicos de forma asíncrona.
     
     Evita que la interfaz gráfica (GUI) se congele mientras Prover9 o Mace4
@@ -66,7 +66,7 @@ class HiloMotor(QThread):
     resultado_listo = pyqtSignal(str, str, dict)
 
     def __init__(self, motor, texto_final, tiempo_limite, snapshot):
-        """
+        """!
         @brief Constructor del hilo de ejecución.
         
         @param motor Nombre del motor a utilizar ('prover9' o 'mace4').
@@ -81,7 +81,7 @@ class HiloMotor(QThread):
         self.snapshot = snapshot
 
     def run(self):
-        """
+        """!
         @brief Método principal que se ejecuta en el subproceso.
         """
         if self.motor == 'prover9':
@@ -92,14 +92,14 @@ class HiloMotor(QThread):
 
 
 class ResaltadorProver9(QSyntaxHighlighter):
-    """
+    """!
     @brief Gestor de resaltado de sintaxis en tiempo real.
     
     Aplica colores específicos a operadores lógicos, palabras clave,
     bloques estructurales y comentarios en los editores de texto.
     """
     def __init__(self, editor):
-        """
+        """!
         @brief Inicializa el resaltador y define las expresiones regulares.
         
         @param editor Referencia al QTextEdit donde se aplicará el resaltado.
@@ -133,7 +133,7 @@ class ResaltadorProver9(QSyntaxHighlighter):
         self.reglas.append((QRegularExpression(r"%.*"), formato_comentario))
 
     def highlightBlock(self, text):
-        """
+        """!
         @brief Aplica los formatos definidos a un bloque de texto.
         
         @param text Texto actual sobre el que se evalúan las expresiones regulares.
@@ -150,14 +150,14 @@ class ResaltadorProver9(QSyntaxHighlighter):
 
 
 class VentanaPrincipal(QMainWindow):
-    """
+    """!
     @brief Clase central de la aplicación de escritorio.
     
     Gestiona la construcción visual, el ciclo de vida de los eventos,
     el estado interno, la internacionalización y la conexión de señales y slots.
     """
     def __init__(self):
-        """
+        """!
         @brief Constructor de la ventana principal.
         """
         super().__init__()
@@ -171,7 +171,7 @@ class VentanaPrincipal(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        """
+        """!
         @brief Construye la jerarquía visual de componentes (Layouts y Widgets).
         """
         self.setGeometry(100, 100, 1100, 900)
@@ -219,7 +219,7 @@ class VentanaPrincipal(QMainWindow):
         self.snapshot_guardado = self.obtener_estado_actual()
 
     def crear_barra_menus(self):
-        """
+        """!
         @brief Crea y configura la barra de herramientas superior (File, Examples, Language).
         """
         self.menuBar().clear()
@@ -268,7 +268,7 @@ class VentanaPrincipal(QMainWindow):
         self.menu_idioma.addAction(accion_en)
 
     def configurar_tab_prover9(self):
-        """
+        """!
         @brief Orquesta los componentes visuales internos de la pestaña Prover9.
         """
         estilo_codigo = "font-family: 'JetBrains Mono'; font-size: 12pt;"
@@ -329,7 +329,7 @@ class VentanaPrincipal(QMainWindow):
         self.tab_prover9.setLayout(layout_principal)
 
     def configurar_tab_mace4(self):
-        """
+        """!
         @brief Orquesta los componentes visuales internos de la pestaña Mace4.
         """
         estilo_codigo = "font-family: 'JetBrains Mono'; font-size: 12pt;"
@@ -390,7 +390,7 @@ class VentanaPrincipal(QMainWindow):
         self.tab_mace4.setLayout(layout_principal)
 
     def crear_panel_insercion(self, editor_destino):
-        """
+        """!
         @brief Crea la botonera lateral izquierda para inyectar operadores lógicos.
         
         @param editor_destino Editor de código principal de la pestaña (obsoleto tras refactor).
@@ -416,7 +416,7 @@ class VentanaPrincipal(QMainWindow):
         return grupo, lbl_ops, botones_ops
 
     def crear_panel_opciones_p9(self):
-        """
+        """!
         @brief Genera y devuelve el panel de opciones avanzadas (derecho) para Prover9.
         
         @return Objeto QScrollArea que contiene todos los controles de configuración.
@@ -528,7 +528,7 @@ class VentanaPrincipal(QMainWindow):
         return scroll
 
     def crear_panel_opciones_m4(self):
-        """
+        """!
         @brief Genera y devuelve el panel de opciones avanzadas (derecho) para Mace4.
         
         @return Objeto QScrollArea que contiene todos los controles de configuración.
@@ -615,7 +615,7 @@ class VentanaPrincipal(QMainWindow):
         return scroll
 
     def cambiar_idioma(self, nuevo_idioma):
-        """
+        """!
         @brief Modifica el idioma interno y repinta todos los textos.
         
         @param nuevo_idioma Clave del nuevo idioma ('es_ES' o 'en_US').
@@ -625,7 +625,7 @@ class VentanaPrincipal(QMainWindow):
         self.actualizar_textos_interfaz()
 
     def actualizar_textos_interfaz(self):
-        """
+        """!
         @brief Recorre la GUI inyectando las cadenas correspondientes al idioma seleccionado.
         """
         txt = TRADUCCIONES[self.idioma_actual]
@@ -717,7 +717,7 @@ class VentanaPrincipal(QMainWindow):
                     combo.setItemText(i, trad(combo.itemData(i)))
 
     def actualizar_titulo_ventana(self):
-        """
+        """!
         @brief Refresca el título de la aplicación para mostrar el nombre del archivo activo.
         """
         txt = TRADUCCIONES[self.idioma_actual]
@@ -729,7 +729,7 @@ class VentanaPrincipal(QMainWindow):
             self.setWindowTitle(nombre_base)
 
     def nuevo_proyecto(self):
-        """
+        """!
         @brief Limpia los editores de texto previa confirmación si hay cambios no guardados.
         """
         if not self.advertir_cambios_sin_guardar(): return
@@ -742,7 +742,7 @@ class VentanaPrincipal(QMainWindow):
         self.snapshot_guardado = self.obtener_estado_actual()
 
     def abrir_archivo(self):
-        """
+        """!
         @brief Abre un cuadro de diálogo para cargar un archivo `.in` en el editor libre.
         """
         if not self.advertir_cambios_sin_guardar(): return
@@ -763,7 +763,7 @@ class VentanaPrincipal(QMainWindow):
             self.snapshot_guardado = self.obtener_estado_actual()
 
     def guardar_archivo(self):
-        """
+        """!
         @brief Guarda el contenido del proyecto activo en el disco físico.
         
         @return True si la operación fue exitosa, False si el usuario canceló.
@@ -793,7 +793,7 @@ class VentanaPrincipal(QMainWindow):
             return False
 
     def exportar_salida(self):
-        """
+        """!
         @brief Exporta la consola de resultados actual a un archivo `.out`.
         """
         editor = self.salida_p9 if self.tabs.currentIndex() == 0 else self.salida_m4
@@ -803,7 +803,7 @@ class VentanaPrincipal(QMainWindow):
                 with open(ruta, "w", encoding="utf-8") as f: f.write(editor.toPlainText())
 
     def cargar_ejemplo_tipo(self, slot_menu):
-        """
+        """!
         @brief Carga un problema predefinido desde el diccionario de idiomas.
         
         @param slot_menu Entero (1, 2 o 3) correspondiente a la opción del menú pulsada.
@@ -848,7 +848,7 @@ class VentanaPrincipal(QMainWindow):
         self.snapshot_guardado = self.obtener_estado_actual()
 
     def obtener_estado_actual(self):
-        """
+        """!
         @brief Genera un diccionario 'snapshot' con todos los textos actuales.
         
         @return Diccionario que mapea los estados de los editores para comprobación.
@@ -861,7 +861,7 @@ class VentanaPrincipal(QMainWindow):
         }
 
     def advertir_cambios_sin_guardar(self):
-        """
+        """!
         @brief Lanza un MessageBox si detecta discrepancias con el último guardado.
         
         @return True si es seguro proceder, False si el usuario aborta la acción.
@@ -892,7 +892,7 @@ class VentanaPrincipal(QMainWindow):
             return False
 
     def closeEvent(self, evento):
-        """
+        """!
         @brief Interceptor del cierre de ventana (cruz de Windows/macOS).
         
         @param evento Objeto de evento de cierre propiciado por Qt.
@@ -903,7 +903,7 @@ class VentanaPrincipal(QMainWindow):
             evento.ignore()
 
     def eventFilter(self, objeto, evento):
-        """
+        """!
         @brief Filtro global para recrear el efecto Placeholder.
         
         @param objeto Componente emisor del evento.
@@ -931,7 +931,7 @@ class VentanaPrincipal(QMainWindow):
         return super().eventFilter(objeto, evento) 
 
     def alternar_modo_p9(self, checked):
-        """
+        """!
         @brief Transita entre la vista Básica y Avanzada en Prover9, traduciendo fórmulas.
         
         @param checked Booleano que indica si el modo avanzado está marcado.
@@ -957,7 +957,7 @@ class VentanaPrincipal(QMainWindow):
         self.vista_stack_p9.setCurrentIndex(1 if checked else 0)
 
     def alternar_modo_m4(self, checked):
-        """
+        """!
         @brief Transita entre la vista Básica y Avanzada en Mace4, traduciendo fórmulas.
         
         @param checked Booleano que indica si el modo avanzado está marcado.
@@ -983,7 +983,7 @@ class VentanaPrincipal(QMainWindow):
         self.vista_stack_m4.setCurrentIndex(1 if checked else 0)
 
     def inyectar_operador_inteligente(self, simbolo, clave_op):
-        """
+        """!
         @brief Inserta un símbolo lógico en el editor con foco o el predeterminado.
         
         @param simbolo Cadena representativa (ej. ' -> ').
@@ -1006,7 +1006,7 @@ class VentanaPrincipal(QMainWindow):
             caja.setFocus()
 
     def reset_opciones_p9(self):
-        """
+        """!
         @brief Restaura los valores por defecto del panel visual de Prover9 (Basic Options).
         """
         self.spin_max_weight.setValue(100)
@@ -1019,7 +1019,7 @@ class VentanaPrincipal(QMainWindow):
         self.chk_prolog_vars.setChecked(False)
 
     def reset_categoria_p9(self, categoria):
-        """
+        """!
         @brief Restaura a valores por defecto los widgets de una categoría concreta.
         
         @param categoria Nombre del grupo (ej. 'Term Ordering').
@@ -1035,7 +1035,7 @@ class VentanaPrincipal(QMainWindow):
                     widget.setCurrentText(por_defecto)
 
     def reset_opciones_m4(self):
-        """
+        """!
         @brief Restaura los valores por defecto de todos los paneles en Mace4.
         """
         self.spin_domain_size.setValue(0)
@@ -1061,7 +1061,7 @@ class VentanaPrincipal(QMainWindow):
         self.spin_selection_measure.setValue(4)
 
     def agregar_al_historial(self, hora, motor, tag_resultado, snapshot_datos):
-        """
+        """!
         @brief Introduce un nuevo registro analizado en la tabla y memoria del historial.
         
         @param hora Etiqueta temporal (string).
@@ -1082,7 +1082,7 @@ class VentanaPrincipal(QMainWindow):
         self.datos_historial.insert(0, snapshot_datos)
 
     def recuperar_desde_historial(self, item):
-        """
+        """!
         @brief Restaura todo el estado de la UI (texto y modos) haciendo doble click en la tabla.
         
         @param item Fila seleccionada por el usuario en QTableWidget.
@@ -1110,7 +1110,7 @@ class VentanaPrincipal(QMainWindow):
                 c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
 
     def procesar_prover9(self):
-        """
+        """!
         @brief Recolecta la entrada, desactiva la UI y lanza el subproceso del demostrador.
         """
         txt = TRADUCCIONES[self.idioma_actual]
@@ -1141,7 +1141,7 @@ class VentanaPrincipal(QMainWindow):
         self.hilo_p9.start()
 
     def al_terminar_prover9(self, resultado_crudo, hora, snapshot):
-        """
+        """!
         @brief Captura la señal final de Prover9, imprime salidas y refresca historial.
         
         @param resultado_crudo Texto íntegro generado por el log del motor.
@@ -1158,7 +1158,7 @@ class VentanaPrincipal(QMainWindow):
         self.btn_p9.setStyleSheet("font-weight: bold; background-color: #2962ff; color: white; padding: 10px;")
 
     def procesar_mace4(self):
-        """
+        """!
         @brief Recolecta la entrada, desactiva la UI y lanza el subproceso buscador de modelos.
         """
         txt = TRADUCCIONES[self.idioma_actual]
@@ -1189,7 +1189,7 @@ class VentanaPrincipal(QMainWindow):
         self.hilo_m4.start()
 
     def al_terminar_m4(self, resultado_crudo, hora, snapshot):
-        """
+        """!
         @brief Captura la señal final de Mace4, imprime matrices y refresca historial.
         
         @param resultado_crudo Texto íntegro generado por el log del motor.
@@ -1206,7 +1206,7 @@ class VentanaPrincipal(QMainWindow):
         self.btn_m4.setStyleSheet("font-weight: bold; background-color: #d32f2f; color: white; padding: 10px;")
 
     def cocinar_entrada_p9(self, caja_premisas, caja_conclusion):
-        """
+        """!
         @brief Compone el script fuente .in anexando las configuraciones del usuario.
         
         @param caja_premisas Editor que contiene axiomas (sos).
@@ -1260,7 +1260,7 @@ class VentanaPrincipal(QMainWindow):
         return texto_cocinado
 
     def cocinar_entrada_m4(self, caja_premisas, caja_conclusion):
-        """
+        """!
         @brief Compone el script fuente .in anexando dominios de búsqueda y heurísticas.
         
         @param caja_premisas Editor que contiene axiomas (sos).
@@ -1310,7 +1310,7 @@ class VentanaPrincipal(QMainWindow):
         return texto_cocinado
 
     def cocinar_entrada_directa(self, texto_premisas, texto_conclusion):
-        """
+        """!
         @brief Envuelve axiomas limpios dentro de bloques de lista sintácticos.
         
         @param texto_premisas Cadena con premisas lógicas directas.
@@ -1334,7 +1334,7 @@ class VentanaPrincipal(QMainWindow):
         return texto_cocinado
 
     def extraer_texto_util(self, caja, ejemplo_plantilla):
-        """
+        """!
         @brief Descarta el Placeholder garantizando strings limpios en caso de inactividad.
         
         @param caja Editor a consultar.
@@ -1347,7 +1347,7 @@ class VentanaPrincipal(QMainWindow):
         return t
 
     def extraer_formulas_regex(self, texto):
-        """
+        """!
         @brief Analiza y extrae fórmulas usando expresiones regulares (regex).
         
         Utilizado principalmente al transitar del modo avanzado al básico.
@@ -1367,7 +1367,7 @@ class VentanaPrincipal(QMainWindow):
         return premisas, conclusion
 
     def limpiar_y_traducir_error(self, salida_cruda):
-        """
+        """!
         @brief Analizador inteligente del log en bruto del demostrador.
         
         Parsea el texto para detectar teoremas probados, contramodelos 
