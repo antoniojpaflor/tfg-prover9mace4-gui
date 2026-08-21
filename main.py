@@ -389,11 +389,10 @@ class VentanaPrincipal(QMainWindow):
         layout_principal.addWidget(self.grupo_opciones_m4)
         self.tab_mace4.setLayout(layout_principal)
 
-    def crear_panel_insercion(self, editor_destino):
+    def crear_panel_insercion(self):
         """!
         @brief Crea la botonera lateral izquierda para inyectar operadores lógicos.
         
-        @param editor_destino Editor de código principal de la pestaña (obsoleto tras refactor).
         @return Tupla (QGroupBox, QLabel, Lista de tuplas de botones).
         """
         grupo = QGroupBox("")
