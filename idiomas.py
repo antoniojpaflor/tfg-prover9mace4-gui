@@ -1,4 +1,4 @@
-"""
+"""!
 @file idiomas.py
 @brief Diccionarios de internacionalización y traducción para la interfaz gráfica.
 

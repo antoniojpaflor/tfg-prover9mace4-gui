@@ -1,4 +1,4 @@
-"""
+"""!
 @file launcher.py
 @brief Módulo de ejecución y comunicación con los motores lógicos Prover9 y Mace4.
 
@@ -14,7 +14,7 @@ from datetime import datetime
 
 
 def obtener_ruta_recurso(nombre_archivo):
-    """
+    """!
     @brief Obtiene la ruta absoluta al recurso, compatible con desarrollo y con PyInstaller.
     
     @param nombre_archivo Nombre del archivo binario a buscar (con o sin extensión .exe).
@@ -28,7 +28,7 @@ def obtener_ruta_recurso(nombre_archivo):
 
 
 def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
-    """
+    """!
     @brief Ejecuta un motor lógico como subproceso y captura su salida.
     
     Configura el entorno según el sistema operativo, busca el binario 
@@ -100,7 +100,7 @@ def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
 
 
 def ejecutar_prover9(texto_entrada, tiempo_limite=5):
-    """
+    """!
     @brief Envoltorio específico para ejecutar el demostrador de teoremas Prover9.
     
     @param texto_entrada Código fuente de Prover9 listo para ser procesado.
@@ -113,7 +113,7 @@ def ejecutar_prover9(texto_entrada, tiempo_limite=5):
 
 
 def ejecutar_mace4(texto_entrada, tiempo_limite=3):
-    """
+    """!
     @brief Envoltorio específico para ejecutar el buscador de modelos finitos Mace4.
     
     @param texto_entrada Código fuente de Mace4 listo para ser procesado.
