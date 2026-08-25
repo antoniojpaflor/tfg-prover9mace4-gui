@@ -320,7 +320,7 @@ class VentanaPrincipal(QMainWindow):
         self.salida_p9.setReadOnly(True)
         columna_derecha.addWidget(self.salida_p9)
         
-        self.grupo_ins_p9, self.lbl_ops_p9, self.botones_ops_p9 = self.crear_panel_insercion(self.entrada_libre_p9)
+        self.grupo_ins_p9, self.lbl_ops_p9, self.botones_ops_p9 = self.crear_panel_insercion()
         layout_principal.addWidget(self.grupo_ins_p9)
         layout_principal.addLayout(columna_derecha)
         
@@ -381,7 +381,7 @@ class VentanaPrincipal(QMainWindow):
         self.salida_m4.setReadOnly(True)
         columna_derecha.addWidget(self.salida_m4)
         
-        self.grupo_ins_m4, self.lbl_ops_m4, self.botones_ops_m4 = self.crear_panel_insercion(self.entrada_libre_m4)
+        self.grupo_ins_m4, self.lbl_ops_m4, self.botones_ops_m4 = self.crear_panel_insercion()
         layout_principal.addWidget(self.grupo_ins_m4)
         layout_principal.addLayout(columna_derecha)
         
@@ -1098,6 +1098,10 @@ class VentanaPrincipal(QMainWindow):
             self.premisas_p9.setPlainText(snap['premisas'])
             self.conclusion_p9.setPlainText(snap['conclusion'])
             self.entrada_libre_p9.setPlainText(snap['libre'])
+            
+            if 'salida' in snap:
+                self.salida_p9.setPlainText(snap['salida'])
+                
             for c in [self.premisas_p9, self.conclusion_p9, self.entrada_libre_p9]:
                 c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
         else:
@@ -1105,6 +1109,10 @@ class VentanaPrincipal(QMainWindow):
             self.premisas_m4.setPlainText(snap['premisas'])
             self.conclusion_m4.setPlainText(snap['conclusion'])
             self.entrada_libre_m4.setPlainText(snap['libre'])
+            
+            if 'salida' in snap:
+                self.salida_m4.setPlainText(snap['salida'])
+                
             for c in [self.premisas_m4, self.conclusion_m4, self.entrada_libre_m4]:
                 c.setStyleSheet("color: #ffffff; font-family: 'JetBrains Mono'; font-size: 12pt;")
 
@@ -1149,6 +1157,7 @@ class VentanaPrincipal(QMainWindow):
         """
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
         self.salida_p9.setPlainText(resultado_traducido)
+        snapshot['salida'] = resultado_traducido
         self.agregar_al_historial(hora, "Prover9", tag, snapshot)
         
         txt = TRADUCCIONES[self.idioma_actual]
@@ -1197,6 +1206,7 @@ class VentanaPrincipal(QMainWindow):
         """
         resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
         self.salida_m4.setPlainText(resultado_traducido)
+        snapshot['salida'] = resultado_traducido
         self.agregar_al_historial(hora, "Mace4", tag, snapshot)
         
         txt = TRADUCCIONES[self.idioma_actual]
