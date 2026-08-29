@@ -192,6 +192,7 @@ class VentanaPrincipal(QMainWindow):
         layout_central_ventana.addWidget(self.tabs, stretch=3)
         
         self.grupo_historial = QGroupBox("")
+        self.grupo_historial.setMinimumHeight(200)
         layout_historial = QVBoxLayout(self.grupo_historial)
         self.tabla_historial = QTableWidget(0, 3)
         self.tabla_historial.setFont(QFont("Segoe UI", 9))
@@ -320,7 +321,7 @@ class VentanaPrincipal(QMainWindow):
         self.salida_p9.setReadOnly(True)
         columna_derecha.addWidget(self.salida_p9)
         
-        self.grupo_ins_p9, self.lbl_ops_p9, self.botones_ops_p9 = self.crear_panel_insercion()
+        self.grupo_ins_p9, self.labels_ops_p9, self.botones_ops_p9 = self.crear_panel_insercion()
         layout_principal.addWidget(self.grupo_ins_p9)
         layout_principal.addLayout(columna_derecha)
         
@@ -381,7 +382,7 @@ class VentanaPrincipal(QMainWindow):
         self.salida_m4.setReadOnly(True)
         columna_derecha.addWidget(self.salida_m4)
         
-        self.grupo_ins_m4, self.lbl_ops_m4, self.botones_ops_m4 = self.crear_panel_insercion()
+        self.grupo_ins_m4, self.labels_ops_m4, self.botones_ops_m4 = self.crear_panel_insercion()
         layout_principal.addWidget(self.grupo_ins_m4)
         layout_principal.addLayout(columna_derecha)
         
@@ -391,28 +392,61 @@ class VentanaPrincipal(QMainWindow):
 
     def crear_panel_insercion(self):
         """!
-        @brief Crea la botonera lateral izquierda para inyectar operadores lógicos.
+        @brief Crea la botonera lateral izquierda para inyectar operadores lógicos y estructuras.
         
-        @return Tupla (QGroupBox, QLabel, Lista de tuplas de botones).
+        @return Tupla (QGroupBox, Lista de labels, Lista de botones).
         """
         grupo = QGroupBox("")
-        layout_grupo = QVBoxLayout()
-        lbl_ops = QLabel("")
-        layout_grupo.addWidget(lbl_ops)
+        layout_principal = QVBoxLayout(grupo)
+        layout_principal.setContentsMargins(0, 15, 0, 0) # Margen superior para el título
+
+        # Creamos el área de scroll para que no empuje la ventana hacia abajo
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.setStyleSheet("background-color: transparent;")
+
+        # Contenedor interno para los botones
+        contenido = QWidget()
+        contenido.setStyleSheet("background-color: transparent;")
+        layout_grupo = QVBoxLayout(contenido)
+        layout_grupo.setContentsMargins(5, 0, 5, 0)
+
+        labels_ops = []
         botones_ops = []
-        operadores_config = [
-            ('op_neg', " - "), ('op_conj', " & "), ('op_disj', " | "), 
-            ('op_impl', " -> "), ('op_equiv', " <-> ")
+        configuracion = [
+            ('lbl_operadores', [
+                ('op_neg', " - "), ('op_conj', " & "), ('op_disj', " | "), 
+                ('op_impl', " -> "), ('op_equiv', " <-> ")
+            ]),
+            ('lbl_cuantificadores', [
+                ('op_all', "all "), ('op_exists', "exists "),
+                ('op_eq', " = "), ('op_neq', " != ")
+            ]),
+            ('lbl_bloques', [
+                ('op_sos', "formulas(sos).\n  "), ('op_goals', "formulas(goals).\n  "), 
+                ('op_end', "end_of_list.\n\n")
+            ])
         ]
-        for clave, simbolo in operadores_config:
-            btn = QPushButton("") 
-            btn.clicked.connect(lambda checked, s=simbolo, c_clave=clave: self.inyectar_operador_inteligente(s, c_clave))
-            layout_grupo.addWidget(btn)
-            botones_ops.append((btn, clave))
+        
+        for clave_lbl, botones in configuracion:
+            lbl = QLabel("")
+            layout_grupo.addWidget(lbl)
+            labels_ops.append((lbl, clave_lbl))
+            for clave_btn, simbolo in botones:
+                btn = QPushButton("") 
+                btn.clicked.connect(lambda checked, s=simbolo, c=clave_btn: self.inyectar_operador_inteligente(s, c))
+                layout_grupo.addWidget(btn)
+                botones_ops.append((btn, clave_btn))
+                
         layout_grupo.addStretch()
-        grupo.setLayout(layout_grupo)
-        grupo.setFixedWidth(230) 
-        return grupo, lbl_ops, botones_ops
+        
+        # Ensamblamos las piezas
+        scroll.setWidget(contenido)
+        layout_principal.addWidget(scroll)
+        
+        grupo.setFixedWidth(300) 
+        return grupo, labels_ops, botones_ops
 
     def crear_panel_opciones_p9(self):
         """!
@@ -659,7 +693,8 @@ class VentanaPrincipal(QMainWindow):
         self.btn_p9.setText(txt['btn_verificar_p9'])
         self.lbl_res_p9.setText(txt['lbl_resultado'])
         self.grupo_ins_p9.setTitle(txt['grupo_insercion'])
-        self.lbl_ops_p9.setText(txt['lbl_operadores'])
+        for lbl, clave in self.labels_ops_p9:
+            lbl.setText(txt[clave])
         for boton, clave in self.botones_ops_p9:
             boton.setText(txt[clave])
         
@@ -670,7 +705,8 @@ class VentanaPrincipal(QMainWindow):
         self.btn_m4.setText(txt['btn_buscar_m4'])
         self.lbl_res_m4.setText(txt['lbl_resultado'])
         self.grupo_ins_m4.setTitle(txt['grupo_insercion'])
-        self.lbl_ops_m4.setText(txt['lbl_operadores'])
+        for lbl, clave in self.labels_ops_m4:
+            lbl.setText(txt[clave])
         for boton, clave in self.botones_ops_m4:
             boton.setText(txt[clave])
             
