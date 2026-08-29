@@ -95,7 +95,7 @@ class HiloMotor(QThread):
 
     def abortar(self):
         """!
-        @brief Detiene el subproceso liberando bloqueos nativos y rompiendo tuberías.
+        @brief Marca la bandera de cancelación. El motor subyacente la detectará y se detendrá.
         """
         self.cancelado = True
 
