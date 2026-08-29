@@ -65,19 +65,17 @@ class HiloMotor(QThread):
     """
     resultado_listo = pyqtSignal(str, str, dict)
 
-    def __init__(self, motor, texto_final, tiempo_limite, snapshot):
+    def __init__(self, motor, texto_final, snapshot):
         """!
         @brief Constructor del hilo de ejecución.
         
         @param motor Nombre del motor a utilizar ('prover9' o 'mace4').
         @param texto_final Cadena de texto con el código a procesar.
-        @param tiempo_limite Límite de tiempo en segundos para la ejecución.
         @param snapshot Diccionario con el estado de la interfaz gráfica para el historial.
         """
         super().__init__()
         self.motor = motor
         self.texto_final = texto_final
-        self.tiempo_limite = tiempo_limite
         self.snapshot = snapshot
 
     def run(self):
@@ -85,9 +83,9 @@ class HiloMotor(QThread):
         @brief Método principal que se ejecuta en el subproceso.
         """
         if self.motor == 'prover9':
-            resultado_crudo, hora = ejecutar_prover9(self.texto_final, tiempo_limite=self.tiempo_limite)
+            resultado_crudo, hora = ejecutar_prover9(self.texto_final)
         else:
-            resultado_crudo, hora = ejecutar_mace4(self.texto_final, tiempo_limite=self.tiempo_limite)
+            resultado_crudo, hora = ejecutar_mace4(self.texto_final)
         self.resultado_listo.emit(resultado_crudo, hora, self.snapshot)
 
 
@@ -806,16 +804,30 @@ class VentanaPrincipal(QMainWindow):
         txt = TRADUCCIONES[self.idioma_actual]
         if not self.ruta_archivo_actual:
             ruta, _ = QFileDialog.getSaveFileName(self, "Guardar / Save", "", "Inputs (*.in)")
-            if not ruta:
-                return False
+            if not ruta: return False
             self.ruta_archivo_actual = ruta
 
         p = self.tabs.currentIndex()
         idioma_txt = TRADUCCIONES[self.idioma_actual]
+        
         if p == 0:
-            texto = self.extraer_texto_util(self.entrada_libre_p9, idioma_txt['ph_libre_p9']) if self.chk_modo_p9.isChecked() else self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9)
+            opciones = self.generar_opciones_p9()
+            if self.chk_modo_p9.isChecked():
+                texto_usuario = self.extraer_texto_util(self.entrada_libre_p9, idioma_txt['ph_libre_p9'])
+                texto = opciones + texto_usuario if texto_usuario else ""
+            else:
+                premisas = self.extraer_texto_util(self.premisas_p9, idioma_txt['ph_premisas_p9'])
+                conclusion = self.extraer_texto_util(self.conclusion_p9, idioma_txt['ph_conclusion_p9'])
+                texto = opciones + self.cocinar_formulas_p9(premisas, conclusion) if (premisas or conclusion) else ""
         else:
-            texto = self.extraer_texto_util(self.entrada_libre_m4, idioma_txt['ph_libre_m4']) if self.chk_modo_m4.isChecked() else self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4)
+            opciones = self.generar_opciones_m4()
+            if self.chk_modo_m4.isChecked():
+                texto_usuario = self.extraer_texto_util(self.entrada_libre_m4, idioma_txt['ph_libre_m4'])
+                texto = opciones + texto_usuario if texto_usuario else ""
+            else:
+                premisas = self.extraer_texto_util(self.premisas_m4, idioma_txt['ph_premisas_m4'])
+                conclusion = self.extraer_texto_util(self.conclusion_m4, idioma_txt['ph_conclusion_m4'])
+                texto = opciones + self.cocinar_formulas_m4(premisas, conclusion) if (premisas or conclusion) else ""
         
         try:
             with open(self.ruta_archivo_actual, "w", encoding="utf-8") as f: f.write(texto)
@@ -1154,7 +1166,7 @@ class VentanaPrincipal(QMainWindow):
 
     def procesar_prover9(self):
         """!
-        @brief Recolecta la entrada, desactiva la UI y lanza el subproceso del demostrador.
+        @brief Recolecta la entrada, inyecta opciones de la interfaz, desactiva la UI y lanza el demostrador.
         """
         txt = TRADUCCIONES[self.idioma_actual]
         snapshot = {
@@ -1163,12 +1175,14 @@ class VentanaPrincipal(QMainWindow):
             'libre': self.entrada_libre_p9.toPlainText()
         }
         
+        opciones = self.generar_opciones_p9()
         if self.chk_modo_p9.isChecked():
-            texto_final = self.extraer_texto_util(self.entrada_libre_p9, txt['ph_libre_p9'])
+            texto_usuario = self.extraer_texto_util(self.entrada_libre_p9, txt['ph_libre_p9'])
+            texto_final = opciones + texto_usuario if texto_usuario else ""
         else:
             premisas = self.extraer_texto_util(self.premisas_p9, txt['ph_premisas_p9'])
             conclusion = self.extraer_texto_util(self.conclusion_p9, txt['ph_conclusion_p9'])
-            texto_final = self.cocinar_entrada_p9(self.premisas_p9, self.conclusion_p9) if (premisas or conclusion) else ""
+            texto_final = opciones + self.cocinar_formulas_p9(premisas, conclusion) if (premisas or conclusion) else ""
             
         if not texto_final.strip():
             self.salida_p9.setPlainText("❌ Error: No hay datos de entrada válidos.")
@@ -1179,7 +1193,7 @@ class VentanaPrincipal(QMainWindow):
         self.btn_p9.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
         self.salida_p9.setPlainText(txt['msg_procesando_p9'])
 
-        self.hilo_p9 = HiloMotor('prover9', texto_final, self.spin_max_seconds_p9.value(), snapshot)
+        self.hilo_p9 = HiloMotor('prover9', texto_final, snapshot)
         self.hilo_p9.resultado_listo.connect(self.al_terminar_prover9)
         self.hilo_p9.start()
 
@@ -1203,7 +1217,7 @@ class VentanaPrincipal(QMainWindow):
 
     def procesar_mace4(self):
         """!
-        @brief Recolecta la entrada, desactiva la UI y lanza el subproceso buscador de modelos.
+        @brief Recolecta la entrada, inyecta opciones de la interfaz, desactiva la UI y lanza el buscador de modelos.
         """
         txt = TRADUCCIONES[self.idioma_actual]
         snapshot = {
@@ -1212,12 +1226,14 @@ class VentanaPrincipal(QMainWindow):
             'libre': self.entrada_libre_m4.toPlainText()
         }
         
+        opciones = self.generar_opciones_m4()
         if self.chk_modo_m4.isChecked():
-            texto_final = self.extraer_texto_util(self.entrada_libre_m4, txt['ph_libre_m4'])
+            texto_usuario = self.extraer_texto_util(self.entrada_libre_m4, txt['ph_libre_m4'])
+            texto_final = opciones + texto_usuario if texto_usuario else ""
         else:
             premisas = self.extraer_texto_util(self.premisas_m4, txt['ph_premisas_m4'])
             conclusion = self.extraer_texto_util(self.conclusion_m4, txt['ph_conclusion_m4'])
-            texto_final = self.cocinar_entrada_m4(self.premisas_m4, self.conclusion_m4) if (premisas or conclusion) else ""
+            texto_final = opciones + self.cocinar_formulas_m4(premisas, conclusion) if (premisas or conclusion) else ""
 
         if not texto_final.strip():
             self.salida_m4.setPlainText("❌ Error: No hay datos de entrada válidos.")
@@ -1228,11 +1244,11 @@ class VentanaPrincipal(QMainWindow):
         self.btn_m4.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
         self.salida_m4.setPlainText(txt['msg_procesando_m4'])
 
-        self.hilo_m4 = HiloMotor('mace4', texto_final, self.spin_max_seconds_m4.value(), snapshot)
-        self.hilo_m4.resultado_listo.connect(self.al_terminar_m4)
+        self.hilo_m4 = HiloMotor('mace4', texto_final, snapshot)
+        self.hilo_m4.resultado_listo.connect(self.al_terminar_mace4)
         self.hilo_m4.start()
 
-    def al_terminar_m4(self, resultado_crudo, hora, snapshot):
+    def al_terminar_mace4(self, resultado_crudo, hora, snapshot):
         """!
         @brief Captura la señal final de Mace4, imprime matrices y refresca historial.
         
@@ -1250,20 +1266,17 @@ class VentanaPrincipal(QMainWindow):
         self.btn_m4.setText(txt['btn_buscar_m4'])
         self.btn_m4.setStyleSheet("font-weight: bold; background-color: #d32f2f; color: white; padding: 10px;")
 
-    def cocinar_entrada_p9(self, caja_premisas, caja_conclusion):
+    def generar_opciones_p9(self):
         """!
-        @brief Compone el script fuente .in anexando las configuraciones del usuario.
+        @brief Extrae la configuración del panel derecho y genera las directivas de Prover9.
         
-        @param caja_premisas Editor que contiene axiomas (sos).
-        @param caja_conclusion Editor que contiene teoremas (goals).
-        @return Script validado de Prover9 listo para ser ejecutado.
+        @return Cadena de texto con las opciones (assign/set/clear) formateadas para el archivo .in.
         """
         texto_cocinado = ""
         if hasattr(self, 'grupo_all_options') and self.grupo_all_options.isChecked():
             for nombre, (widget, _, _) in self.all_assigns_p9.items():
                 val = widget.value() if isinstance(widget, QSpinBox) else widget.currentData()
-                if nombre == "pick_given_ratio" and val == -1:
-                    continue
+                if nombre == "pick_given_ratio" and val == -1: continue
                 texto_cocinado += f"assign({nombre}, {val}).\n"
             for nombre, (chk, _, _) in self.all_flags_p9.items():
                 if chk.isChecked(): texto_cocinado += f"set({nombre}).\n"
@@ -1275,7 +1288,6 @@ class VentanaPrincipal(QMainWindow):
             texto_cocinado += f"assign(order, {self.combo_order.currentData()}).\n"
             texto_cocinado += f"assign(eq_defs, {self.combo_eq_defs.currentData()}).\n"
             texto_cocinado += f"assign(max_seconds, {self.spin_max_seconds_p9.value()}).\n"
-            
             flags_basicos = [
                 ('expand_relational_defs', self.chk_expand_relational),
                 ('restrict_denials', self.chk_restrict_denials),
@@ -1284,33 +1296,13 @@ class VentanaPrincipal(QMainWindow):
             for nombre, widget in flags_basicos:
                 if widget.isChecked(): texto_cocinado += f"set({nombre}).\n"
                 else: texto_cocinado += f"clear({nombre}).\n"
-                
-        texto_cocinado += "\n"
-        lineas_premisas = caja_premisas.toPlainText().split('\n')
-        conclusion = caja_conclusion.toPlainText().strip()
-        
-        texto_cocinado += "formulas(sos).\n"
-        for linea in lineas_premisas:
-            linea_limpia = linea.strip()
-            if linea_limpia:
-                if not linea_limpia.endswith('.'):
-                    linea_limpia += '.'
-                texto_cocinado += f"  {linea_limpia}\n"
-        texto_cocinado += "end_of_list.\n\n"
-        
-        if conclusion:
-            if not conclusion.endswith('.'):
-                conclusion += '.'
-            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
-        return texto_cocinado
+        return texto_cocinado + "\n"
 
-    def cocinar_entrada_m4(self, caja_premisas, caja_conclusion):
+    def generar_opciones_m4(self):
         """!
-        @brief Compone el script fuente .in anexando dominios de búsqueda y heurísticas.
+        @brief Extrae la configuración del panel derecho y genera las directivas de Mace4.
         
-        @param caja_premisas Editor que contiene axiomas (sos).
-        @param caja_conclusion Editor que contiene metas sospechosas de ser falsas.
-        @return Script validado de Mace4 listo para ser ejecutado.
+        @return Cadena de texto con las opciones (assign/set/clear) formateadas para el archivo .in.
         """
         texto_cocinado = ""
         if self.spin_domain_size.value() > 0:
@@ -1325,7 +1317,6 @@ class VentanaPrincipal(QMainWindow):
         texto_cocinado += f"assign(max_megs, {self.spin_max_megs.value()}).\n"
         texto_cocinado += f"assign(selection_order, {self.spin_selection_order.value()}).\n"
         texto_cocinado += f"assign(selection_measure, {self.spin_selection_measure.value()}).\n"
-
         flags_m4 = {
             'prolog_style_variables': self.chk_prolog_vars_m4, 'integer_ring': self.chk_integer_ring,
             'skolems_last': self.chk_skolems_last, 'print_models': self.chk_print_models,
@@ -1336,23 +1327,33 @@ class VentanaPrincipal(QMainWindow):
         for flag, widget in flags_m4.items():
             if widget.isChecked(): texto_cocinado += f"set({flag}).\n"
             else: texto_cocinado += f"clear({flag}).\n"
+        return texto_cocinado + "\n"
 
-        texto_cocinado += "\n"
-        lineas_premisas = caja_premisas.toPlainText().split('\n')
-        conclusion = caja_conclusion.toPlainText().strip()
+    def cocinar_formulas_p9(self, premisas, conclusion):
+        """!
+        @brief Envuelve axiomas y teoremas dentro de los bloques sintácticos de Prover9.
         
-        texto_cocinado += "formulas(sos).\n"
-        for linea in lineas_premisas:
-            linea_limpia = linea.strip()
-            if linea_limpia:
-                if not linea_limpia.endswith('.'): linea_limpia += '.'
-                texto_cocinado += f"  {linea_limpia}\n"
+        @param premisas Cadena con las premisas lógicas directas.
+        @param conclusion Cadena con el objetivo a demostrar.
+        @return Cadena formateada con los bloques formulas(sos) y formulas(goals).
+        """
+        texto_cocinado = "formulas(sos).\n"
+        for linea in premisas.split('\n'):
+            if linea.strip(): texto_cocinado += f"  {linea.strip()}{'.' if not linea.strip().endswith('.') else ''}\n"
         texto_cocinado += "end_of_list.\n\n"
-
-        if conclusion:
-            if not conclusion.endswith('.'): conclusion += '.'
-            texto_cocinado += f"formulas(goals).\n  {conclusion}\nend_of_list.\n"
+        if conclusion.strip():
+            texto_cocinado += f"formulas(goals).\n  {conclusion.strip()}{'.' if not conclusion.strip().endswith('.') else ''}\nend_of_list.\n"
         return texto_cocinado
+
+    def cocinar_formulas_m4(self, premisas, conclusion):
+        """!
+        @brief Envuelve axiomas y teoremas dentro de los bloques sintácticos de Mace4.
+        
+        @param premisas Cadena con las premisas lógicas directas.
+        @param conclusion Cadena con la meta sospechosa de ser falsa.
+        @return Cadena formateada delegando en la sintaxis base (compartida con Prover9).
+        """
+        return self.cocinar_formulas_p9(premisas, conclusion)
 
     def cocinar_entrada_directa(self, texto_premisas, texto_conclusion):
         """!

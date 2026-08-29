@@ -27,96 +27,61 @@ def obtener_ruta_recurso(nombre_archivo):
     return os.path.join(ruta_base, 'bin', nombre_archivo)
 
 
-def ejecutar_motor_logico(comando_base, texto_entrada, tiempo_limite=3):
+def ejecutar_motor_logico(comando_base, texto_entrada):
     """!
-    @brief Ejecuta un motor lógico como subproceso y captura su salida.
+    @brief Ejecuta un motor lógico como subproceso delegando el control temporal al propio motor.
     
     Configura el entorno según el sistema operativo, busca el binario 
-    correspondiente y maneja los tiempos de espera y errores del sistema.
+    correspondiente e inicia el proceso capturando su salida estándar de forma bloqueante.
     
     @param comando_base Lista con el nombre del motor (ej. ['prover9']).
     @param texto_entrada Código fuente en formato cadena para ser procesado.
-    @param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 3).
     @return Salida estándar (stdout) del motor lógico o mensaje de error formateado.
     """
     sistema = platform.system()
     nombre_binario = comando_base[0]
     
-    if sistema == 'Windows':
-        nombre_binario += '.exe'
-    elif sistema == 'Linux':
-        nombre_binario += '_linux'
-    elif sistema == 'Darwin':
-        nombre_binario += '_mac'
+    if sistema == 'Windows': nombre_binario += '.exe'
+    elif sistema == 'Linux': nombre_binario += '_linux'
+    elif sistema == 'Darwin': nombre_binario += '_mac'
         
     ruta_binario = obtener_ruta_recurso(nombre_binario)
     comando_final = [ruta_binario] + comando_base[1:]
-    proceso = None
     
-    opciones_subproceso = {
-        'stdin': subprocess.PIPE,
-        'stdout': subprocess.PIPE,
-        'stderr': subprocess.PIPE,
-        'text': True
-    }
-    
-    if sistema == 'Windows':
-        opciones_subproceso['creationflags'] = subprocess.CREATE_NO_WINDOW
+    opciones_subproceso = {'stdin': subprocess.PIPE, 'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE, 'text': True}
+    if sistema == 'Windows': opciones_subproceso['creationflags'] = subprocess.CREATE_NO_WINDOW
     
     try:
         proceso = subprocess.Popen(comando_final, **opciones_subproceso)
-        stdout, stderr = proceso.communicate(input=texto_entrada, timeout=tiempo_limite)
+        stdout, stderr = proceso.communicate(input=texto_entrada)
         
         if proceso.returncode != 0 and not stdout:
             return f"Error de ejecución (Código de salida: {proceso.returncode}):\nIntentando ejecutar: {ruta_binario}\nDetalles (Stderr): {stderr}"
-            
         return stdout
         
-    except subprocess.TimeoutExpired:
-        if proceso:
-            proceso.kill()
-            proceso.communicate()
-            
-        if comando_base[0] == 'mace4':
-            return (
-                "TIMEOUT_EXPIRED_M4\n"
-                "Mace4 ha agotado el tiempo límite de búsqueda sin encontrar contraejemplos.\n"
-                "¡Prueba a verificarlo en la pestaña de Prover9!"
-            )
-        else:
-            return (
-                "TIMEOUT_EXPIRED_P9\n"
-                "Prover9 ha agotado el tiempo límite configurado sin encontrar una demostración."
-            )
-            
     except FileNotFoundError:
         return f"Error crítico: No se encuentra el ejecutable en la ruta {ruta_binario}. Revisa la carpeta 'bin/'."
-        
     except OSError as e:
         return f"Error del sistema operativo:\n{str(e)}"
 
-
-def ejecutar_prover9(texto_entrada, tiempo_limite=5):
+def ejecutar_prover9(texto_entrada):
     """!
     @brief Envoltorio específico para ejecutar el demostrador de teoremas Prover9.
     
     @param texto_entrada Código fuente de Prover9 listo para ser procesado.
-    @param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 5).
     @return Tupla que contiene la cadena de texto con el resultado crudo y la hora de ejecución.
     """
     hora_ejecucion = datetime.now().strftime("%H:%M:%S")
-    resultado = ejecutar_motor_logico(['prover9'], texto_entrada, tiempo_limite=tiempo_limite)
+    resultado = ejecutar_motor_logico(['prover9'], texto_entrada)
     return resultado, hora_ejecucion
 
-
-def ejecutar_mace4(texto_entrada, tiempo_limite=3):
+def ejecutar_mace4(texto_entrada):
     """!
     @brief Envoltorio específico para ejecutar el buscador de modelos finitos Mace4.
     
     @param texto_entrada Código fuente de Mace4 listo para ser procesado.
-    @param tiempo_limite Tiempo máximo de ejecución en segundos (por defecto 3).
     @return Tupla que contiene la cadena de texto con el resultado crudo y la hora de ejecución.
     """
     hora_ejecucion = datetime.now().strftime("%H:%M:%S")
-    resultado = ejecutar_motor_logico(['mace4'], texto_entrada, tiempo_limite=tiempo_limite)
+    resultado = ejecutar_motor_logico(['mace4'], texto_entrada)
     return resultado, hora_ejecucion
