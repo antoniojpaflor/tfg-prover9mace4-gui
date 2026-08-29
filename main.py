@@ -77,16 +77,27 @@ class HiloMotor(QThread):
         self.motor = motor
         self.texto_final = texto_final
         self.snapshot = snapshot
+        self.cancelado = False
 
     def run(self):
         """!
         @brief Método principal que se ejecuta en el subproceso.
         """
         if self.motor == 'prover9':
-            resultado_crudo, hora = ejecutar_prover9(self.texto_final)
+            resultado_crudo, hora = ejecutar_prover9(self.texto_final, self)
         else:
-            resultado_crudo, hora = ejecutar_mace4(self.texto_final)
-        self.resultado_listo.emit(resultado_crudo, hora, self.snapshot)
+            resultado_crudo, hora = ejecutar_mace4(self.texto_final, self)
+        
+        if self.cancelado or resultado_crudo == "CANCELADO":
+            self.resultado_listo.emit("CANCELADO", hora, self.snapshot)
+        else:
+            self.resultado_listo.emit(resultado_crudo, hora, self.snapshot)
+
+    def abortar(self):
+        """!
+        @brief Detiene el subproceso liberando bloqueos nativos y rompiendo tuberías.
+        """
+        self.cancelado = True
 
 
 class ResaltadorProver9(QSyntaxHighlighter):
@@ -1166,8 +1177,12 @@ class VentanaPrincipal(QMainWindow):
 
     def procesar_prover9(self):
         """!
-        @brief Recolecta la entrada, inyecta opciones de la interfaz, desactiva la UI y lanza el demostrador.
+        @brief Recolecta la entrada, inyecta opciones de la interfaz y lanza el demostrador.
         """
+        if hasattr(self, 'hilo_p9') and self.hilo_p9.isRunning():
+            self.cancelar_ejecucion()
+            return
+            
         txt = TRADUCCIONES[self.idioma_actual]
         snapshot = {
             'pestaña': 0, 'modo_avanzado': self.chk_modo_p9.isChecked(),
@@ -1188,9 +1203,9 @@ class VentanaPrincipal(QMainWindow):
             self.salida_p9.setPlainText("❌ Error: No hay datos de entrada válidos.")
             return
 
-        self.btn_p9.setEnabled(False)
-        self.btn_p9.setText("Procesando... (Por favor, espera)")
-        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
+        self.btn_p9.setText(txt['btn_cancelar'])
+        self.btn_p9.setStyleSheet("font-weight: bold; background-color: #e65100; color: white; padding: 10px;")
+        
         self.salida_p9.setPlainText(txt['msg_procesando_p9'])
 
         self.hilo_p9 = HiloMotor('prover9', texto_final, snapshot)
@@ -1199,26 +1214,37 @@ class VentanaPrincipal(QMainWindow):
 
     def al_terminar_prover9(self, resultado_crudo, hora, snapshot):
         """!
-        @brief Captura la señal final de Prover9, imprime salidas y refresca historial.
+        @brief Recibe y procesa el resultado del hilo de Prover9.
         
-        @param resultado_crudo Texto íntegro generado por el log del motor.
-        @param hora Sello de tiempo final.
-        @param snapshot Datos persistidos para vincular a esta ejecución.
+        Evalúa si la ejecución fue cancelada o terminó de forma natural, 
+        actualiza la interfaz con el veredicto y restaura el estado del botón.
+        
+        @param resultado_crudo Texto íntegro generado por el motor o el tag "CANCELADO".
+        @param hora Marca de tiempo de la ejecución.
+        @param snapshot Diccionario con el estado visual previo de la interfaz.
         """
-        resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
-        self.salida_p9.setPlainText(resultado_traducido)
-        snapshot['salida'] = resultado_traducido
-        self.agregar_al_historial(hora, "Prover9", tag, snapshot)
-        
         txt = TRADUCCIONES[self.idioma_actual]
+        
+        if resultado_crudo == "CANCELADO":
+            self.salida_p9.setPlainText("⚠️ Ejecución cancelada por el usuario.")
+        else:
+            resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
+            self.salida_p9.setPlainText(resultado_traducido)
+            snapshot['salida'] = resultado_traducido
+            self.agregar_al_historial(hora, "Prover9", tag, snapshot)
+            
         self.btn_p9.setEnabled(True)
         self.btn_p9.setText(txt['btn_verificar_p9'])
         self.btn_p9.setStyleSheet("font-weight: bold; background-color: #2962ff; color: white; padding: 10px;")
 
     def procesar_mace4(self):
         """!
-        @brief Recolecta la entrada, inyecta opciones de la interfaz, desactiva la UI y lanza el buscador de modelos.
+        @brief Recolecta la entrada, inyecta opciones de la interfaz y lanza el buscador de modelos.
         """
+        if hasattr(self, 'hilo_m4') and self.hilo_m4.isRunning():
+            self.cancelar_ejecucion()
+            return
+            
         txt = TRADUCCIONES[self.idioma_actual]
         snapshot = {
             'pestaña': 1, 'modo_avanzado': self.chk_modo_m4.isChecked(),
@@ -1239,9 +1265,9 @@ class VentanaPrincipal(QMainWindow):
             self.salida_m4.setPlainText("❌ Error: No hay datos de entrada válidos.")
             return
 
-        self.btn_m4.setEnabled(False)
-        self.btn_m4.setText("Procesando... (Por favor, espera)")
-        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #f39c12; color: white; padding: 10px;")
+        self.btn_m4.setText(txt['btn_cancelar'])
+        self.btn_m4.setStyleSheet("font-weight: bold; background-color: #e65100; color: white; padding: 10px;")
+        
         self.salida_m4.setPlainText(txt['msg_procesando_m4'])
 
         self.hilo_m4 = HiloMotor('mace4', texto_final, snapshot)
@@ -1250,21 +1276,43 @@ class VentanaPrincipal(QMainWindow):
 
     def al_terminar_mace4(self, resultado_crudo, hora, snapshot):
         """!
-        @brief Captura la señal final de Mace4, imprime matrices y refresca historial.
+        @brief Recibe y procesa el resultado del hilo de Mace4.
         
-        @param resultado_crudo Texto íntegro generado por el log del motor.
-        @param hora Sello de tiempo final.
-        @param snapshot Datos persistidos para vincular a esta ejecución.
+        Evalúa si la ejecución fue cancelada o terminó de forma natural, 
+        actualiza la interfaz con la matriz de modelos y restaura el botón.
+        
+        @param resultado_crudo Texto íntegro generado por el motor o el tag "CANCELADO".
+        @param hora Marca de tiempo de la ejecución.
+        @param snapshot Diccionario con el estado visual previo de la interfaz.
         """
-        resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
-        self.salida_m4.setPlainText(resultado_traducido)
-        snapshot['salida'] = resultado_traducido
-        self.agregar_al_historial(hora, "Mace4", tag, snapshot)
-        
         txt = TRADUCCIONES[self.idioma_actual]
+        
+        if resultado_crudo == "CANCELADO":
+            self.salida_m4.setPlainText("⚠️ Ejecución cancelada por el usuario.")
+        else:
+            resultado_traducido, tag = self.limpiar_y_traducir_error(resultado_crudo)
+            self.salida_m4.setPlainText(resultado_traducido)
+            snapshot['salida'] = resultado_traducido
+            self.agregar_al_historial(hora, "Mace4", tag, snapshot)
+            
         self.btn_m4.setEnabled(True)
         self.btn_m4.setText(txt['btn_buscar_m4'])
         self.btn_m4.setStyleSheet("font-weight: bold; background-color: #d32f2f; color: white; padding: 10px;")
+
+    def cancelar_ejecucion(self):
+        """!
+        @brief Interrumpe el hilo delegando la restauración a la señal asíncrona.
+        """
+        pestaña = self.tabs.currentIndex()
+        if pestaña == 0 and hasattr(self, 'hilo_p9') and self.hilo_p9.isRunning():
+            self.btn_p9.setEnabled(False) 
+            self.btn_p9.setText("Cancelando...")
+            self.hilo_p9.abortar()
+            
+        elif pestaña == 1 and hasattr(self, 'hilo_m4') and self.hilo_m4.isRunning():
+            self.btn_m4.setEnabled(False) 
+            self.btn_m4.setText("Cancelando...")
+            self.hilo_m4.abortar()
 
     def generar_opciones_p9(self):
         """!
